@@ -1,4 +1,4 @@
-	.file	"josua.c"
+	.file	"c_test.c"
 	.section	.rodata
 .LC0:
 	.string	"%d"
