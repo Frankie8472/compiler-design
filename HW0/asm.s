@@ -12,7 +12,7 @@ main:
 	movl	%eax, 4(%esp)       # Store %eax in Stack+4 (second argument)
     movl	$pattern, (%esp)    # Move Pointer to pattern to Stack (first argument)
     call    scanf               # Read number. store in Stack+4
-    addl    $1, 4(%esp)         # Add One to read value
+    incl    4(%esp)             # Add One to read value
 	call	printf              # Print read value
     
     xorl    %eax, %eax          # Cleanup
