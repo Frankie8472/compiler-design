@@ -14,33 +14,12 @@
 
 ## start of main
 main:
-
-# create new stack frame
-push %ebp
-mov  %esp, %ebp
-
-
-# read input value and store it on the stack
-subl $4, %esp   ## allocate stack
-push %esp       ## push ptr for input
-push $.format   ## push "%d"
-call scanf      ## call to scanf
-
-# increment value on the stack
-incl 8(%esp)
-
-# save value on second place on stack
-movl 8(%esp), %ecx
-movl %ecx, 4(%esp)
-
-# print out incremented value
-call printf
-
-# deallocate stack
-addl $12, %esp
-
-# restore old stack frame
-pop %ebp
-
-# return
+pushl   %ebp            # create new stack frame
+movl    %esp, %ebp
+movl    %esp, (%esp)
+pushl   $.format
+call    scanf           # read input value
+incl    4(%esp)         # increment value on the stack
+call    printf          # print out incremented value
+leave                   # restore old stack frame
 ret
