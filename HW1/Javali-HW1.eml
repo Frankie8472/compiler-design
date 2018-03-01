@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component jdk="1.8 (openjdk)" jdk_type="JavaSDK">
+	<exclude-output/>
+	<contentEntry url="file://$MODULE_DIR$"/>
+	<lib name="antlr-4.4-complete.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/antlr-4.4-complete.jar!/"/>
+	</lib>
+	<lib name="junit-4.12.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/junit-4.12.jar!/"/>
+	</lib>
+	<lib name="hamcrest-core-1.3.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/hamcrest-core-1.3.jar!/"/>
+	</lib>
+	<lib name="javaliParserObf.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/javaliParserObf.jar!/"/>
+	</lib>
+</component>
