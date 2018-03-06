@@ -1,3 +1,5 @@
-.svn
-.idea
-bin
+.svn/
+.idea/
+bin/
+*.iml
+*.eml
