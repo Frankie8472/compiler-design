@@ -51,9 +51,22 @@ class ExprGenerator extends ExprVisitor<Register, Void> {
 	public Register binaryOp(BinaryOp ast, Void arg) {
 		//TODO: binaryOP
 		//cg.emit.emitRaw("# BINARYOP");
+		Register src = null;
+		Register dest = null;
+		cg.emit.emitRaw("#START");
+		cg.emit.emitRaw("#"+ast.right().rwChildren.size());
+		cg.emit.emitRaw("#SECOND");
+		cg.emit.emitRaw("#"+ast.left().rwChildren.size());
+		cg.emit.emitRaw("#END");
 
-		Register src = cg.eg.visit(ast.right(), arg);
-		Register dest = cg.eg.visit(ast.left(), arg);
+		if (ast.right().rwChildren.size() > ast.left().rwChildren.size()) {
+			src = cg.eg.visit(ast.right(), arg);
+			dest = cg.eg.visit(ast.left(), arg);
+		} else {
+			dest = cg.eg.visit(ast.left(), arg);
+			src = cg.eg.visit(ast.right(), arg);
+		}
+
 		String op = "";
 		switch(ast.operator) {
 			case B_MINUS:

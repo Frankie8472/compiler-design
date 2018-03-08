@@ -111,6 +111,7 @@ class StmtGenerator extends AstVisitor<Register, Void> {
 	public Register assign(Assign ast, Void arg) {
 		//TODO: assign
 		//cg.emit.emitRaw("# ASSIGN");
+
 		Register src = cg.eg.visit(ast.right(), arg);
 		String dest = "var_" + AstOneLine.toString(ast.left());
 		cg.emit.emitMove(src, dest);

@@ -68,54 +68,238 @@ main:
         movl %edi, var_i7
         # Emitting r1 = (i0 + (i1 + (i2 + (i3 + (i4 + (i5 + (i6 + i7)))))))
           # Emitting (i0 + (i1 + (i2 + (i3 + (i4 + (i5 + (i6 + i7)))))))
+          #START
+          #2
+          #SECOND
+          #0
+          #END
             # Emitting (i1 + (i2 + (i3 + (i4 + (i5 + (i6 + i7))))))
+            #START
+            #2
+            #SECOND
+            #0
+            #END
               # Emitting (i2 + (i3 + (i4 + (i5 + (i6 + i7)))))
+              #START
+              #2
+              #SECOND
+              #0
+              #END
                 # Emitting (i3 + (i4 + (i5 + (i6 + i7))))
+                #START
+                #2
+                #SECOND
+                #0
+                #END
                   # Emitting (i4 + (i5 + (i6 + i7)))
+                  #START
+                  #2
+                  #SECOND
+                  #0
+                  #END
                     # Emitting (i5 + (i6 + i7))
+                    #START
+                    #2
+                    #SECOND
+                    #0
+                    #END
                       # Emitting (i6 + i7)
-                        # Emitting i7
-                        movl var_i7, %edi
+                      #START
+                      #0
+                      #SECOND
+                      #0
+                      #END
                         # Emitting i6
-                        movl var_i6, %esi
-                      addl %edi, %esi
+                        movl var_i6, %edi
+                        # Emitting i7
+                        movl var_i7, %esi
+                      addl %esi, %edi
                       # Emitting i5
-                      movl var_i5, %edi
-                    addl %esi, %edi
+                      movl var_i5, %esi
+                    addl %edi, %esi
                     # Emitting i4
-                    movl var_i4, %esi
-                  addl %edi, %esi
+                    movl var_i4, %edi
+                  addl %esi, %edi
                   # Emitting i3
-                  movl var_i3, %edi
-                addl %esi, %edi
+                  movl var_i3, %esi
+                addl %edi, %esi
                 # Emitting i2
-                movl var_i2, %esi
-              addl %edi, %esi
+                movl var_i2, %edi
+              addl %esi, %edi
               # Emitting i1
-              movl var_i1, %edi
-            addl %esi, %edi
+              movl var_i1, %esi
+            addl %edi, %esi
             # Emitting i0
-            movl var_i0, %esi
-          addl %edi, %esi
-        movl %esi, var_r1
+            movl var_i0, %edi
+          addl %esi, %edi
+        movl %edi, var_r1
         # Emitting r2 = (((((((i0 + i1) + i2) + i3) + i4) + i5) + i6) + i7)
           # Emitting (((((((i0 + i1) + i2) + i3) + i4) + i5) + i6) + i7)
+          #START
+          #0
+          #SECOND
+          #2
+          #END
+            # Emitting ((((((i0 + i1) + i2) + i3) + i4) + i5) + i6)
+            #START
+            #0
+            #SECOND
+            #2
+            #END
+              # Emitting (((((i0 + i1) + i2) + i3) + i4) + i5)
+              #START
+              #0
+              #SECOND
+              #2
+              #END
+                # Emitting ((((i0 + i1) + i2) + i3) + i4)
+                #START
+                #0
+                #SECOND
+                #2
+                #END
+                  # Emitting (((i0 + i1) + i2) + i3)
+                  #START
+                  #0
+                  #SECOND
+                  #2
+                  #END
+                    # Emitting ((i0 + i1) + i2)
+                    #START
+                    #0
+                    #SECOND
+                    #2
+                    #END
+                      # Emitting (i0 + i1)
+                      #START
+                      #0
+                      #SECOND
+                      #0
+                      #END
+                        # Emitting i0
+                        movl var_i0, %edi
+                        # Emitting i1
+                        movl var_i1, %esi
+                      addl %esi, %edi
+                      # Emitting i2
+                      movl var_i2, %esi
+                    addl %esi, %edi
+                    # Emitting i3
+                    movl var_i3, %esi
+                  addl %esi, %edi
+                  # Emitting i4
+                  movl var_i4, %esi
+                addl %esi, %edi
+                # Emitting i5
+                movl var_i5, %esi
+              addl %esi, %edi
+              # Emitting i6
+              movl var_i6, %esi
+            addl %esi, %edi
             # Emitting i7
             movl var_i7, %esi
-            # Emitting ((((((i0 + i1) + i2) + i3) + i4) + i5) + i6)
-              # Emitting i6
-              movl var_i6, %edi
-              # Emitting (((((i0 + i1) + i2) + i3) + i4) + i5)
+          addl %esi, %edi
+        movl %edi, var_r2
+        # Emitting r3 = (((i0 + i1) + (i2 + i3)) + ((i4 + i5) + (i6 + i7)))
+          # Emitting (((i0 + i1) + (i2 + i3)) + ((i4 + i5) + (i6 + i7)))
+          #START
+          #2
+          #SECOND
+          #2
+          #END
+            # Emitting ((i0 + i1) + (i2 + i3))
+            #START
+            #2
+            #SECOND
+            #2
+            #END
+              # Emitting (i0 + i1)
+              #START
+              #0
+              #SECOND
+              #0
+              #END
+                # Emitting i0
+                movl var_i0, %edi
+                # Emitting i1
+                movl var_i1, %esi
+              addl %esi, %edi
+              # Emitting (i2 + i3)
+              #START
+              #0
+              #SECOND
+              #0
+              #END
+                # Emitting i2
+                movl var_i2, %esi
+                # Emitting i3
+                movl var_i3, %edx
+              addl %edx, %esi
+            addl %esi, %edi
+            # Emitting ((i4 + i5) + (i6 + i7))
+            #START
+            #2
+            #SECOND
+            #2
+            #END
+              # Emitting (i4 + i5)
+              #START
+              #0
+              #SECOND
+              #0
+              #END
+                # Emitting i4
+                movl var_i4, %esi
                 # Emitting i5
                 movl var_i5, %edx
-                # Emitting ((((i0 + i1) + i2) + i3) + i4)
-                  # Emitting i4
-                  movl var_i4, %ecx
-                  # Emitting (((i0 + i1) + i2) + i3)
-                    # Emitting i3
-                    movl var_i3, %ebx
-                    # Emitting ((i0 + i1) + i2)
-                      # Emitting i2
-                      movl var_i2, %eax
-                      # Emitting (i0 + i1)
-                        # Emitting i1
+              addl %edx, %esi
+              # Emitting (i6 + i7)
+              #START
+              #0
+              #SECOND
+              #0
+              #END
+                # Emitting i6
+                movl var_i6, %edx
+                # Emitting i7
+                movl var_i7, %ecx
+              addl %ecx, %edx
+            addl %edx, %esi
+          addl %esi, %edi
+        movl %edi, var_r3
+        # Emitting write(r1)
+          # Emitting r1
+          movl var_r1, %edi
+        push %edi
+        push $label_int
+        call printf
+        addl $8, %esp
+        # Emitting writeln()
+        push $label_new_line
+        call printf
+        addl $4, %esp
+        # Emitting write(r2)
+          # Emitting r2
+          movl var_r2, %edi
+        push %edi
+        push $label_int
+        call printf
+        addl $8, %esp
+        # Emitting writeln()
+        push $label_new_line
+        call printf
+        addl $4, %esp
+        # Emitting write(r3)
+          # Emitting r3
+          movl var_r3, %edi
+        push %edi
+        push $label_int
+        call printf
+        addl $8, %esp
+        # Emitting writeln()
+        push $label_new_line
+        call printf
+        addl $4, %esp
+    xorl %eax, %eax
+    leave
+    ret

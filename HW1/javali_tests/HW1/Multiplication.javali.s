@@ -28,16 +28,21 @@ main:
         movl %edi, var_i1
         # Emitting r1 = (i1 * 3)
           # Emitting (i1 * 3)
-            # Emitting 3
-            movl $3, %edi
+          #START
+          #0
+          #SECOND
+          #0
+          #END
             # Emitting i1
-            movl var_i1, %esi
-          imull %edi, %esi
-        movl %esi, var_r1
+            movl var_i1, %edi
+            # Emitting 3
+            movl $3, %esi
+          imull %esi, %edi
+        movl %edi, var_r1
         # Emitting write(r1)
           # Emitting r1
-          movl var_r1, %esi
-        push %esi
+          movl var_r1, %edi
+        push %edi
         push $label_int
         call printf
         addl $8, %esp
@@ -47,10 +52,15 @@ main:
         addl $4, %esp
         # Emitting r1 = (i0 * i1)
           # Emitting (i0 * i1)
-            # Emitting i1
-            movl var_i1, %esi
+          #START
+          #0
+          #SECOND
+          #0
+          #END
             # Emitting i0
             movl var_i0, %edi
+            # Emitting i1
+            movl var_i1, %esi
           imull %esi, %edi
         movl %edi, var_r1
         # Emitting write(r1)
@@ -66,24 +76,39 @@ main:
         addl $4, %esp
         # Emitting r1 = (((r1 * i0) * i1) * 3)
           # Emitting (((r1 * i0) * i1) * 3)
-            # Emitting 3
-            movl $3, %edi
+          #START
+          #0
+          #SECOND
+          #2
+          #END
             # Emitting ((r1 * i0) * i1)
+            #START
+            #0
+            #SECOND
+            #2
+            #END
+              # Emitting (r1 * i0)
+              #START
+              #0
+              #SECOND
+              #0
+              #END
+                # Emitting r1
+                movl var_r1, %edi
+                # Emitting i0
+                movl var_i0, %esi
+              imull %esi, %edi
               # Emitting i1
               movl var_i1, %esi
-              # Emitting (r1 * i0)
-                # Emitting i0
-                movl var_i0, %edx
-                # Emitting r1
-                movl var_r1, %ecx
-              imull %edx, %ecx
-            imull %esi, %ecx
-          imull %edi, %ecx
-        movl %ecx, var_r1
+            imull %esi, %edi
+            # Emitting 3
+            movl $3, %esi
+          imull %esi, %edi
+        movl %edi, var_r1
         # Emitting write(r1)
           # Emitting r1
-          movl var_r1, %ecx
-        push %ecx
+          movl var_r1, %edi
+        push %edi
         push $label_int
         call printf
         addl $8, %esp
