@@ -3,3 +3,10 @@
 bin/
 *.iml
 *.eml
+
+*.bin
+*.err
+*.exec.ref
+*.s
+*.semantic.ref
+*.parser.ref

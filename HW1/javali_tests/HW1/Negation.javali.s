@@ -40,61 +40,41 @@ main:
         movl %edi, var_B
         # Emitting a = (A * -(B))
           # Emitting (A * -(B))
-          #LEFT
-          #1
-          #RIGHT
-          #1
-          #END
-            # Emitting A
-            movl var_A, %edi
             # Emitting -(B)
               # Emitting B
-              movl var_B, %esi
-            negl %esi
-          imull %esi, %edi
-        movl %edi, var_a
+              movl var_B, %edi
+            negl %edi
+            # Emitting A
+            movl var_A, %esi
+          imull %edi, %esi
+        movl %esi, var_a
         # Emitting b = (-(A) * B)
           # Emitting (-(A) * B)
-          #LEFT
-          #1
-          #RIGHT
-          #1
-          #END
+            # Emitting B
+            movl var_B, %esi
             # Emitting -(A)
               # Emitting A
               movl var_A, %edi
             negl %edi
-            # Emitting B
-            movl var_B, %esi
           imull %esi, %edi
         movl %edi, var_b
         # Emitting c = -((A + B))
           # Emitting -((A + B))
             # Emitting (A + B)
-            #LEFT
-            #1
-            #RIGHT
-            #1
-            #END
-              # Emitting A
-              movl var_A, %edi
               # Emitting B
-              movl var_B, %esi
-            addl %esi, %edi
-          negl %edi
-        movl %edi, var_c
+              movl var_B, %edi
+              # Emitting A
+              movl var_A, %esi
+            addl %edi, %esi
+          negl %esi
+        movl %esi, var_c
         # Emitting d = -((A * B))
           # Emitting -((A * B))
             # Emitting (A * B)
-            #LEFT
-            #1
-            #RIGHT
-            #1
-            #END
-              # Emitting A
-              movl var_A, %edi
               # Emitting B
               movl var_B, %esi
+              # Emitting A
+              movl var_A, %edi
             imull %esi, %edi
           negl %edi
         movl %edi, var_d

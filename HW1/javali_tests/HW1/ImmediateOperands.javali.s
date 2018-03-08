@@ -21,21 +21,16 @@ main:
         movl %edi, var_i0
         # Emitting i0 = (5 + i0)
           # Emitting (5 + i0)
-          #LEFT
-          #1
-          #RIGHT
-          #1
-          #END
-            # Emitting 5
-            movl $5, %edi
             # Emitting i0
-            movl var_i0, %esi
-          addl %esi, %edi
-        movl %edi, var_i0
+            movl var_i0, %edi
+            # Emitting 5
+            movl $5, %esi
+          addl %edi, %esi
+        movl %esi, var_i0
         # Emitting write(i0)
           # Emitting i0
-          movl var_i0, %edi
-        push %edi
+          movl var_i0, %esi
+        push %esi
         push $label_int
         call printf
         addl $8, %esp
@@ -45,15 +40,10 @@ main:
         addl $4, %esp
         # Emitting i0 = (i0 + 5)
           # Emitting (i0 + 5)
-          #LEFT
-          #1
-          #RIGHT
-          #1
-          #END
-            # Emitting i0
-            movl var_i0, %edi
             # Emitting 5
             movl $5, %esi
+            # Emitting i0
+            movl var_i0, %edi
           addl %esi, %edi
         movl %edi, var_i0
         # Emitting write(i0)
@@ -69,30 +59,20 @@ main:
         addl $4, %esp
         # Emitting i0 = ((i0 + 5) + 3)
           # Emitting ((i0 + 5) + 3)
-          #LEFT
-          #1
-          #RIGHT
-          #2
-          #END
             # Emitting (i0 + 5)
-            #LEFT
-            #1
-            #RIGHT
-            #1
-            #END
-              # Emitting i0
-              movl var_i0, %edi
               # Emitting 5
-              movl $5, %esi
-            addl %esi, %edi
+              movl $5, %edi
+              # Emitting i0
+              movl var_i0, %esi
+            addl %edi, %esi
             # Emitting 3
-            movl $3, %esi
-          addl %esi, %edi
-        movl %edi, var_i0
+            movl $3, %edi
+          addl %edi, %esi
+        movl %esi, var_i0
         # Emitting write(i0)
           # Emitting i0
-          movl var_i0, %edi
-        push %edi
+          movl var_i0, %esi
+        push %esi
         push $label_int
         call printf
         addl $8, %esp
