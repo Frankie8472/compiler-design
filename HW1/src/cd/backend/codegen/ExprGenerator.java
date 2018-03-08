@@ -104,16 +104,23 @@ class ExprGenerator extends ExprVisitor<Register, Void> {
 
                 cg.emit.emit("pushl", Register.EAX);
                 cg.emit.emit("pushl", Register.EDX);
+                cg.emit.emit("pushl", src);
                 cg.emit.emitMove(dest, Register.EAX);
                 cg.emit.emitRaw("cltd");
-                cg.emit.emit("idivl", src);
+                cg.emit.emit("idivl", "(%esp)");
+                cg.emit.emit("addl", 4, Register.ESP);
                 cg.emit.emitMove(Register.EAX, dest);
                 cg.rm.releaseRegister(src);
-                cg.emit.emit("popl", Register.EDX);
-                if (!dest.equals(Register.EAX)) {
-                    cg.emit.emit("popl", Register.EAX);
-                } else {
+
+                if (dest.equals(Register.EDX)) {
                     cg.emit.emit("addl", 4, Register.ESP);
+                } else {
+                    cg.emit.emit("popl", Register.EDX);
+                }
+                if (dest.equals(Register.EAX)) {
+                    cg.emit.emit("addl", 4, Register.ESP);
+                } else {
+                    cg.emit.emit("popl", Register.EAX);
                 }
 
 
