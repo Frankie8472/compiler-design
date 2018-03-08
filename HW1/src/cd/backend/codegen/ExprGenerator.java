@@ -19,6 +19,8 @@ import cd.ir.Ast.Var;
 import cd.ir.ExprVisitor;
 import cd.util.debug.AstOneLine;
 
+import javax.management.RuntimeErrorException;
+
 /**
  * Generates code to evaluate expressions. After emitting the code, returns a
  * String which indicates the register where the result can be found.
@@ -47,9 +49,90 @@ class ExprGenerator extends ExprVisitor<Register, Void> {
 
 	@Override
 	public Register binaryOp(BinaryOp ast, Void arg) {
-		{
-			throw new ToDoException();
+		//TODO: binaryOP
+		//cg.emit.emitRaw("# BINARYOP");
+
+		Register src = cg.eg.visit(ast.right(), arg);
+		Register dest = cg.eg.visit(ast.left(), arg);
+		String op = "";
+		switch(ast.operator) {
+			case B_MINUS:
+				op = "subl";
+				cg.emit.emit(op, src, dest);
+				cg.rm.releaseRegister(src);
+				break;
+
+			case B_PLUS:
+				op = "addl";
+				cg.emit.emit(op, src, dest);
+				cg.rm.releaseRegister(src);
+				break;
+
+			case B_TIMES:
+				op = "imull";
+				cg.emit.emit(op, src, dest);
+				cg.rm.releaseRegister(src);
+				break;
+
+			case B_DIV:
+				Register eax_old = null, edx_old = null;
+				Register eax = Register.EAX;
+				Register edx = Register.EDX;
+
+				// check if eax is in use and if its eax, if not
+				if (cg.rm.isInUse(eax)) {
+					if (!dest.equals(eax)) {
+						eax_old = cg.rm.getRegister();
+						cg.emit.emitMove(eax, eax_old);
+						cg.emit.emitMove(dest, eax);
+					} // else dest.equals(eax)
+				} else {
+					cg.emit.emitMove(dest, eax);
+				}
+
+				// check if edx is in use
+				if (cg.rm.isInUse(edx)) {
+					edx_old = cg.rm.getRegister();
+					cg.emit.emitMove(edx, edx_old);
+					if (src.equals(edx)) {
+						src = edx_old;
+					}
+				}
+
+				cg.emit.emitRaw("cltd");
+				cg.emit.emit("idivl", src); //result/quotient in eax, reminder in edx
+
+				// move result and restore old vars
+				if(eax_old != null){
+					cg.emit.emitMove(eax_old, eax);
+					cg.rm.releaseRegister(eax_old);
+				} else if (!dest.equals(eax)) {
+					cg.emit.emitMove(eax, dest);
+				}
+
+				if(edx_old != null) {
+					if (src.equals(edx_old)){
+						cg.rm.releaseRegister(edx);
+					} else {
+						cg.emit.emitMove(edx_old, edx);
+					}
+					cg.rm.releaseRegister(edx_old);
+				}
+				break;
+
+			case B_OR:					break;
+			case B_AND:					break;
+			case B_EQUAL:				break;
+			case B_NOT_EQUAL:			break;
+			case B_MOD:					break;
+			case B_LESS_THAN:			break;
+			case B_GREATER_THAN:		break;
+			case B_LESS_OR_EQUAL:		break;
+			case B_GREATER_OR_EQUAL:	break;
+			default:					break;
 		}
+
+		return dest;
 	}
 
 	@Override
@@ -61,9 +144,18 @@ class ExprGenerator extends ExprVisitor<Register, Void> {
 
 	@Override
 	public Register builtInRead(BuiltInRead ast, Void arg) {
-		{
-			throw new ToDoException();
-		}
+		//TODO: read
+		//cg.emit.emitRaw("# READ");
+
+		Register dest = cg.rm.getRegister();
+		cg.emit.emit("subl", 4, Register.ESP);
+		cg.emit.emit("movl", Register.ESP, "(%esp)");
+		cg.emit.emit("push", AssemblyEmitter.labelAddress("label_int"));
+		cg.emit.emit("call", "scanf");
+		cg.emit.emitMove("4(%esp)", dest);
+		cg.emit.emit("addl", 8, Register.ESP);
+
+		return dest;
 	}
 
 	@Override
@@ -82,9 +174,13 @@ class ExprGenerator extends ExprVisitor<Register, Void> {
 
 	@Override
 	public Register intConst(IntConst ast, Void arg) {
-		{
-			throw new ToDoException();
-		}
+		//TODO: intconst
+		//cg.emit.emitRaw("# INTCONST");
+
+		Register dest = cg.rm.getRegister();
+		int src = ast.value;
+		cg.emit.emit("movl", src, dest);
+		return dest;
 	}
 
 	@Override
@@ -124,16 +220,32 @@ class ExprGenerator extends ExprVisitor<Register, Void> {
 
 	@Override
 	public Register unaryOp(UnaryOp ast, Void arg) {
-		{
-			throw new ToDoException();
+		// TODO: unaryOP
+		//cg.emit.emitRaw("# UNARYOP");
+
+		String op;
+		Register dest = visit(ast.arg(), arg);
+		switch(ast.operator) {
+			case U_MINUS:		op = "negl"; cg.emit.emit(op, dest); break;
+			case U_BOOL_NOT:	op = "notl"; cg.emit.emit(op, dest); break;
+			case U_PLUS:		break;
+			default:			break;
 		}
+
+		return dest;
+
 	}
 	
 	@Override
 	public Register var(Var ast, Void arg) {
-		{
-			throw new ToDoException();
-		}
-	}
+		//TODO: var
+		//cg.emit.emitRaw("# VAR");
 
+		Register dest = cg.rm.getRegister();
+		String src = "var_" + ast.name;
+		cg.emit.emitMove(src, dest);
+
+		return dest;
+
+	}
 }
