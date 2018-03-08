@@ -1,15 +1,8 @@
-/* Test division */
+/* Test Multiple Variable initialisation */
 class Main {
-	void main() {
-		int i0, i1, i2;
-		int i3, i4, i5;
-		i0 = 1;
-		i1 = -6;
-		i2 = 1;
-
-		i3 = i0 / i2;
-		i4 = i1 / i2;
-		i5 = - i0 - i1;
-        write(1/2);
+	void main() { // var must begin with latin letter, no special characters
+        int a, b, c;
+        int treq3454;
+        int A5, ReW;
 	}
 }

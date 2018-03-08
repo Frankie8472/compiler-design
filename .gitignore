@@ -5,6 +5,7 @@ bin/
 *.eml
 
 *.bin
+*.javali.bin
 *.err
 *.exec.ref
 *.s
