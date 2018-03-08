@@ -7,28 +7,39 @@ label_int:
 label_new_line:
     .string "\n"
     .section .data
+      # Emitting int r1
 var_r1:
-    .int 0
+      .int 0
+      # Emitting int r2
 var_r2:
-    .int 0
+      .int 0
+      # Emitting int r3
 var_r3:
-    .int 0
+      .int 0
+      # Emitting int i0
 var_i0:
-    .int 0
+      .int 0
+      # Emitting int i1
 var_i1:
-    .int 0
+      .int 0
+      # Emitting int i2
 var_i2:
-    .int 0
+      .int 0
+      # Emitting int i3
 var_i3:
-    .int 0
+      .int 0
+      # Emitting int i4
 var_i4:
-    .int 0
+      .int 0
+      # Emitting int i5
 var_i5:
-    .int 0
+      .int 0
+      # Emitting int i6
 var_i6:
-    .int 0
+      .int 0
+      # Emitting int i7
 var_i7:
-    .int 0
+      .int 0
     .section .text
 main:
     push %ebp
@@ -68,46 +79,46 @@ main:
         movl %edi, var_i7
         # Emitting r1 = (i0 + (i1 + (i2 + (i3 + (i4 + (i5 + (i6 + i7)))))))
           # Emitting (i0 + (i1 + (i2 + (i3 + (i4 + (i5 + (i6 + i7)))))))
-          #START
-          #2
-          #SECOND
-          #0
+          #LEFT
+          #7
+          #RIGHT
+          #1
           #END
             # Emitting (i1 + (i2 + (i3 + (i4 + (i5 + (i6 + i7))))))
-            #START
-            #2
-            #SECOND
-            #0
+            #LEFT
+            #6
+            #RIGHT
+            #1
             #END
               # Emitting (i2 + (i3 + (i4 + (i5 + (i6 + i7)))))
-              #START
-              #2
-              #SECOND
-              #0
+              #LEFT
+              #5
+              #RIGHT
+              #1
               #END
                 # Emitting (i3 + (i4 + (i5 + (i6 + i7))))
-                #START
-                #2
-                #SECOND
-                #0
+                #LEFT
+                #4
+                #RIGHT
+                #1
                 #END
                   # Emitting (i4 + (i5 + (i6 + i7)))
-                  #START
-                  #2
-                  #SECOND
-                  #0
+                  #LEFT
+                  #3
+                  #RIGHT
+                  #1
                   #END
                     # Emitting (i5 + (i6 + i7))
-                    #START
+                    #LEFT
                     #2
-                    #SECOND
-                    #0
+                    #RIGHT
+                    #1
                     #END
                       # Emitting (i6 + i7)
-                      #START
-                      #0
-                      #SECOND
-                      #0
+                      #LEFT
+                      #1
+                      #RIGHT
+                      #1
                       #END
                         # Emitting i6
                         movl var_i6, %edi
@@ -135,46 +146,46 @@ main:
         movl %edi, var_r1
         # Emitting r2 = (((((((i0 + i1) + i2) + i3) + i4) + i5) + i6) + i7)
           # Emitting (((((((i0 + i1) + i2) + i3) + i4) + i5) + i6) + i7)
-          #START
-          #0
-          #SECOND
-          #2
+          #LEFT
+          #1
+          #RIGHT
+          #7
           #END
             # Emitting ((((((i0 + i1) + i2) + i3) + i4) + i5) + i6)
-            #START
-            #0
-            #SECOND
-            #2
+            #LEFT
+            #1
+            #RIGHT
+            #6
             #END
               # Emitting (((((i0 + i1) + i2) + i3) + i4) + i5)
-              #START
-              #0
-              #SECOND
-              #2
+              #LEFT
+              #1
+              #RIGHT
+              #5
               #END
                 # Emitting ((((i0 + i1) + i2) + i3) + i4)
-                #START
-                #0
-                #SECOND
-                #2
+                #LEFT
+                #1
+                #RIGHT
+                #4
                 #END
                   # Emitting (((i0 + i1) + i2) + i3)
-                  #START
-                  #0
-                  #SECOND
-                  #2
+                  #LEFT
+                  #1
+                  #RIGHT
+                  #3
                   #END
                     # Emitting ((i0 + i1) + i2)
-                    #START
-                    #0
-                    #SECOND
+                    #LEFT
+                    #1
+                    #RIGHT
                     #2
                     #END
                       # Emitting (i0 + i1)
-                      #START
-                      #0
-                      #SECOND
-                      #0
+                      #LEFT
+                      #1
+                      #RIGHT
+                      #1
                       #END
                         # Emitting i0
                         movl var_i0, %edi
@@ -202,22 +213,22 @@ main:
         movl %edi, var_r2
         # Emitting r3 = (((i0 + i1) + (i2 + i3)) + ((i4 + i5) + (i6 + i7)))
           # Emitting (((i0 + i1) + (i2 + i3)) + ((i4 + i5) + (i6 + i7)))
-          #START
-          #2
-          #SECOND
-          #2
+          #LEFT
+          #4
+          #RIGHT
+          #4
           #END
             # Emitting ((i0 + i1) + (i2 + i3))
-            #START
+            #LEFT
             #2
-            #SECOND
+            #RIGHT
             #2
             #END
               # Emitting (i0 + i1)
-              #START
-              #0
-              #SECOND
-              #0
+              #LEFT
+              #1
+              #RIGHT
+              #1
               #END
                 # Emitting i0
                 movl var_i0, %edi
@@ -225,10 +236,10 @@ main:
                 movl var_i1, %esi
               addl %esi, %edi
               # Emitting (i2 + i3)
-              #START
-              #0
-              #SECOND
-              #0
+              #LEFT
+              #1
+              #RIGHT
+              #1
               #END
                 # Emitting i2
                 movl var_i2, %esi
@@ -237,16 +248,16 @@ main:
               addl %edx, %esi
             addl %esi, %edi
             # Emitting ((i4 + i5) + (i6 + i7))
-            #START
+            #LEFT
             #2
-            #SECOND
+            #RIGHT
             #2
             #END
               # Emitting (i4 + i5)
-              #START
-              #0
-              #SECOND
-              #0
+              #LEFT
+              #1
+              #RIGHT
+              #1
               #END
                 # Emitting i4
                 movl var_i4, %esi
@@ -254,10 +265,10 @@ main:
                 movl var_i5, %edx
               addl %edx, %esi
               # Emitting (i6 + i7)
-              #START
-              #0
-              #SECOND
-              #0
+              #LEFT
+              #1
+              #RIGHT
+              #1
               #END
                 # Emitting i6
                 movl var_i6, %edx

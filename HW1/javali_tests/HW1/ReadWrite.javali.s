@@ -7,16 +7,21 @@ label_int:
 label_new_line:
     .string "\n"
     .section .data
+      # Emitting int r1
 var_r1:
-    .int 0
+      .int 0
+      # Emitting int r2
 var_r2:
-    .int 0
+      .int 0
+      # Emitting int i0
 var_i0:
-    .int 0
+      .int 0
+      # Emitting int i1
 var_i1:
-    .int 0
+      .int 0
+      # Emitting int i2
 var_i2:
-    .int 0
+      .int 0
     .section .text
 main:
     push %ebp
@@ -37,10 +42,10 @@ main:
         movl %edi, var_i1
         # Emitting r1 = (i0 + i1)
           # Emitting (i0 + i1)
-          #START
-          #0
-          #SECOND
-          #0
+          #LEFT
+          #1
+          #RIGHT
+          #1
           #END
             # Emitting i0
             movl var_i0, %edi
@@ -61,10 +66,10 @@ main:
         addl $4, %esp
         # Emitting write((r1 - 3))
           # Emitting (r1 - 3)
-          #START
-          #0
-          #SECOND
-          #0
+          #LEFT
+          #1
+          #RIGHT
+          #1
           #END
             # Emitting r1
             movl var_r1, %edi

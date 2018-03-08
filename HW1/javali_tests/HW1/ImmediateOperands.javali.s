@@ -7,8 +7,9 @@ label_int:
 label_new_line:
     .string "\n"
     .section .data
+      # Emitting int i0
 var_i0:
-    .int 0
+      .int 0
     .section .text
 main:
     push %ebp
@@ -20,10 +21,10 @@ main:
         movl %edi, var_i0
         # Emitting i0 = (5 + i0)
           # Emitting (5 + i0)
-          #START
-          #0
-          #SECOND
-          #0
+          #LEFT
+          #1
+          #RIGHT
+          #1
           #END
             # Emitting 5
             movl $5, %edi
@@ -44,10 +45,10 @@ main:
         addl $4, %esp
         # Emitting i0 = (i0 + 5)
           # Emitting (i0 + 5)
-          #START
-          #0
-          #SECOND
-          #0
+          #LEFT
+          #1
+          #RIGHT
+          #1
           #END
             # Emitting i0
             movl var_i0, %edi
@@ -68,16 +69,16 @@ main:
         addl $4, %esp
         # Emitting i0 = ((i0 + 5) + 3)
           # Emitting ((i0 + 5) + 3)
-          #START
-          #0
-          #SECOND
+          #LEFT
+          #1
+          #RIGHT
           #2
           #END
             # Emitting (i0 + 5)
-            #START
-            #0
-            #SECOND
-            #0
+            #LEFT
+            #1
+            #RIGHT
+            #1
             #END
               # Emitting i0
               movl var_i0, %edi

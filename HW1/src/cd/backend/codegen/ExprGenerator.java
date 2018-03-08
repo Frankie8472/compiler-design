@@ -2,6 +2,7 @@ package cd.backend.codegen;
 
 import cd.ToDoException;
 import cd.backend.codegen.RegisterManager.Register;
+import cd.ir.Ast;
 import cd.ir.Ast.BinaryOp;
 import cd.ir.Ast.BooleanConst;
 import cd.ir.Ast.BuiltInRead;
@@ -47,19 +48,33 @@ class ExprGenerator extends ExprVisitor<Register, Void> {
 
 	}
 
+	public int cntReg(Expr ast){
+		int num = 0;
+		if(ast instanceof Ast.LeftRightExpr){
+			num = cntReg(((Ast.LeftRightExpr) ast).left()) + cntReg(((Ast.LeftRightExpr) ast).right());
+		} else if (ast instanceof Ast.ArgExpr){
+			num = cntReg(((Ast.ArgExpr) ast).arg());
+		} else if(ast instanceof Ast.MethodCallExpr){
+			// dummy case
+		} else { // leaf expr
+			num = 1;
+		}
+		return num;
+	}
+
 	@Override
 	public Register binaryOp(BinaryOp ast, Void arg) {
 		//TODO: binaryOP
 		//cg.emit.emitRaw("# BINARYOP");
-		Register src = null;
-		Register dest = null;
-		cg.emit.emitRaw("#START");
-		cg.emit.emitRaw("#"+ast.right().rwChildren.size());
-		cg.emit.emitRaw("#SECOND");
-		cg.emit.emitRaw("#"+ast.left().rwChildren.size());
+		Register src;
+		Register dest;
+		cg.emit.emitRaw("#LEFT");
+		cg.emit.emitRaw("#"+cntReg(ast.right()));
+		cg.emit.emitRaw("#RIGHT");
+		cg.emit.emitRaw("#"+cntReg(ast.left()));
 		cg.emit.emitRaw("#END");
 
-		if (ast.right().rwChildren.size() > ast.left().rwChildren.size()) {
+		if (cntReg(ast.right()) > cntReg(ast.left())) {
 			src = cg.eg.visit(ast.right(), arg);
 			dest = cg.eg.visit(ast.left(), arg);
 		} else {
@@ -92,45 +107,91 @@ class ExprGenerator extends ExprVisitor<Register, Void> {
 				Register eax = Register.EAX;
 				Register edx = Register.EDX;
 
-				// check if eax is in use and if its eax, if not
-				if (cg.rm.isInUse(eax)) {
-					if (!dest.equals(eax)) {
-						eax_old = cg.rm.getRegister();
-						cg.emit.emitMove(eax, eax_old);
-						cg.emit.emitMove(dest, eax);
-					} // else dest.equals(eax)
-				} else {
-					cg.emit.emitMove(dest, eax);
-				}
-
-				// check if edx is in use
-				if (cg.rm.isInUse(edx)) {
-					edx_old = cg.rm.getRegister();
-					cg.emit.emitMove(edx, edx_old);
-					if (src.equals(edx)) {
-						src = edx_old;
-					}
-				}
-
-				cg.emit.emitRaw("cltd");
-				cg.emit.emit("idivl", src); //result/quotient in eax, reminder in edx
-
-				// move result and restore old vars
-				if(eax_old != null){
-					cg.emit.emitMove(eax_old, eax);
-					cg.rm.releaseRegister(eax_old);
-				} else if (!dest.equals(eax)) {
-					cg.emit.emitMove(eax, dest);
-				}
-
-				if(edx_old != null) {
-					if (src.equals(edx_old)){
-						cg.rm.releaseRegister(edx);
+				if (cg.rm.availableRegisters() > 1) {
+					// check if eax is in use and if its eax, if not
+					if (cg.rm.isInUse(eax)) {
+						if (!dest.equals(eax)) {
+							eax_old = cg.rm.getRegister();
+							cg.emit.emitMove(eax, eax_old);
+							cg.emit.emitMove(dest, eax);
+						} // else dest.equals(eax)
 					} else {
-						cg.emit.emitMove(edx_old, edx);
+						cg.emit.emitMove(dest, eax);
 					}
-					cg.rm.releaseRegister(edx_old);
+
+					// check if edx is in use
+					if (cg.rm.isInUse(edx)) {
+						edx_old = cg.rm.getRegister();
+						cg.emit.emitMove(edx, edx_old);
+						if (src.equals(edx)) {
+							src = edx_old;
+						}
+					}
+
+					cg.emit.emitRaw("cltd");
+					cg.emit.emit("idivl", src); //result/quotient in eax, reminder in edx
+
+					// move result and restore old vars
+					cg.emit.emitMove(eax, dest);
+
+					if (eax_old != null) {
+						cg.emit.emitMove(eax, dest);
+						cg.emit.emitMove(eax_old, eax);
+						cg.rm.releaseRegister(eax_old);
+					} else if (!dest.equals(eax)) {
+						cg.emit.emitMove(eax, dest);
+					}
+
+					if (edx_old != null) {
+						if (src.equals(edx_old)) {
+							cg.rm.releaseRegister(edx);
+						} else {
+							cg.emit.emitMove(edx_old, edx);
+						}
+						cg.rm.releaseRegister(edx_old);
+					}
+				} else { // use stack
+					// check if eax is in use and if its eax, if not
+					if (cg.rm.isInUse(eax)) {
+						if (!dest.equals(eax)) {
+							cg.emit.emit("pushl", eax);
+							cg.emit.emitMove(dest, eax);
+							eax_old = eax;
+						} // else dest.equals(eax)
+					} else {
+						cg.emit.emitMove(dest, eax);
+					}
+
+					// check if edx is in use
+					if (cg.rm.isInUse(edx)) {
+						cg.emit.emit("pushl", edx);
+						edx_old = edx;
+					}
+
+					if (src.equals(edx)) {
+						cg.emit.emitRaw("cltd");
+						cg.emit.emit("idivl", "(%esp)"); //result/quotient in eax, reminder in edx
+					} else {
+						cg.emit.emitRaw("cltd");
+						cg.emit.emit("idivl", src); //result/quotient in eax, reminder in edx
+					}
+
+					// move result and restore old vars
+					if (eax_old != null) {
+						cg.emit.emitMove(eax, dest);
+						cg.emit.emit("popl", eax);
+					} else if (!dest.equals(eax)) {
+						cg.emit.emitMove(eax, dest);
+					}
+
+
+					if (edx_old != null) {
+						cg.emit.emit("addl", 4, Register.ESP);
+						cg.rm.releaseRegister(edx);
+					}
 				}
+
+
 				break;
 
 			case B_OR:					break;

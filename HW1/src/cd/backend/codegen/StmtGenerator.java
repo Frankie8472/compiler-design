@@ -70,12 +70,8 @@ class StmtGenerator extends AstVisitor<Register, Void> {
 
 			// DATA_INT_SECTION
 			cg.emit.emitRaw(Config.DATA_INT_SECTION);
-            String name;
-			for(Ast s : ast.decls().rwChildren()){
-				name = AstOneLine.toString(s).substring(4);
-				cg.emit.emitLabel("var_" + name);
-				cg.emit.emitRaw(Config.DOT_INT + " " + 0);
-			}
+
+			visitChildren(ast.decls(), arg);
 
 			cg.emit.emitRaw(Config.TEXT_SECTION);
 			cg.emit.emitLabel("main");
@@ -91,6 +87,13 @@ class StmtGenerator extends AstVisitor<Register, Void> {
 
             return reg;
 		}
+	}
+
+	@Override
+	public Register varDecl(Ast.VarDecl ast, Void arg) {
+		cg.emit.emitLabel("var_" + ast.name);
+		cg.emit.emitConstantData("0");
+		return null;
 	}
 
 	@Override
@@ -113,7 +116,7 @@ class StmtGenerator extends AstVisitor<Register, Void> {
 		//cg.emit.emitRaw("# ASSIGN");
 
 		Register src = cg.eg.visit(ast.right(), arg);
-		String dest = "var_" + AstOneLine.toString(ast.left());
+		String dest = "var_" + ((Ast.Var) ast.left()).name;
 		cg.emit.emitMove(src, dest);
 		cg.rm.releaseRegister(src);
 

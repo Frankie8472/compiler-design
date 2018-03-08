@@ -7,18 +7,24 @@ label_int:
 label_new_line:
     .string "\n"
     .section .data
+      # Emitting int A
 var_A:
-    .int 0
+      .int 0
+      # Emitting int B
 var_B:
-    .int 0
+      .int 0
+      # Emitting int a
 var_a:
-    .int 0
+      .int 0
+      # Emitting int b
 var_b:
-    .int 0
+      .int 0
+      # Emitting int c
 var_c:
-    .int 0
+      .int 0
+      # Emitting int d
 var_d:
-    .int 0
+      .int 0
     .section .text
 main:
     push %ebp
@@ -34,68 +40,68 @@ main:
         movl %edi, var_B
         # Emitting a = (A * -(B))
           # Emitting (A * -(B))
-          #START
+          #LEFT
           #1
-          #SECOND
-          #0
+          #RIGHT
+          #1
           #END
+            # Emitting A
+            movl var_A, %edi
             # Emitting -(B)
               # Emitting B
-              movl var_B, %edi
-            negl %edi
-            # Emitting A
-            movl var_A, %esi
-          imull %edi, %esi
-        movl %esi, var_a
+              movl var_B, %esi
+            negl %esi
+          imull %esi, %edi
+        movl %edi, var_a
         # Emitting b = (-(A) * B)
           # Emitting (-(A) * B)
-          #START
-          #0
-          #SECOND
+          #LEFT
+          #1
+          #RIGHT
           #1
           #END
             # Emitting -(A)
               # Emitting A
-              movl var_A, %esi
-            negl %esi
+              movl var_A, %edi
+            negl %edi
             # Emitting B
-            movl var_B, %edi
-          imull %edi, %esi
-        movl %esi, var_b
+            movl var_B, %esi
+          imull %esi, %edi
+        movl %edi, var_b
         # Emitting c = -((A + B))
           # Emitting -((A + B))
             # Emitting (A + B)
-            #START
-            #0
-            #SECOND
-            #0
+            #LEFT
+            #1
+            #RIGHT
+            #1
             #END
               # Emitting A
-              movl var_A, %esi
+              movl var_A, %edi
               # Emitting B
-              movl var_B, %edi
-            addl %edi, %esi
-          negl %esi
-        movl %esi, var_c
+              movl var_B, %esi
+            addl %esi, %edi
+          negl %edi
+        movl %edi, var_c
         # Emitting d = -((A * B))
           # Emitting -((A * B))
             # Emitting (A * B)
-            #START
-            #0
-            #SECOND
-            #0
+            #LEFT
+            #1
+            #RIGHT
+            #1
             #END
               # Emitting A
-              movl var_A, %esi
+              movl var_A, %edi
               # Emitting B
-              movl var_B, %edi
-            imull %edi, %esi
-          negl %esi
-        movl %esi, var_d
+              movl var_B, %esi
+            imull %esi, %edi
+          negl %edi
+        movl %edi, var_d
         # Emitting write(a)
           # Emitting a
-          movl var_a, %esi
-        push %esi
+          movl var_a, %edi
+        push %edi
         push $label_int
         call printf
         addl $8, %esp
@@ -105,8 +111,8 @@ main:
         addl $4, %esp
         # Emitting write(b)
           # Emitting b
-          movl var_b, %esi
-        push %esi
+          movl var_b, %edi
+        push %edi
         push $label_int
         call printf
         addl $8, %esp
@@ -116,8 +122,8 @@ main:
         addl $4, %esp
         # Emitting write(c)
           # Emitting c
-          movl var_c, %esi
-        push %esi
+          movl var_c, %edi
+        push %edi
         push $label_int
         call printf
         addl $8, %esp
@@ -127,8 +133,8 @@ main:
         addl $4, %esp
         # Emitting write(d)
           # Emitting d
-          movl var_d, %esi
-        push %esi
+          movl var_d, %edi
+        push %edi
         push $label_int
         call printf
         addl $8, %esp
