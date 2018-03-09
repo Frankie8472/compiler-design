@@ -78,7 +78,7 @@ public abstract class Ast {
 			return this.accept((ExprVisitor<R,A>)visitor, arg);
 		}
 		public abstract <R,A> R accept(ExprVisitor<R, A> visitor, A arg);
-		
+
 		/** Copies any non-AST fields. */
 		protected <E extends Expr> E postCopy(E item) {
 			return item;

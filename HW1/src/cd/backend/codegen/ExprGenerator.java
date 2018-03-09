@@ -1,5 +1,6 @@
 package cd.backend.codegen;
 
+import cd.Config;
 import cd.backend.codegen.RegisterManager.Register;
 import cd.ir.Ast;
 import cd.ir.Ast.BinaryOp;
@@ -24,6 +25,7 @@ import cd.util.debug.AstOneLine;
  * String which indicates the register where the result can be found.
  */
 class ExprGenerator extends ExprVisitor<Register, Void> {
+
     protected final AstCodeGenerator cg;
 
     ExprGenerator(AstCodeGenerator astCodeGenerator) {
@@ -85,19 +87,16 @@ class ExprGenerator extends ExprVisitor<Register, Void> {
             case B_MINUS:
                 op = "subl";
                 cg.emit.emit(op, src, dest);
-                cg.rm.releaseRegister(src);
                 break;
 
             case B_PLUS:
                 op = "addl";
                 cg.emit.emit(op, src, dest);
-                cg.rm.releaseRegister(src);
                 break;
 
             case B_TIMES:
                 op = "imull";
                 cg.emit.emit(op, src, dest);
-                cg.rm.releaseRegister(src);
                 break;
 
             case B_DIV: // dest / src
@@ -107,118 +106,22 @@ class ExprGenerator extends ExprVisitor<Register, Void> {
                 cg.emit.emit("pushl", src);
                 cg.emit.emitMove(dest, Register.EAX);
                 cg.emit.emitRaw("cltd");
-                cg.emit.emit("idivl", "(%esp)");
+                cg.emit.emit("idivl", AssemblyEmitter.registerOffset(0, Register.ESP));
                 cg.emit.emit("addl", 4, Register.ESP);
                 cg.emit.emitMove(Register.EAX, dest);
-                cg.rm.releaseRegister(src);
 
                 if (dest.equals(Register.EDX)) {
                     cg.emit.emit("addl", 4, Register.ESP);
                 } else {
                     cg.emit.emit("popl", Register.EDX);
                 }
+                //DOES NOT MAKE SENSE
                 if (dest.equals(Register.EAX)) {
                     cg.emit.emit("addl", 4, Register.ESP);
                 } else {
                     cg.emit.emit("popl", Register.EAX);
                 }
 
-
-                /*
-                Register eax_old = null, edx_old = null;
-                Register eax = Register.EAX;
-                Register edx = Register.EDX;
-
-                if (cg.rm.availableRegisters() > 1) {
-                    // check if eax is in use and if its eax, if not
-                    if (cg.rm.isInUse(eax)) {
-                        if (!dest.equals(eax)) {
-                            eax_old = cg.rm.getRegister();
-                            cg.emit.emitMove(eax, eax_old);
-                            cg.emit.emitMove(dest, eax);
-                        } // else dest.equals(eax)
-                    } else {
-                        cg.emit.emitMove(dest, eax);
-                    }
-
-                    // check if edx is in use
-                    if (cg.rm.isInUse(edx)) {
-                        edx_old = cg.rm.getRegister();
-                        cg.emit.emitMove(edx, edx_old);
-                        if (src.equals(edx)) {
-                            src = edx_old;
-                        }
-                    }
-
-                    cg.emit.emitRaw("cltd");
-                    cg.emit.emit("idivl", src); //result/quotient in eax, reminder in edx
-
-                    // move result and restore old vars
-                    cg.emit.emitMove(eax, dest);
-
-                    if (edx_old != null) {
-                        if (src.equals(edx_old)) {
-                            cg.rm.releaseRegister(edx);
-                        } else {
-                            cg.emit.emitMove(edx_old, edx);
-                        }
-                        cg.rm.releaseRegister(edx_old);
-                    }
-
-                    if (eax_old != null) {
-                        cg.emit.emitMove(eax, dest);
-                        cg.emit.emitMove(eax_old, eax);
-                        cg.rm.releaseRegister(eax_old);
-                    } else if (!dest.equals(eax)) {
-                        cg.emit.emitMove(eax, dest);
-                    }
-
-
-                } else { // use stack
-                    // check if eax is in use and if its eax, if not
-                    if (cg.rm.isInUse(eax)) {
-                        if (!dest.equals(eax)) {
-                            cg.emit.emit("pushl", eax);
-                            cg.emit.emitMove(dest, eax);
-                            eax_old = eax;
-                        } // else dest.equals(eax)
-                    } else {
-                        cg.emit.emitMove(dest, eax);
-                    }
-
-                    // check if edx is in use
-                    if (cg.rm.isInUse(edx)) {
-                        cg.emit.emit("pushl", edx);
-                        edx_old = edx;
-                    }
-
-                    if (src.equals(edx)) {
-                        cg.emit.emitRaw("cltd");
-                        cg.emit.emit("idivl", "(%esp)"); //result/quotient in eax, reminder in edx
-                    } else {
-                        cg.emit.emitRaw("cltd");
-                        cg.emit.emit("idivl", src); //result/quotient in eax, reminder in edx
-                    }
-
-                    // move result and restore old vars
-
-                    if (edx_old != null) {
-                        cg.emit.emit("addl", 4, Register.ESP);
-                        cg.rm.releaseRegister(edx);
-                    }
-
-                    if (eax_old != null) {
-                        cg.emit.emitMove(eax, dest);
-                        cg.emit.emit("popl", eax);
-                    } else if (!dest.equals(eax)) {
-                        cg.emit.emitMove(eax, dest);
-                    }
-
-
-
-                }
-
-*/
                 break;
 
             case B_OR:
@@ -243,6 +146,8 @@ class ExprGenerator extends ExprVisitor<Register, Void> {
                 break;
         }
 
+        // CleanUp
+        cg.rm.releaseRegister(src);
         return dest;
     }
 
@@ -255,15 +160,15 @@ class ExprGenerator extends ExprVisitor<Register, Void> {
 
     @Override
     public Register builtInRead(BuiltInRead ast, Void arg) {
-        Register dest = cg.rm.getRegister();
-        cg.emit.emit("subl", 4, Register.ESP);
-        cg.emit.emit("movl", Register.ESP, "(%esp)");
-        cg.emit.emit("push", AssemblyEmitter.labelAddress("label_int"));
-        cg.emit.emit("call", "scanf");
-        cg.emit.emitMove("4(%esp)", dest);
-        cg.emit.emit("addl", 8, Register.ESP);
+        Register result = cg.rm.getRegister();
+        cg.emit.emit("leal", AssemblyEmitter.registerOffset(-4,Register.ESP), result);
+        cg.emit.emit("pushl", result);
+        cg.emit.emit("pushl", AssemblyEmitter.labelAddress("label_print"));
+        cg.emit.emit("call", Config.SCANF);
+        cg.emit.emit("popl", result);
+        cg.emit.emit("popl", result);
 
-        return dest;
+        return result;
     }
 
     @Override
@@ -283,8 +188,7 @@ class ExprGenerator extends ExprVisitor<Register, Void> {
     @Override
     public Register intConst(IntConst ast, Void arg) {
         Register dest = cg.rm.getRegister();
-        int src = ast.value;
-        cg.emit.emit("movl", src, dest);
+        cg.emit.emit("movl", ast.value, dest);
         return dest;
     }
 
@@ -325,23 +229,23 @@ class ExprGenerator extends ExprVisitor<Register, Void> {
 
     @Override
     public Register unaryOp(UnaryOp ast, Void arg) {
-        String op;
+        String op = "nop";
         Register dest = visit(ast.arg(), arg);
+
         switch (ast.operator) {
             case U_MINUS:
                 op = "negl";
-                cg.emit.emit(op, dest);
                 break;
             case U_BOOL_NOT:
                 op = "notl";
-                cg.emit.emit(op, dest);
                 break;
             case U_PLUS:
+                // Is in use later
                 break;
             default:
                 break;
         }
-
+        cg.emit.emit(op, dest);
         return dest;
 
     }

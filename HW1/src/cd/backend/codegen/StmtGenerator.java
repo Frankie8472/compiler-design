@@ -1,7 +1,6 @@
 package cd.backend.codegen;
 
 import cd.Config;
-import cd.ToDoException;
 import cd.backend.codegen.RegisterManager.Register;
 import cd.frontend.parser.ParseFailure;
 import cd.ir.Ast;
@@ -13,49 +12,50 @@ import cd.ir.Ast.MethodCall;
 import cd.ir.Ast.MethodDecl;
 import cd.ir.Ast.WhileLoop;
 import cd.ir.AstVisitor;
+import cd.util.debug.AstDump;
 import cd.util.debug.AstOneLine;
-import jdk.nashorn.internal.ir.debug.ASTWriter;
 
 /**
  * Generates code to process statements and declarations.
  */
 class StmtGenerator extends AstVisitor<Register, Void> {
-    protected final AstCodeGenerator cg;
-    private MethodDecl methodDecl;
 
-    StmtGenerator(AstCodeGenerator astCodeGenerator) {
-        cg = astCodeGenerator;
-    }
+	protected final AstCodeGenerator cg;
 
-    public void gen(Ast ast) {
-        visit(ast, null);
-    }
+	StmtGenerator(AstCodeGenerator astCodeGenerator) {
+		cg = astCodeGenerator;
+	}
 
-    @Override
-    public Register visit(Ast ast, Void arg) {
-        try {
-            cg.emit.increaseIndent("Emitting " + AstOneLine.toString(ast));
-            return super.visit(ast, arg);
-        } finally {
-            cg.emit.decreaseIndent();
-        }
-    }
+	public void gen(Ast ast) {
+		visit(ast, null);
+	}
 
-    @Override
-    public Register methodCall(MethodCall ast, Void dummy) {
-        {
-            throw new RuntimeException("Not required");
-        }
-    }
+	@Override
+	public Register visit(Ast ast, Void arg) {
+		try {
+			cg.emit.increaseIndent("Emitting " + AstOneLine.toString(ast));
+			return super.visit(ast, arg);
+		} finally {
+			cg.emit.decreaseIndent();
+		}
+	}
+
+	@Override
+	public Register methodCall(MethodCall ast, Void dummy) {
+		{
+			throw new RuntimeException("Not required");
+		}
+	}
 
     @Override
     public Register methodDecl(MethodDecl ast, Void arg) {
         cg.rm.initRegisters();
+
         cg.emit.emitRaw(".globl " + Config.MAIN);
 
         // DATA_STR_SECTION
         cg.emit.emitRaw(Config.DATA_STR_SECTION);
-        cg.emit.emitLabel("label_int");
+        cg.emit.emitLabel("label_print");
         cg.emit.emitRaw(Config.DOT_STRING + " \"%d\"");
         cg.emit.emitLabel("label_new_line");
         cg.emit.emitRaw(Config.DOT_STRING + " \"\\n\"");
@@ -66,14 +66,14 @@ class StmtGenerator extends AstVisitor<Register, Void> {
 
         // TEXT_SECTION
         cg.emit.emitRaw(Config.TEXT_SECTION);
-        cg.emit.emitLabel("main");
+        cg.emit.emitLabel(Config.MAIN);
 
         // ENTER
         cg.emit.emit("push", Register.EBP);
         cg.emit.emitMove(Register.ESP, Register.EBP);
 
         // FUNCTION
-        Register reg = cg.sg.visit(ast.body(), arg);
+        Register reg = visitChildren(ast.body(), arg);
 
         // FREE ALL REGS
         cg.rm.releaseRegister(Register.EAX);
@@ -92,12 +92,40 @@ class StmtGenerator extends AstVisitor<Register, Void> {
     }
 
     @Override
+    public Register varDecl(Ast.VarDecl ast, Void arg) {
+        cg.emit.emitLabel("var_" + ast.name);
+        cg.emit.emitConstantData("0");
+        return null;
+    }
+
+    @Override
     public Register ifElse(IfElse ast, Void arg) {
         {
             throw new RuntimeException("Not required");
         }
     }
 
+
+    @Override
+    public Register assign(Assign ast, Void arg) {
+        Register src = cg.eg.visit(ast.right(), arg);
+        String dest = "var_" + ((Ast.Var) ast.left()).name; //Not happy with that
+        cg.emit.emitMove(src, dest);
+        cg.rm.releaseRegister(src);
+        return null;
+    }
+
+    /*    @Override
+        public Register assign(Assign ast, Void arg) {
+
+            Register right = cg.eg.visit(ast.right(), arg);
+            Register left = cg.eg.visit(ast.left(), arg);
+
+            cg.emit.emitMove(right, left);
+
+            cg.rm.releaseRegister(right);
+            return left;
+        }*/
     @Override
     public Register whileLoop(WhileLoop ast, Void arg) {
         {
@@ -106,22 +134,16 @@ class StmtGenerator extends AstVisitor<Register, Void> {
     }
 
     @Override
-    public Register assign(Assign ast, Void arg) {
-        Register src = cg.eg.visit(ast.right(), arg);
-        String dest = "var_" + ((Ast.Var) ast.left()).name;
-        cg.emit.emitMove(src, dest);
-        cg.rm.releaseRegister(src);
-        return null;
-    }
-
-    @Override
     public Register builtInWrite(BuiltInWrite ast, Void arg) {
-        Register tmp = cg.eg.visit(ast.arg(), arg);
-        cg.emit.emit("push", tmp);
-        cg.emit.emit("push", AssemblyEmitter.labelAddress("label_int"));
+        Register result = cg.eg.visit(ast.arg(), arg);
+
+        cg.emit.emit("push", result);
+        cg.emit.emit("push", AssemblyEmitter.labelAddress("label_print"));
         cg.emit.emit("call", Config.PRINTF);
-        cg.rm.releaseRegister(tmp);
-        cg.emit.emit("addl", 8, Register.ESP);
+        cg.emit.emit("pop", result);
+        cg.emit.emit("pop", result);
+
+        cg.rm.releaseRegister(result);
         return null;
     }
 
@@ -130,13 +152,6 @@ class StmtGenerator extends AstVisitor<Register, Void> {
         cg.emit.emit("push", AssemblyEmitter.labelAddress("label_new_line"));
         cg.emit.emit("call", Config.PRINTF);
         cg.emit.emit("addl", 4, Register.ESP);
-        return null;
-    }
-
-    @Override
-    public Register varDecl(Ast.VarDecl ast, Void arg) {
-        cg.emit.emitLabel("var_" + ast.name);
-        cg.emit.emitConstantData("0");
         return null;
     }
 }

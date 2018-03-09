@@ -1,0 +1,37 @@
+class Main {
+	void main() { // var must begin with latin letter, no special characters
+       int a, b, c, d;
+
+       a = read();
+       b = read();
+
+       a = a*a;
+       b = b-1;
+       write(a);
+       writeln();
+       a = a*a;
+       b = b-1;
+       write(a);
+       writeln();
+       a = a*a;
+       b = b-1;
+       write(a);
+       writeln();
+       a = a*a;
+       b = b-1;
+       write(a);
+       writeln();
+       a = a*a;
+       b = b-1;
+       write(a);
+       writeln();
+       a = a*a;
+       b = b-1;
+       write(a);
+       writeln();
+
+       d = 2147483647;
+       write(d+1);
+       writeln();
+	}
+}

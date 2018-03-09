@@ -3,7 +3,6 @@
 bin/
 *.iml
 *.eml
-
 *.bin
 *.javali.bin
 *.err
