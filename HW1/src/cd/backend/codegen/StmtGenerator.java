@@ -76,12 +76,12 @@ class StmtGenerator extends AstVisitor<Register, Void> {
         Register reg = visitChildren(ast.body(), arg);
 
         // FREE ALL REGS
-        cg.rm.releaseRegister(Register.EAX);
-        cg.rm.releaseRegister(Register.EDX);
-        cg.rm.releaseRegister(Register.EBX);
-        cg.rm.releaseRegister(Register.ECX);
-        cg.rm.releaseRegister(Register.EDI);
-        cg.rm.releaseRegister(Register.ESI);
+//        cg.rm.releaseRegister(Register.EAX);
+//        cg.rm.releaseRegister(Register.EDX);
+//        cg.rm.releaseRegister(Register.EBX);
+//        cg.rm.releaseRegister(Register.ECX);
+//        cg.rm.releaseRegister(Register.EDI);
+//        cg.rm.releaseRegister(Register.ESI);
 
         // EAX = 0, LEAVE, RET
         cg.emit.emit("xorl", Register.EAX, Register.EAX);
