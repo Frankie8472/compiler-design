@@ -1,0 +1,11 @@
+/* test30  Max registers needed (balanced tree with depth = 6) */
+
+class Main {
+	void main() {
+
+        int a, b;
+        a = (((((a + b) + (a + b)) + ((a + b) + (a + b))) + (((a + b) + (a + b)) + ((a + b) + (a + b)))) + ((((a + b) + (a + b)) + ((a + b) + (a + b))) + (((a + b) + (a + b)) + ((a + b) + (a + b)))));
+        //a = ((((((a + b) + (a + b)) + ((a + b) + (a + b))) + (((a + b) + (a + b)) + ((a + b) + (a + b)))) + ((((a + b) + (a + b)) + ((a + b) + (a + b))) + (((a + b) + (a + b)) + ((a + b) + (a + b))))) + (((((a + b) + (a + b)) + ((a + b) + (a + b))) + (((a + b) + (a + b)) + ((a + b) + (a + b)))) + ((((a + b) + (a + b)) + ((a + b) + (a + b))) + (((a + b) + (a + b)) + ((a + b) + (a + b))))));
+
+	}
+}

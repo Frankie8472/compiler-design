@@ -1,0 +1,9 @@
+/* test28  Division by zero (must fail, error: 136) */
+
+class Main {
+	void main() {
+
+        write(1/0);
+
+	}
+}

@@ -1,13 +1,15 @@
-/* Test Write (normal, interleaved, negative, zero, T_max, T_min, only Integers) */
+/* test07  Assign: var to int, var to var, var a to var a */
+
 class Main {
 	void main() { // var must begin with latin letter, no special characters
-        int a, b, c, d, zero, max, min;
+
+        int a, b, c, d, e, f, g;
         a = 5;
         b = 6;
-        c = 1000;
-        d = -10;
-        zero = 0;
-        max = 2147483647;
-        min = -2147483647;
+        c = 6;
+
+        a = b;
+        c = c;
+
 	}
 }

@@ -49,7 +49,7 @@ class StmtGenerator extends AstVisitor<Register, Void> {
 
     @Override
     public Register methodDecl(MethodDecl ast, Void arg) {
-        cg.rm.initRegisters();
+	    cg.rm.initRegisters();
 
         cg.emit.emitRaw(".globl " + Config.MAIN);
 
@@ -115,17 +115,6 @@ class StmtGenerator extends AstVisitor<Register, Void> {
         return null;
     }
 
-    /*    @Override
-        public Register assign(Assign ast, Void arg) {
-
-            Register right = cg.eg.visit(ast.right(), arg);
-            Register left = cg.eg.visit(ast.left(), arg);
-
-            cg.emit.emitMove(right, left);
-
-            cg.rm.releaseRegister(right);
-            return left;
-        }*/
     @Override
     public Register whileLoop(WhileLoop ast, Void arg) {
         {

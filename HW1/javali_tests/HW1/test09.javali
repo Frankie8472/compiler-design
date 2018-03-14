@@ -1,0 +1,20 @@
+/* test09  Write new line */
+
+class Main {
+	void main() {
+
+        writeln();
+        writeln();
+        writeln();
+        writeln();
+        writeln();
+        writeln();
+        writeln();
+        writeln();
+        writeln();
+        writeln();
+        writeln();
+        writeln();
+
+	}
+}

@@ -1,19 +1,11 @@
-/* Test Addition (normal, interleaved, negative, zero, T_max, T_min, only Integers) */
+/* test02  Multiple Variable initialisation */
+
 class Main {
-	void main() { // var must begin with latin letter, no special characters
+	void main() {
+
+	    // var must begin with latin letter, no special characters
         int a, b, c, d, zero, max, min;
-        a = 5;
-        b = 6;
-        c = 1000;
-        d = -10;
-        zero = 0;
-        max = 2147483647;
-        min = -2147483647;
-        a=a+b;
-        b=b+c;
-        c=c+d;
-        d=d+zero;
-        max=max+1;
-        min=min+max+max+max;
+        int e, f, g, h, i;
+
 	}
 }

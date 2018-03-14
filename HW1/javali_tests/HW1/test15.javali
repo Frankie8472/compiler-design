@@ -1,0 +1,15 @@
+/* test15  Overflow: top, bottom */
+
+class Main {
+	void main() {
+
+
+        int max, min, t_min;
+        max = 2147483647;
+        min = -2147483647;
+        //t_min = -2147483648;
+        write(max+max);
+        write(min-min);
+
+	}
+}

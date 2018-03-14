@@ -1,13 +1,13 @@
-/* Test Multiplication (normal, interleaved, negative, zero, T_max, T_min, only Integers) */
+/* test04  Very long variable */
+
 class Main {
-	void main() { // var must begin with latin letter, no special characters
-        int a, b, c, d, zero, max, min;
-        a = 5;
-        b = 6;
-        c = 1000;
-        d = -10;
-        zero = 0;
-        max = 2147483647;
-        min = -2147483647;
+	void main() {
+
+	    // 27 chars
+	    int abcdefghijklmnopqrstuvwxyz;
+
+	    // 10*27 chars
+	    int abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz;
+
 	}
 }

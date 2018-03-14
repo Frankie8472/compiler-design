@@ -1,13 +1,13 @@
-/* Test Overflow signed, unsigned */
+/* test08  Write to int, var, new line */
+
 class Main {
-	void main() { // var must begin with latin letter, no special characters
-        int a, b, c, d, zero, max, min;
+	void main() {
+
+        int a;
         a = 5;
-        b = 6;
-        c = 1000;
-        d = -10;
-        zero = 0;
-        max = 2147483647;
-        min = -2147483647;
+        write(5);
+        write(a);
+        write(a+5);
+
 	}
 }

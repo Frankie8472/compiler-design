@@ -1,13 +1,17 @@
-/* Test Subtraction (normal, interleaved, negative, zero, T_max, T_min, only Integers) */
+/* test03  Variable name same as label name, label_print, label_new_line, main (must fail) */
+
 class Main {
-	void main() { // var must begin with latin letter, no special characters
-        int a, b, c, d, zero, max, min;
-        a = 5;
-        b = 6;
-        c = 1000;
-        d = -10;
-        zero = 0;
-        max = 2147483647;
-        min = -2147483647;
+	void main() {
+
+        // Must fail, special character "_" is not allowed
+        int main, label_print, label_new_line;
+        label_print = 5;
+        label_new_line = 6;
+        main = 7;
+        write(main);
+        writeln();
+        write(label_print);
+        write(label_new_line);
+
 	}
 }

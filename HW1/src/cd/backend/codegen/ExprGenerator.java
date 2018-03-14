@@ -237,7 +237,7 @@ class ExprGenerator extends ExprVisitor<Register, Void> {
                 op = "negl";
                 break;
             case U_BOOL_NOT:
-                op = "notl";
+                op = "notl"; // this is not correct and not neccesary
                 break;
             case U_PLUS:
                 // Is in use later

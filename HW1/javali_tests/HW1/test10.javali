@@ -1,0 +1,11 @@
+/* test10  Read to var, int */
+
+class Main {
+	void main() {
+
+        int a;
+        a = read();
+        5 = read();
+
+	}
+}

@@ -1,0 +1,21 @@
+/* test23  Multiplication var, var: (+,+), (+,-), (-,+), (-,-), nested */
+
+class Main {
+	void main() {
+
+        int a, b;
+        a = 10;
+        b = 1;
+        a = b * a;
+        b = b * -a;
+        a = -b * -a;
+        a = -b * a;
+        a = b * (-a);
+        a = (-b) * a;
+        a = (-b) * (-a);
+        a = (b * a) * (b * a);
+        a = ((b * a) * (b * a)) * ((b * a) * (b * a));
+        a = ((b * a) * (b * a)) * ((b * a) * (b * a)) * ((b * a) * (b * a)) * ((b * a) * (b * a)) * ((b * a) * (b * a)) * ((b * a) * (b * a)) * ((b * a) * (b * a)) * ((b * a) * (b * a)) * ((b * a) * (b * a)) * ((b * a) * (b * a)) * ((b * a) * (b * a)) * ((b * a) * (b * a)) * ((b * a) * (b * a)) * ((b * a) * (b * a)) * ((b * a) * (b * a)) * ((b * a) * (b * a)) * ((b * a) * (b * a)) * ((b * a) * (b * a)) * ((b * a) * (b * a)) * ((b * a) * (b * a)) * ((b * a) * (b * a)) * ((b * a) * (b * a));
+
+	}
+}

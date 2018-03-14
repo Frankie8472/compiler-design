@@ -1,8 +1,7 @@
-/* Test Multiple Variable initialisation */
+/* test01  Only main -> empty */
+
 class Main {
-	void main() { // var must begin with latin letter, no special characters
-        int a, b, c;
-        int treq3454;
-        int A5, ReW;
+	void main() {
+
 	}
 }

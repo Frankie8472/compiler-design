@@ -1,34 +1,34 @@
-test01  Multiple Variable initialisation
-test02  Addition (normal, interleaved, negative, zero, T_max, T_min, only Integers)
-test03  Subtraction (normal, interleaved, negative, zero, T_max, T_min, only Integers)
-test04  Multiplication (normal, interleaved, negative, zero, T_max, T_min, only Integers)
-test05  Division (normal, interleaved, negative, zero, T_max, T_min, only Integers)
-test06  Read (normal, interleaved, negative, zero, T_max, T_min, only Integers)
-test07  Write (normal, interleaved, negative, zero, T_max, T_min, only Integers)
-test08  Overflow signed, unsigned
-test09
-test10
-test11
-test12
-test13
-test14
-test15
-test16
-test17
-test18
-test19
-test20
-test21
-test22
-test23
-test24
-test25
-test26
-test27
-test28
-test29
-test30
-test31
+test01  Only main -> empty
+test02  Multiple Variable initialisation
+test03  Variable name same as label name, label_print, label_new_line, main
+test04  Very long variable
+test05  Double variable initialization (must fail)
+test06  Variable not initialized but assigned an int (must fail)
+test07  Assign: var to int, var to var, var a to var a
+test08  Write to int, var, new line
+test09  Write new line
+test10  Read to var, int, standalone expr
+test11  Subtraction int, int: (+,+), (+,-), (-,+), (-,-), nested
+test12  Subtraction int, var: (+,+), (+,-), (-,+), (-,-), nested
+test13  Subtraction var, int: (+,+), (+,-), (-,+), (-,-), nested
+test14  Subtraction var, var: (+,+), (+,-), (-,+), (-,-), nested
+test15  Overflow: top, bottom
+test16  Addition int, int: (+,+), (+,-), (-,+), (-,-), nested
+test17  Addition int, var: (+,+), (+,-), (-,+), (-,-), nested
+test18  Addition var, int: (+,+), (+,-), (-,+), (-,-), nested
+test19  Addition var, var: (+,+), (+,-), (-,+), (-,-), nested
+test20  Multiplication int, int: (+,+), (+,-), (-,+), (-,-), nested
+test21  Multiplication int, var: (+,+), (+,-), (-,+), (-,-), nested
+test22  Multiplication var, int: (+,+), (+,-), (-,+), (-,-), nested
+test23  Multiplication var, var: (+,+), (+,-), (-,+), (-,-), nested
+test24  Division int, int: (+,+), (+,-), (-,+), (-,-), nested
+test25  Division int, var: (+,+), (+,-), (-,+), (-,-), nested
+test26  Division var, int: (+,+), (+,-), (-,+), (-,-), nested
+test27  Division var, var: (+,+), (+,-), (-,+), (-,-), nested
+test28  Division by zero (must fail, error: 136)
+test29  Unaryop: plus, minus
+test30  Max registers needed (balanced tree with depth = 6)
+test31  Standalone Expr (should not parse)
 test32
 test33
 test34
