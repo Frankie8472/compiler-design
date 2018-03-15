@@ -53,10 +53,8 @@ class ExprGenerator extends ExprVisitor<Register, Void> {
             int right = cntReg(((Ast.LeftRightExpr) ast).right());
             if (left == right) {
                 num = right + 1;
-            } else if (left < right) {
-                num = right;
             } else {
-                num = left;
+                num = Math.max(left, right);
             }
         } else if (ast instanceof Ast.ArgExpr) {
             num = cntReg(((Ast.ArgExpr) ast).arg());
@@ -115,7 +113,6 @@ class ExprGenerator extends ExprVisitor<Register, Void> {
                 } else {
                     cg.emit.emit("popl", Register.EDX);
                 }
-                //DOES NOT MAKE SENSE
                 if (dest.equals(Register.EAX)) {
                     cg.emit.emit("addl", 4, Register.ESP);
                 } else {
@@ -161,7 +158,7 @@ class ExprGenerator extends ExprVisitor<Register, Void> {
     @Override
     public Register builtInRead(BuiltInRead ast, Void arg) {
         Register result = cg.rm.getRegister();
-        cg.emit.emit("leal", AssemblyEmitter.registerOffset(-4,Register.ESP), result);
+        cg.emit.emit("leal", AssemblyEmitter.registerOffset(-4, Register.ESP), result);
         cg.emit.emit("pushl", result);
         cg.emit.emit("pushl", AssemblyEmitter.labelAddress("label_print"));
         cg.emit.emit("call", Config.SCANF);

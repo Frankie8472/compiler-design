@@ -17,7 +17,7 @@ public abstract class Ast {
 	 * <p><b>Note:</b> this list may contain null pointers! 
 	 */
 	public final List<Ast> rwChildren;
-	
+
 	protected Ast(int fixedCount) {
 		if (fixedCount == -1)
 			this.rwChildren = new ArrayList<Ast>();
