@@ -1,8 +1,0 @@
-/* test31  Standalone Expr (should not parse)*/
-class Main {
-	void main() {
-
-        5+3;
-
-	}
-}

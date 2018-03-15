@@ -55,7 +55,8 @@ public class Main {
 	/** Parse command line, invoke compile() routine */
 	public static void main(String args[]) throws IOException {
 		Main m = new Main();
-		
+		adsfsaf
+		throw new RuntimeException("sadf");
 		for (String arg : args) {
 			if (arg.equals("-d"))
 				m.debug = new OutputStreamWriter(System.err);

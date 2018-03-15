@@ -1,13 +1,9 @@
 test01  Only main -> empty
 test02  Multiple Variable initialisation
-test03  Variable name same as label name, label_print, label_new_line, main
 test04  Very long variable
-test05  Double variable initialization (must fail)
-test06  Variable not initialized but assigned an int (must fail)
 test07  Assign: var to int, var to var, var a to var a
 test08  Write to int, var, new line
 test09  Write new line
-test10  Read to var, int, standalone expr
 test11  Subtraction int, int: (+,+), (+,-), (-,+), (-,-), nested
 test12  Subtraction int, var: (+,+), (+,-), (-,+), (-,-), nested
 test13  Subtraction var, int: (+,+), (+,-), (-,+), (-,-), nested
@@ -28,7 +24,6 @@ test27  Division var, var: (+,+), (+,-), (-,+), (-,-), nested
 test28  Division by zero (must fail, error: 136)
 test29  Unaryop: plus, minus
 test30  Max registers needed (balanced tree with depth = 6)
-test31  Standalone Expr (should not parse)
 test32
 test33
 test34

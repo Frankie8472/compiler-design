@@ -1,9 +1,0 @@
-/* test06  Variable not initialized but assigned an int (must fail) */
-
-class Main {
-	void main() {
-
-        a = 5;
-
-	}
-}
