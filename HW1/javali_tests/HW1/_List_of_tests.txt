@@ -4,6 +4,7 @@ test04  Very long variable
 test07  Assign: var to int, var to var, var a to var a
 test08  Write to int, var, new line
 test09  Write new line
+test10  Read to var
 test11  Subtraction int, int: (+,+), (+,-), (-,+), (-,-), nested
 test12  Subtraction int, var: (+,+), (+,-), (-,+), (-,-), nested
 test13  Subtraction var, int: (+,+), (+,-), (-,+), (-,-), nested

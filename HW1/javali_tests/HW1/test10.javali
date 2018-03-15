@@ -1,0 +1,10 @@
+/* test04  Very long variable */
+
+class Main {
+	void main() {
+        int a;
+
+        a = read();
+
+	}
+}
