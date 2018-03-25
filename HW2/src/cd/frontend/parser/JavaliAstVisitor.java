@@ -7,6 +7,8 @@ import cd.ToDoException;
 import cd.frontend.parser.JavaliParser.ClassDeclContext;
 import cd.ir.Ast;
 import cd.ir.Ast.ClassDecl;
+import jdk.nashorn.internal.ir.TernaryNode;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
 
@@ -21,7 +23,7 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
 
         List<Ast> children = new ArrayList<>();
         for(JavaliParser.VarDeclContext context : ctx.memberList().varDecl()){
-            children.add(visit(context));
+            children.addAll(visit(context).children());
         }
 
 	    for(JavaliParser.MethodDeclContext context : ctx.memberList().methodDecl()){
@@ -57,7 +59,8 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
 
         List<Ast> decls = new ArrayList<>();
         for(JavaliParser.VarDeclContext context : ctx.varDecl()){
-            decls.add(visit(context));
+            Ast.Seq varDecls = (Ast.Seq) visit(context);
+            decls.addAll(varDecls.rwChildren());
         }
 
         List<Ast> body = new ArrayList<>();
@@ -69,5 +72,16 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
         Ast.MethodDecl decl = new Ast.MethodDecl(type, name, paramTypes, paramNames,new Ast.Seq(decls), new Ast.Seq(body));
 
         return decl;
+    }
+
+    @Override
+    public Ast visitVarDecl(JavaliParser.VarDeclContext ctx) {
+	    String type = ctx.type().getText();
+	    List<Ast> delcls = new ArrayList<>();
+	    for (TerminalNode node: ctx.Identifier()){
+            delcls.add(new Ast.VarDecl(type,node.getText()));
+        }
+        Ast.Seq seq = new Ast.Seq(delcls);
+        return seq;
     }
 }
