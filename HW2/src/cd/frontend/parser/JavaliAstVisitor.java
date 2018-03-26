@@ -24,7 +24,6 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
         ctx.memberList().varDecl().forEach(terminalNode -> children.addAll(visit(terminalNode).rwChildren));
         ctx.memberList().methodDecl().forEach(terminalNode -> children.add(visit(terminalNode)));
 
-
 		ClassDecl decl = new ClassDecl(name, parent, children);
 
 		classDecls.add(decl);
@@ -49,10 +48,7 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
         }
 
         List<Ast> decls = new ArrayList<>();
-        for(JavaliParser.VarDeclContext context : ctx.varDecl()){
-            Ast.Seq varDecls = (Ast.Seq) visit(context);
-            decls.addAll(varDecls.rwChildren());
-        }
+        ctx.varDecl().forEach(terminalNode -> decls.addAll(visit(terminalNode).rwChildren));
 
         List<Ast> body = new ArrayList<>();
         ctx.stmt().forEach(terminalNode -> body.add(visit(terminalNode)));
@@ -65,13 +61,53 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
     @Override
     public Ast visitVarDecl(JavaliParser.VarDeclContext ctx) {
 	    String type = ctx.type().getText();
-	    List<Ast> delcls = new ArrayList<>();
-	    for (TerminalNode node: ctx.Identifier()){
-            delcls.add(new Ast.VarDecl(type,node.getText()));
-        }
-        Ast.Seq seq = new Ast.Seq(delcls);
-        return seq;
+	    List<Ast> decls = new ArrayList<>();
+	    ctx.Identifier().forEach(terminalNode -> decls.add(new Ast.VarDecl(type, terminalNode.getText())));
+
+        return new Ast.Seq(decls);
     }
 
+    @Override
+    public Ast visitStmt(JavaliParser.StmtContext ctx) {
+	    return visit(ctx.getChild(0));
+    }
+
+    @Override
+    public Ast visitWriteStmt(JavaliParser.WriteStmtContext ctx) {
+	    if(ctx.expr() != null){
+	        return new Ast.BuiltInWrite((Ast.Expr) visit(ctx.expr()));
+        }
+        return new Ast.BuiltInWriteln();
+    }
+
+    @Override
+    public Ast visitReturnStmt(JavaliParser.ReturnStmtContext ctx) {
+        return new Ast.ReturnStmt((Ast.Expr) visit(ctx.expr()));
+    }
+
+    @Override
+    public Ast visitWhileStmt(JavaliParser.WhileStmtContext ctx) {
+        return new Ast.WhileLoop((Ast.Expr) visit(ctx.expr()), visit(ctx.stmtBlock()));
+    }
+
+    @Override
+    public Ast visitIfStmt(JavaliParser.IfStmtContext ctx) {
+        return new Ast.IfElse((Ast.Expr) visit(ctx.expr()), visit(ctx.stmtBlock(0)), visit(ctx.stmtBlock(1)));
+    }
+
+    @Override
+    public Ast visitMethodCallStmt(JavaliParser.MethodCallStmtContext ctx) {
+        return visit(ctx.methodCallExpr());
+    }
+
+    @Override
+    public Ast visitExpr(JavaliParser.ExprContext ctx) {
+        System.out.println(ctx.start.getText());
+
+	    //return new Ast.Expr();
+        //return new Ast.ArgExpr();
+        //return new Ast.LeftRightExpr();
+        return null;
+    }
 
 }
