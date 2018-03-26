@@ -165,11 +165,82 @@ public interface JavaliVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitLocalMethodCall(JavaliParser.LocalMethodCallContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link JavaliParser#expr}.
+	 * Visit a parse tree produced by the {@code ExprUnaryOp}
+	 * labeled alternative in {@link JavaliParser#expr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitExpr(JavaliParser.ExprContext ctx);
+	T visitExprUnaryOp(JavaliParser.ExprUnaryOpContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ExprBOpComp}
+	 * labeled alternative in {@link JavaliParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExprBOpComp(JavaliParser.ExprBOpCompContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ExprBOpEq}
+	 * labeled alternative in {@link JavaliParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExprBOpEq(JavaliParser.ExprBOpEqContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ExprBOpAdd}
+	 * labeled alternative in {@link JavaliParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExprBOpAdd(JavaliParser.ExprBOpAddContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ExprCast}
+	 * labeled alternative in {@link JavaliParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExprCast(JavaliParser.ExprCastContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ExprIdentifierAccess}
+	 * labeled alternative in {@link JavaliParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExprIdentifierAccess(JavaliParser.ExprIdentifierAccessContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ExprBOpOr}
+	 * labeled alternative in {@link JavaliParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExprBOpOr(JavaliParser.ExprBOpOrContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ExprLiteral}
+	 * labeled alternative in {@link JavaliParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExprLiteral(JavaliParser.ExprLiteralContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ExprBOpMult}
+	 * labeled alternative in {@link JavaliParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExprBOpMult(JavaliParser.ExprBOpMultContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ExprInBrackets}
+	 * labeled alternative in {@link JavaliParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExprInBrackets(JavaliParser.ExprInBracketsContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ExprBOpAnd}
+	 * labeled alternative in {@link JavaliParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExprBOpAnd(JavaliParser.ExprBOpAndContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link JavaliParser#type}.
 	 * @param ctx the parse tree

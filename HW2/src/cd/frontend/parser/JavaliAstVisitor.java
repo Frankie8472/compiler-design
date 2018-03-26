@@ -10,13 +10,13 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
 
-    public List<ClassDecl> classDecls = new ArrayList<>();
+	public List<ClassDecl> classDecls = new ArrayList<>();
 
-    @Override
-    public Ast visitClassDecl(ClassDeclContext ctx) {
-        String name = ctx.Identifier().get(0).getText();
-        String parent = "Object";
-        if (ctx.Identifier().size() > 1) {
+	@Override
+	public Ast visitClassDecl(ClassDeclContext ctx) {
+	    String name = ctx.Identifier().get(0).getText();
+	    String parent = "Object";
+	    if (ctx.Identifier().size() > 1) {
             parent = ctx.Identifier().get(1).getText(); // No Interface and no multiple inheritance so only one parent
         }
 
@@ -24,16 +24,16 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
         ctx.memberList().varDecl().forEach(terminalNode -> children.addAll(visit(terminalNode).rwChildren));
         ctx.memberList().methodDecl().forEach(terminalNode -> children.add(visit(terminalNode)));
 
-        ClassDecl decl = new ClassDecl(name, parent, children);
+		ClassDecl decl = new ClassDecl(name, parent, children);
 
-        classDecls.add(decl);
-        return decl;
-    }
+		classDecls.add(decl);
+		return decl;
+	}
 
     @Override
     public Ast visitMethodDecl(JavaliParser.MethodDeclContext ctx) {
         String type = "void";
-        if (ctx.type() != null) {
+        if (ctx.type() != null){
             type = ctx.type().getText();
         }
 
@@ -42,7 +42,7 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
         List<String> paramNames = new ArrayList<>();
         List<String> paramTypes = new ArrayList<>();
 
-        if (ctx.formalParamList() != null) {
+        if(ctx.formalParamList() != null) {
             ctx.formalParamList().Identifier().forEach(terminalNode -> paramNames.add(terminalNode.getText()));
             ctx.formalParamList().type().forEach(terminalNode -> paramTypes.add(terminalNode.getText()));
         }
@@ -101,14 +101,61 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
     }
 
     @Override
-    public Ast visitExpr(JavaliParser.ExprContext ctx){
-            System.out.println(ctx.start.getText());
+    public Ast visitExprBOpAdd(JavaliParser.ExprBOpAddContext ctx) {
+        return new Ast.BinaryOp((Ast.Expr) visit(ctx.expr(0)), Ast.BinaryOp.BOp.valueOf(ctx.op.getText()), (Ast.Expr) visit(ctx.expr(1)));
+    }
 
-            //return new Ast.Expr();
-            //return new Ast.ArgExpr();
-            //return new Ast.LeftRightExpr();
-            return null;
-        }
+    @Override
+    public Ast visitExprBOpComp(JavaliParser.ExprBOpCompContext ctx) {
+        return new Ast.BinaryOp((Ast.Expr) visit(ctx.expr(0)), Ast.BinaryOp.BOp.valueOf(ctx.op.getText()), (Ast.Expr) visit(ctx.expr(1)));
+    }
+
+    @Override
+    public Ast visitExprBOpAnd(JavaliParser.ExprBOpAndContext ctx) {
+        return new Ast.BinaryOp((Ast.Expr) visit(ctx.expr(0)), Ast.BinaryOp.BOp.valueOf(ctx.op.getText()), (Ast.Expr) visit(ctx.expr(1)));
+    }
+
+    @Override
+    public Ast visitExprBOpEq(JavaliParser.ExprBOpEqContext ctx) {
+        return new Ast.BinaryOp((Ast.Expr) visit(ctx.expr(0)), Ast.BinaryOp.BOp.valueOf(ctx.op.getText()), (Ast.Expr) visit(ctx.expr(1)));
+    }
+
+    @Override
+    public Ast visitExprBOpMult(JavaliParser.ExprBOpMultContext ctx) {
+        return new Ast.BinaryOp((Ast.Expr) visit(ctx.expr(0)), Ast.BinaryOp.BOp.valueOf(ctx.op.getText()), (Ast.Expr) visit(ctx.expr(1)));
+    }
+
+    @Override
+    public Ast visitExprBOpOr(JavaliParser.ExprBOpOrContext ctx) {
+        return new Ast.BinaryOp((Ast.Expr) visit(ctx.expr(0)), Ast.BinaryOp.BOp.valueOf(ctx.op.getText()), (Ast.Expr) visit(ctx.expr(1)));
+    }
+
+    @Override
+    public Ast visitExprIdentifierAccess(JavaliParser.ExprIdentifierAccessContext ctx) {
+        return visit(ctx.identifierAccess());
+    }
+
+    @Override
+    public Ast visitExprCast(JavaliParser.ExprCastContext ctx) {
+        return new Ast.Cast((Ast.Expr) visit(ctx.expr()), ctx.referenceType().getText());
+    }
+
+    @Override
+    public Ast visitExprInBrackets(JavaliParser.ExprInBracketsContext ctx) {
+        return visit(ctx.expr());
+    }
+
+    @Override
+    public Ast visitExprLiteral(JavaliParser.ExprLiteralContext ctx) {
+        return visit(ctx.literal());
+    }
+
+    @Override
+    public Ast visitExprUnaryOp(JavaliParser.ExprUnaryOpContext ctx) {
+        return new Ast.UnaryOp(Ast.UnaryOp.UOp.valueOf(ctx.op.getText()), (Ast.Expr) visit(ctx.expr()));
+    }
+
+
 
     @Override
     public Ast visitAssignmentStmt(JavaliParser.AssignmentStmtContext ctx) {
@@ -171,6 +218,22 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
         ctx.expr().forEach(exprContext -> args.add(visit(exprContext)));
 
         return new Ast.Seq(args); // Returning Seq as workaround due to multiple arguments.
+    }
+
+    @Override
+    public Ast visitLiteral(JavaliParser.LiteralContext ctx) {
+        if(ctx.Boolean() != null){
+            if (ctx.Boolean().getText().equals("true")){
+                return new Ast.BooleanConst(true);
+            } else {
+                return new Ast.BooleanConst(false);
+            }
+
+        } else if (ctx.Integer() != null){
+            return new Ast.IntConst(Integer.getInteger(ctx.Integer().getText()));
+        } else {
+            return new Ast.NullConst();
+        }
     }
 
 }

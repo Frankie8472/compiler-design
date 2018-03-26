@@ -91,17 +91,17 @@ identifierAccess
     ;
 
 expr
-    : literal
-    | identifierAccess
-    | '(' expr ')'
-    | ( '+' | '-' | '!') expr
-    | '(' referenceType ')' expr
-    | expr ('*' | '/' | '%' ) expr
-    | expr ('+' | '-' ) expr
-    | expr ('<' | '<=' | '>' | '>=' ) expr
-    | expr ('==' | '!=' ) expr
-    | expr ('&&') expr
-    | expr ( '||') expr
+    : literal                                  # ExprLiteral
+    | identifierAccess                         # ExprIdentifierAccess
+    | '(' expr ')'                             # ExprInBrackets
+    | op=( '+' | '-' | '!') expr               # ExprUnaryOp
+    | '(' referenceType ')' expr               # ExprCast
+    | expr op=('*' | '/' | '%' ) expr          # ExprBOpMult
+    | expr op=('+' | '-' ) expr                # ExprBOpAdd
+    | expr op=('<' | '<=' | '>' | '>=' ) expr  # ExprBOpComp
+    | expr op=('==' | '!=' ) expr              # ExprBOpEq
+    | expr op='&&' expr                        # ExprBOpAnd
+    | expr op='||' expr                        # ExprBOpOr
     ;
 
 ////Operators

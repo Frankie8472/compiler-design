@@ -1,6 +1,6 @@
 class Main {
    void main() {
-      int i, z, t, r, e;
-      int a,b,c,d;
+      int i, z;
+      i = 5 * 2;
    }
 }

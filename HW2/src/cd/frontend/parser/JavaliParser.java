@@ -120,6 +120,14 @@ public class JavaliParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_unit; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterUnit(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitUnit(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitUnit(this);
 			else return visitor.visitChildren(this);
@@ -174,6 +182,14 @@ public class JavaliParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_classDecl; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterClassDecl(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitClassDecl(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitClassDecl(this);
@@ -241,6 +257,14 @@ public class JavaliParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_memberList; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterMemberList(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitMemberList(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitMemberList(this);
 			else return visitor.visitChildren(this);
@@ -305,6 +329,14 @@ public class JavaliParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_varDecl; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterVarDecl(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitVarDecl(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitVarDecl(this);
@@ -378,6 +410,14 @@ public class JavaliParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_methodDecl; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterMethodDecl(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitMethodDecl(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitMethodDecl(this);
@@ -491,6 +531,14 @@ public class JavaliParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_formalParamList; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterFormalParamList(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitFormalParamList(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitFormalParamList(this);
 			else return visitor.visitChildren(this);
@@ -562,6 +610,14 @@ public class JavaliParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_stmt; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterStmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitStmt(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitStmt(this);
@@ -643,6 +699,14 @@ public class JavaliParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_stmtBlock; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterStmtBlock(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitStmtBlock(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitStmtBlock(this);
 			else return visitor.visitChildren(this);
@@ -696,6 +760,14 @@ public class JavaliParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_methodCallStmt; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterMethodCallStmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitMethodCallStmt(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitMethodCallStmt(this);
 			else return visitor.visitChildren(this);
@@ -742,6 +814,14 @@ public class JavaliParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_assignmentStmt; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterAssignmentStmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitAssignmentStmt(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitAssignmentStmt(this);
@@ -815,6 +895,14 @@ public class JavaliParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_writeStmt; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterWriteStmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitWriteStmt(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitWriteStmt(this);
 			else return visitor.visitChildren(this);
@@ -885,6 +973,14 @@ public class JavaliParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_ifStmt; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterIfStmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitIfStmt(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitIfStmt(this);
 			else return visitor.visitChildren(this);
@@ -945,6 +1041,14 @@ public class JavaliParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_whileStmt; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterWhileStmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitWhileStmt(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitWhileStmt(this);
 			else return visitor.visitChildren(this);
@@ -988,6 +1092,14 @@ public class JavaliParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_returnStmt; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterReturnStmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitReturnStmt(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitReturnStmt(this);
@@ -1039,6 +1151,14 @@ public class JavaliParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_newExpr; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterNewExpr(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitNewExpr(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitNewExpr(this);
@@ -1111,6 +1231,14 @@ public class JavaliParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_readExpr; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterReadExpr(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitReadExpr(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitReadExpr(this);
 			else return visitor.visitChildren(this);
@@ -1154,6 +1282,14 @@ public class JavaliParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_methodCallExpr; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterMethodCallExpr(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitMethodCallExpr(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitMethodCallExpr(this);
@@ -1240,6 +1376,14 @@ public class JavaliParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_actualParamList; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterActualParamList(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitActualParamList(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitActualParamList(this);
 			else return visitor.visitChildren(this);
@@ -1305,6 +1449,14 @@ public class JavaliParser extends Parser {
 		}
 		public RemoteMethodCallContext(IdentifierAccessContext ctx) { copyFrom(ctx); }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterRemoteMethodCall(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitRemoteMethodCall(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitRemoteMethodCall(this);
 			else return visitor.visitChildren(this);
@@ -1317,6 +1469,14 @@ public class JavaliParser extends Parser {
 		public TerminalNode Identifier() { return getToken(JavaliParser.Identifier, 0); }
 		public FieldAccessContext(IdentifierAccessContext ctx) { copyFrom(ctx); }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterFieldAccess(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitFieldAccess(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitFieldAccess(this);
 			else return visitor.visitChildren(this);
@@ -1326,6 +1486,14 @@ public class JavaliParser extends Parser {
 		public TerminalNode Identifier() { return getToken(JavaliParser.Identifier, 0); }
 		public VarAccessContext(IdentifierAccessContext ctx) { copyFrom(ctx); }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterVarAccess(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitVarAccess(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitVarAccess(this);
 			else return visitor.visitChildren(this);
@@ -1333,6 +1501,14 @@ public class JavaliParser extends Parser {
 	}
 	public static class ThisAccessContext extends IdentifierAccessContext {
 		public ThisAccessContext(IdentifierAccessContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterThisAccess(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitThisAccess(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitThisAccess(this);
@@ -1348,6 +1524,14 @@ public class JavaliParser extends Parser {
 		}
 		public ArrayAccessContext(IdentifierAccessContext ctx) { copyFrom(ctx); }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterArrayAccess(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitArrayAccess(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitArrayAccess(this);
 			else return visitor.visitChildren(this);
@@ -1359,6 +1543,14 @@ public class JavaliParser extends Parser {
 			return getRuleContext(ActualParamListContext.class,0);
 		}
 		public LocalMethodCallContext(IdentifierAccessContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterLocalMethodCall(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitLocalMethodCall(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitLocalMethodCall(this);
@@ -1513,28 +1705,250 @@ public class JavaliParser extends Parser {
 	}
 
 	public static class ExprContext extends ParserRuleContext {
-		public LiteralContext literal() {
-			return getRuleContext(LiteralContext.class,0);
+		public ExprContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
 		}
-		public IdentifierAccessContext identifierAccess() {
-			return getRuleContext(IdentifierAccessContext.class,0);
+		@Override public int getRuleIndex() { return RULE_expr; }
+	 
+		public ExprContext() { }
+		public void copyFrom(ExprContext ctx) {
+			super.copyFrom(ctx);
 		}
+	}
+	public static class ExprUnaryOpContext extends ExprContext {
+		public Token op;
+		public ExprContext expr() {
+			return getRuleContext(ExprContext.class,0);
+		}
+		public ExprUnaryOpContext(ExprContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterExprUnaryOp(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitExprUnaryOp(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitExprUnaryOp(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class ExprBOpCompContext extends ExprContext {
+		public Token op;
 		public List<ExprContext> expr() {
 			return getRuleContexts(ExprContext.class);
 		}
 		public ExprContext expr(int i) {
 			return getRuleContext(ExprContext.class,i);
 		}
+		public ExprBOpCompContext(ExprContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterExprBOpComp(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitExprBOpComp(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitExprBOpComp(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class ExprBOpEqContext extends ExprContext {
+		public Token op;
+		public List<ExprContext> expr() {
+			return getRuleContexts(ExprContext.class);
+		}
+		public ExprContext expr(int i) {
+			return getRuleContext(ExprContext.class,i);
+		}
+		public ExprBOpEqContext(ExprContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterExprBOpEq(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitExprBOpEq(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitExprBOpEq(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class ExprBOpAddContext extends ExprContext {
+		public Token op;
+		public List<ExprContext> expr() {
+			return getRuleContexts(ExprContext.class);
+		}
+		public ExprContext expr(int i) {
+			return getRuleContext(ExprContext.class,i);
+		}
+		public ExprBOpAddContext(ExprContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterExprBOpAdd(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitExprBOpAdd(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitExprBOpAdd(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class ExprCastContext extends ExprContext {
 		public ReferenceTypeContext referenceType() {
 			return getRuleContext(ReferenceTypeContext.class,0);
 		}
-		public ExprContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
+		public ExprContext expr() {
+			return getRuleContext(ExprContext.class,0);
 		}
-		@Override public int getRuleIndex() { return RULE_expr; }
+		public ExprCastContext(ExprContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterExprCast(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitExprCast(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitExpr(this);
+			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitExprCast(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class ExprIdentifierAccessContext extends ExprContext {
+		public IdentifierAccessContext identifierAccess() {
+			return getRuleContext(IdentifierAccessContext.class,0);
+		}
+		public ExprIdentifierAccessContext(ExprContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterExprIdentifierAccess(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitExprIdentifierAccess(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitExprIdentifierAccess(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class ExprBOpOrContext extends ExprContext {
+		public Token op;
+		public List<ExprContext> expr() {
+			return getRuleContexts(ExprContext.class);
+		}
+		public ExprContext expr(int i) {
+			return getRuleContext(ExprContext.class,i);
+		}
+		public ExprBOpOrContext(ExprContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterExprBOpOr(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitExprBOpOr(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitExprBOpOr(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class ExprLiteralContext extends ExprContext {
+		public LiteralContext literal() {
+			return getRuleContext(LiteralContext.class,0);
+		}
+		public ExprLiteralContext(ExprContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterExprLiteral(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitExprLiteral(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitExprLiteral(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class ExprBOpMultContext extends ExprContext {
+		public Token op;
+		public List<ExprContext> expr() {
+			return getRuleContexts(ExprContext.class);
+		}
+		public ExprContext expr(int i) {
+			return getRuleContext(ExprContext.class,i);
+		}
+		public ExprBOpMultContext(ExprContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterExprBOpMult(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitExprBOpMult(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitExprBOpMult(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class ExprInBracketsContext extends ExprContext {
+		public ExprContext expr() {
+			return getRuleContext(ExprContext.class,0);
+		}
+		public ExprInBracketsContext(ExprContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterExprInBrackets(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitExprInBrackets(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitExprInBrackets(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class ExprBOpAndContext extends ExprContext {
+		public Token op;
+		public List<ExprContext> expr() {
+			return getRuleContexts(ExprContext.class);
+		}
+		public ExprContext expr(int i) {
+			return getRuleContext(ExprContext.class,i);
+		}
+		public ExprBOpAndContext(ExprContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterExprBOpAnd(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitExprBOpAnd(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitExprBOpAnd(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -1560,18 +1974,28 @@ public class JavaliParser extends Parser {
 			switch ( getInterpreter().adaptivePredict(_input,26,_ctx) ) {
 			case 1:
 				{
+				_localctx = new ExprLiteralContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
+
 				setState(259);
 				literal();
 				}
 				break;
 			case 2:
 				{
+				_localctx = new ExprIdentifierAccessContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
 				setState(260);
 				identifierAccess(0);
 				}
 				break;
 			case 3:
 				{
+				_localctx = new ExprInBracketsContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
 				setState(261);
 				match(T__7);
 				setState(262);
@@ -1582,10 +2006,14 @@ public class JavaliParser extends Parser {
 				break;
 			case 4:
 				{
+				_localctx = new ExprUnaryOpContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
 				setState(265);
+				((ExprUnaryOpContext)_localctx).op = _input.LT(1);
 				_la = _input.LA(1);
 				if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__22) | (1L << T__23) | (1L << T__24))) != 0)) ) {
-				_errHandler.recoverInline(this);
+					((ExprUnaryOpContext)_localctx).op = (Token)_errHandler.recoverInline(this);
 				}
 				else {
 					if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
@@ -1598,6 +2026,9 @@ public class JavaliParser extends Parser {
 				break;
 			case 5:
 				{
+				_localctx = new ExprCastContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
 				setState(267);
 				match(T__7);
 				setState(268);
@@ -1623,14 +2054,15 @@ public class JavaliParser extends Parser {
 					switch ( getInterpreter().adaptivePredict(_input,27,_ctx) ) {
 					case 1:
 						{
-						_localctx = new ExprContext(_parentctx, _parentState);
+						_localctx = new ExprBOpMultContext(new ExprContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expr);
 						setState(274);
 						if (!(precpred(_ctx, 6))) throw new FailedPredicateException(this, "precpred(_ctx, 6)");
 						setState(275);
+						((ExprBOpMultContext)_localctx).op = _input.LT(1);
 						_la = _input.LA(1);
 						if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__25) | (1L << T__26) | (1L << T__27))) != 0)) ) {
-						_errHandler.recoverInline(this);
+							((ExprBOpMultContext)_localctx).op = (Token)_errHandler.recoverInline(this);
 						}
 						else {
 							if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
@@ -1643,14 +2075,15 @@ public class JavaliParser extends Parser {
 						break;
 					case 2:
 						{
-						_localctx = new ExprContext(_parentctx, _parentState);
+						_localctx = new ExprBOpAddContext(new ExprContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expr);
 						setState(277);
 						if (!(precpred(_ctx, 5))) throw new FailedPredicateException(this, "precpred(_ctx, 5)");
 						setState(278);
+						((ExprBOpAddContext)_localctx).op = _input.LT(1);
 						_la = _input.LA(1);
 						if ( !(_la==T__22 || _la==T__23) ) {
-						_errHandler.recoverInline(this);
+							((ExprBOpAddContext)_localctx).op = (Token)_errHandler.recoverInline(this);
 						}
 						else {
 							if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
@@ -1663,14 +2096,15 @@ public class JavaliParser extends Parser {
 						break;
 					case 3:
 						{
-						_localctx = new ExprContext(_parentctx, _parentState);
+						_localctx = new ExprBOpCompContext(new ExprContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expr);
 						setState(280);
 						if (!(precpred(_ctx, 4))) throw new FailedPredicateException(this, "precpred(_ctx, 4)");
 						setState(281);
+						((ExprBOpCompContext)_localctx).op = _input.LT(1);
 						_la = _input.LA(1);
 						if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__28) | (1L << T__29) | (1L << T__30) | (1L << T__31))) != 0)) ) {
-						_errHandler.recoverInline(this);
+							((ExprBOpCompContext)_localctx).op = (Token)_errHandler.recoverInline(this);
 						}
 						else {
 							if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
@@ -1683,14 +2117,15 @@ public class JavaliParser extends Parser {
 						break;
 					case 4:
 						{
-						_localctx = new ExprContext(_parentctx, _parentState);
+						_localctx = new ExprBOpEqContext(new ExprContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expr);
 						setState(283);
 						if (!(precpred(_ctx, 3))) throw new FailedPredicateException(this, "precpred(_ctx, 3)");
 						setState(284);
+						((ExprBOpEqContext)_localctx).op = _input.LT(1);
 						_la = _input.LA(1);
 						if ( !(_la==T__32 || _la==T__33) ) {
-						_errHandler.recoverInline(this);
+							((ExprBOpEqContext)_localctx).op = (Token)_errHandler.recoverInline(this);
 						}
 						else {
 							if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
@@ -1703,28 +2138,24 @@ public class JavaliParser extends Parser {
 						break;
 					case 5:
 						{
-						_localctx = new ExprContext(_parentctx, _parentState);
+						_localctx = new ExprBOpAndContext(new ExprContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expr);
 						setState(286);
 						if (!(precpred(_ctx, 2))) throw new FailedPredicateException(this, "precpred(_ctx, 2)");
-						{
 						setState(287);
-						match(T__34);
-						}
+						((ExprBOpAndContext)_localctx).op = match(T__34);
 						setState(288);
 						expr(3);
 						}
 						break;
 					case 6:
 						{
-						_localctx = new ExprContext(_parentctx, _parentState);
+						_localctx = new ExprBOpOrContext(new ExprContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expr);
 						setState(289);
 						if (!(precpred(_ctx, 1))) throw new FailedPredicateException(this, "precpred(_ctx, 1)");
-						{
 						setState(290);
-						match(T__35);
-						}
+						((ExprBOpOrContext)_localctx).op = match(T__35);
 						setState(291);
 						expr(2);
 						}
@@ -1758,6 +2189,14 @@ public class JavaliParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_type; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterType(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitType(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitType(this);
@@ -1809,6 +2248,14 @@ public class JavaliParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_referenceType; }
 		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterReferenceType(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitReferenceType(this);
+		}
+		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitReferenceType(this);
 			else return visitor.visitChildren(this);
@@ -1856,6 +2303,14 @@ public class JavaliParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_arrayType; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterArrayType(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitArrayType(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitArrayType(this);
@@ -1914,6 +2369,14 @@ public class JavaliParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_literal; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).enterLiteral(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof JavaliListener ) ((JavaliListener)listener).exitLiteral(this);
+		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitLiteral(this);
