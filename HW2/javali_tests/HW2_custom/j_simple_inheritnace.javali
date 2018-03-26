@@ -1,0 +1,36 @@
+class Parent{
+    int m(int number){
+        return 0;
+    }
+}
+
+class Child extends Parent{
+    int m(int number){
+        return 1;
+    }
+
+    int g(){
+        int a;
+        a = 6/4*3-5--2;
+        return 1+2+3+4;
+    }
+}
+
+class main{
+    void main{
+        Parent a,b;
+        Child c;
+        int g,h;
+
+        a = new Parent();
+        b = new Child();
+        c = b;
+
+        g = a.m();
+        h = b.m();
+
+        if(h == c.m()){
+            write(c.g());
+        }
+    }
+}

@@ -1,0 +1,16 @@
+class main{
+    void main(){
+        super parent;
+        sub child;
+
+        parent = new sub();
+        child = (sub) parent;
+    }
+}
+class super{
+
+}
+
+class sub extends super{
+
+}

@@ -1,0 +1,13 @@
+class one extends two{
+
+}
+
+class two extends one{
+
+}
+
+class Main{
+    void main(){
+
+    }
+}
