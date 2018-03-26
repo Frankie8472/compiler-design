@@ -156,18 +156,16 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
     }
 
 
-
-    @Override
     public Ast visitAssignmentStmt(JavaliParser.AssignmentStmtContext ctx) {
-//        Ast.Expr expr = null;
-//        if (ctx.expr() != null) {
-//            expr = (Ast.Expr) visit(ctx.expr());
-//        } else if (ctx.newExpr() != null) {
-//            expr = (Ast.Expr) visit(ctx.newExpr());
-//        } else if (ctx.readExpr() != null) {
-//            expr = (Ast.Expr) visit(ctx.readExpr());
-//        }
-        return new Ast.Assign((Ast.Expr) visit(ctx.identifierAccess()), new Ast.ThisRef());
+        Ast.Expr expr = null;
+        if (ctx.expr() != null) {
+            expr = (Ast.Expr) visit(ctx.expr());
+        } else if (ctx.newExpr() != null) {
+            expr = (Ast.Expr) visit(ctx.newExpr());
+        } else if (ctx.readExpr() != null) {
+            expr = (Ast.Expr) visit(ctx.readExpr());
+        }
+        return new Ast.Assign((Ast.Expr) visit(ctx.identifierAccess()), expr);
     }
 
     @Override
@@ -195,29 +193,23 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
 
     @Override
     public Ast visitLocalMethodCall(JavaliParser.LocalMethodCallContext ctx) {
-        String methodName = ctx.Identifier().getText();
-        List<Ast.Expr> arg = new ArrayList<>();
-        visit(ctx.actualParamList()).rwChildren.forEach(ast -> arg.add((Ast.Expr) ast));
-
-        return new Ast.MethodCallExpr(new Ast.ThisRef(), methodName, arg);
+        return createMethodCallExpr(new Ast.ThisRef(),  ctx.Identifier().getText(), ctx.actualParamList());
     }
 
     @Override
     public Ast visitRemoteMethodCall(JavaliParser.RemoteMethodCallContext ctx) {
         Ast.Expr receiver = (Ast.Expr) visit(ctx.identifierAccess());
-        String methodName = ctx.Identifier().getText();
-        List<Ast.Expr> arg = new ArrayList<>();
-        visit(ctx.actualParamList()).rwChildren.forEach(ast -> arg.add((Ast.Expr) ast));
-
-        return new Ast.MethodCallExpr(receiver, methodName, arg);
+        return createMethodCallExpr(receiver, ctx.Identifier().getText(), ctx.actualParamList());
     }
 
     @Override
-    public Ast visitActualParamList(JavaliParser.ActualParamListContext ctx) {
-        List<Ast> args = new ArrayList<>();
-        ctx.expr().forEach(exprContext -> args.add(visit(exprContext)));
-
-        return new Ast.Seq(args); // Returning Seq as workaround due to multiple arguments.
+    public Ast visitMethodCallExpr(JavaliParser.MethodCallExprContext ctx) {
+        Ast.Expr receiver = new Ast.ThisRef();
+        if(ctx.identifierAccess() != null){
+            receiver = (Ast.Expr) visit(ctx.identifierAccess());
+        }
+        String methodName = ctx.Identifier().getText();
+        return createMethodCallExpr(receiver, methodName, ctx.actualParamList());
     }
 
     @Override
@@ -236,4 +228,12 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
         }
     }
 
+// ------------ Helper Functions -----------------
+
+    private Ast.MethodCallExpr createMethodCallExpr(Ast.Expr receiver, String methodName, JavaliParser.ActualParamListContext args){
+        List<Ast.Expr> arg = new ArrayList<>();
+        args.expr().forEach(exprContext -> arg.add((Ast.Expr) visit(exprContext)));
+
+        return new Ast.MethodCallExpr(receiver, methodName, arg);
+    }
 }
