@@ -94,15 +94,15 @@ expr
     : literal
     | identifierAccess
     | '(' expr ')'
-    //| ( '+' | '-' | '!') expr // TODO: Fix unary ops
-    | '+' expr
-    | '-' expr
-    | '!' expr
-    | '(' referenceType ')' expr
     | expr BinaryOp expr
+    | UnaryOp expr
+    | '(' referenceType ')' expr
     ;
 
 //Operators
+UnaryOp
+    : (AddOp | NotOp)
+    ;
 
 BinaryOp
     : (MultOp | AddOp | CompOp | EqOp | AndOp | OrOp)
@@ -131,6 +131,10 @@ AndOp
 fragment
 OrOp
     : '||'
+    ;
+fragment
+NotOp
+    : '!'
     ;
 
 // LEXER RULES

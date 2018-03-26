@@ -6,6 +6,7 @@ import java.util.List;
 import cd.frontend.parser.JavaliParser.ClassDeclContext;
 import cd.ir.Ast;
 import cd.ir.Ast.ClassDecl;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
 
@@ -20,8 +21,8 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
         }
 
         List<Ast> children = new ArrayList<>();
-        ctx.memberList().varDecl().forEach(terminalNode -> children.add(visitVarDecl(terminalNode)));
-        ctx.memberList().methodDecl().forEach(terminalNode -> children.add(visitMethodDecl(terminalNode)));
+        ctx.memberList().varDecl().forEach(terminalNode -> children.addAll(visit(terminalNode).rwChildren));
+        ctx.memberList().methodDecl().forEach(terminalNode -> children.add(visit(terminalNode)));
 
 
 		ClassDecl decl = new ClassDecl(name, parent, children);
@@ -54,7 +55,7 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
         }
 
         List<Ast> body = new ArrayList<>();
-        ctx.stmt().forEach(terminalNode -> body.add(visitStmt(terminalNode)));
+        ctx.stmt().forEach(terminalNode -> body.add(visit(terminalNode)));
 
         Ast.MethodDecl decl = new Ast.MethodDecl(type, name, paramTypes, paramNames, new Ast.Seq(decls), new Ast.Seq(body));
 
