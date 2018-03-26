@@ -94,48 +94,49 @@ expr
     : literal
     | identifierAccess
     | '(' expr ')'
-    | expr BinaryOp expr
-    | UnaryOp expr
+    | ( '+' | '-' | '!') expr
     | '(' referenceType ')' expr
+    | expr ('*' | '/' | '%' ) expr
+    | expr ('+' | '-' ) expr
+    | expr ('<' | '<=' | '>' | '>=' ) expr
+    | expr ('==' | '!=' ) expr
+    | expr ('&&') expr
+    | expr ( '||') expr
     ;
 
-//Operators
-UnaryOp
-    : (AddOp | NotOp)
-    ;
+////Operators
+//UnaryOp
+//    : (AddOp | NotOp)
+//    ;
 
-BinaryOp
-    : (MultOp | AddOp | CompOp | EqOp | AndOp | OrOp)
-    ;
-
-fragment
-MultOp
-    : ('*' | '/' | '%')
-    ;
-fragment
-AddOp
-    : ('+' | '-')
-    ;
-fragment
-CompOp
-    : ('<' | '<=' | '>' | '>=')
-    ;
-fragment
-EqOp
-    : ('==' | '!=')
-    ;
-fragment
-AndOp
-    : '&&'
-    ;
-fragment
-OrOp
-    : '||'
-    ;
-fragment
-NotOp
-    : '!'
-    ;
+//BinaryOp
+//    : (MultOp | AddOp | CompOp | EqOp | AndOp | OrOp)
+//    ;
+//
+//fragment
+//MultOp
+//    : ('*' | '/' | '%')
+//    ;
+//fragment
+//AddOp
+//    : ('+' | '-')
+//    ;
+//fragment
+//CompOp
+//    : ('<' | '<=' | '>' | '>=')
+//    ;
+//fragment
+//EqOp
+//    : ('==' | '!=')
+//    ;
+//fragment
+//AndOp
+//    : '&&'
+//    ;
+//fragment
+//OrOp
+//    : '||'
+//    ;
 
 // LEXER RULES
 // TODO: provide appropriate lexer rules for numbers and boolean literals
