@@ -1,6 +1,7 @@
 package cd.frontend.parser;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import cd.frontend.parser.JavaliParser.ClassDeclContext;
@@ -102,32 +103,32 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
 
     @Override
     public Ast visitExprBOpAdd(JavaliParser.ExprBOpAddContext ctx) {
-        return new Ast.BinaryOp((Ast.Expr) visit(ctx.expr(0)), Ast.BinaryOp.BOp.valueOf(ctx.op.getText()), (Ast.Expr) visit(ctx.expr(1)));
+        return new Ast.BinaryOp((Ast.Expr) visit(ctx.expr(0)), getBOpFromRepr(ctx.op.getText()), (Ast.Expr) visit(ctx.expr(1)));
     }
 
     @Override
     public Ast visitExprBOpComp(JavaliParser.ExprBOpCompContext ctx) {
-        return new Ast.BinaryOp((Ast.Expr) visit(ctx.expr(0)), Ast.BinaryOp.BOp.valueOf(ctx.op.getText()), (Ast.Expr) visit(ctx.expr(1)));
+        return new Ast.BinaryOp((Ast.Expr) visit(ctx.expr(0)), getBOpFromRepr(ctx.op.getText()), (Ast.Expr) visit(ctx.expr(1)));
     }
 
     @Override
     public Ast visitExprBOpAnd(JavaliParser.ExprBOpAndContext ctx) {
-        return new Ast.BinaryOp((Ast.Expr) visit(ctx.expr(0)), Ast.BinaryOp.BOp.valueOf(ctx.op.getText()), (Ast.Expr) visit(ctx.expr(1)));
+        return new Ast.BinaryOp((Ast.Expr) visit(ctx.expr(0)), getBOpFromRepr(ctx.op.getText()), (Ast.Expr) visit(ctx.expr(1)));
     }
 
     @Override
     public Ast visitExprBOpEq(JavaliParser.ExprBOpEqContext ctx) {
-        return new Ast.BinaryOp((Ast.Expr) visit(ctx.expr(0)), Ast.BinaryOp.BOp.valueOf(ctx.op.getText()), (Ast.Expr) visit(ctx.expr(1)));
+        return new Ast.BinaryOp((Ast.Expr) visit(ctx.expr(0)), getBOpFromRepr(ctx.op.getText()), (Ast.Expr) visit(ctx.expr(1)));
     }
 
     @Override
     public Ast visitExprBOpMult(JavaliParser.ExprBOpMultContext ctx) {
-        return new Ast.BinaryOp((Ast.Expr) visit(ctx.expr(0)), Ast.BinaryOp.BOp.valueOf(ctx.op.getText()), (Ast.Expr) visit(ctx.expr(1)));
+        return new Ast.BinaryOp((Ast.Expr) visit(ctx.expr(0)), getBOpFromRepr(ctx.op.getText()), (Ast.Expr) visit(ctx.expr(1)));
     }
 
     @Override
     public Ast visitExprBOpOr(JavaliParser.ExprBOpOrContext ctx) {
-        return new Ast.BinaryOp((Ast.Expr) visit(ctx.expr(0)), Ast.BinaryOp.BOp.valueOf(ctx.op.getText()), (Ast.Expr) visit(ctx.expr(1)));
+        return new Ast.BinaryOp((Ast.Expr) visit(ctx.expr(0)), getBOpFromRepr(ctx.op.getText()), (Ast.Expr) visit(ctx.expr(1)));
     }
 
     @Override
@@ -152,7 +153,7 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
 
     @Override
     public Ast visitExprUnaryOp(JavaliParser.ExprUnaryOpContext ctx) {
-        return new Ast.UnaryOp(Ast.UnaryOp.UOp.valueOf(ctx.op.getText()), (Ast.Expr) visit(ctx.expr()));
+        return new Ast.UnaryOp(getUOpFromRepr(ctx.op.getText()), (Ast.Expr) visit(ctx.expr()));
     }
 
 
@@ -215,14 +216,9 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
     @Override
     public Ast visitLiteral(JavaliParser.LiteralContext ctx) {
         if(ctx.Boolean() != null){
-            if (ctx.Boolean().getText().equals("true")){
-                return new Ast.BooleanConst(true);
-            } else {
-                return new Ast.BooleanConst(false);
-            }
-
+            return new Ast.BooleanConst(Boolean.parseBoolean(ctx.Boolean().getText()));
         } else if (ctx.Integer() != null){
-            return new Ast.IntConst(Integer.getInteger(ctx.Integer().getText()));
+            return new Ast.IntConst(Integer.parseInt(ctx.Integer().getText()));
         } else {
             return new Ast.NullConst();
         }
@@ -232,8 +228,23 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
 
     private Ast.MethodCallExpr createMethodCallExpr(Ast.Expr receiver, String methodName, JavaliParser.ActualParamListContext args){
         List<Ast.Expr> arg = new ArrayList<>();
-        args.expr().forEach(exprContext -> arg.add((Ast.Expr) visit(exprContext)));
-
+        if(args != null) {
+            args.expr().forEach(exprContext -> arg.add((Ast.Expr) visit(exprContext)));
+        }
         return new Ast.MethodCallExpr(receiver, methodName, arg);
+    }
+
+    private Ast.BinaryOp.BOp getBOpFromRepr(String repr){
+	    for(Ast.BinaryOp.BOp op: Ast.BinaryOp.BOp.values()){
+	        if(op.repr.equals(repr)) return op;
+        }
+        return null;
+    }
+
+    private Ast.UnaryOp.UOp getUOpFromRepr(String repr){
+        for(Ast.UnaryOp.UOp op: Ast.UnaryOp.UOp.values()){
+            if(op.repr.equals(repr)) return op;
+        }
+        return null;
     }
 }
