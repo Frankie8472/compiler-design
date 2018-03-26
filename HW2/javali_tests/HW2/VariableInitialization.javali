@@ -1,6 +1,0 @@
-class Main {
-   void main() {
-      int i, z;
-      i = 5 * 2;
-   }
-}

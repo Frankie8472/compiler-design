@@ -1,0 +1,20 @@
+test01  empty file
+test02  one class
+test03  two classes
+test04  one class, multiple features
+test05  multiple classes, multiple features
+test06  Inheritance with features
+test07  while
+test08  while without braces
+test09  variable initialization
+test10  arrays
+test11  boolean
+test12  assign
+test13  if else
+test14  read
+test15  write, writeln
+test16  return
+test17  expressions
+test18  accesses
+test19  null
+test20  integer
