@@ -95,6 +95,14 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
     }
 
     @Override
+    public Ast visitStmtBlock(JavaliParser.StmtBlockContext ctx) {
+        List<Ast> stmts = new ArrayList<>();
+        ctx.stmt().forEach(stmtContext -> stmts.add(visit(stmtContext)));
+
+        return new Ast.Seq(stmts);
+    }
+
+    @Override
     public Ast visitMethodCallStmt(JavaliParser.MethodCallStmtContext ctx) {
         return new Ast.MethodCall((Ast.MethodCallExpr) visit(ctx.methodCallExpr()));
     }

@@ -3,29 +3,19 @@ class Main {
    int m() {
       return 0;
    }
-
-   int c(int a){
-      return a;
-   }
 	
 	void main() {
 	
-      int res;
-      int[] bla;
-      res = -1;
+	   int res;
+	   res = -1;
 
-      bla = new bla[4];
-      res = bla[3];
       res = m();
-      res = c(res);
       write(res);
       writeln();
-
+      
       res = this.m();
       write(res);
       writeln();
-
-
       
 	}
 	

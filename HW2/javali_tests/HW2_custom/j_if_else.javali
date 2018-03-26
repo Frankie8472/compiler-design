@@ -1,0 +1,13 @@
+class main{
+    void main(){
+        int a,b,v;
+        a = 4;
+        b = a * 5;
+        v = 8;
+        if(b > v){
+            v = a;
+        } else {
+            v = b;
+        }
+    }
+}

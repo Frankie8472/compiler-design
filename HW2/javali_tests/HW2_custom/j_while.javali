@@ -1,0 +1,9 @@
+class main{
+    void main(){
+        int a;
+        a = 10;
+        while(a > 10){
+            a = a - 1;
+        }
+    }
+}

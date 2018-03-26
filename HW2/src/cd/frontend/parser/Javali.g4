@@ -2,7 +2,7 @@ grammar Javali; // parser grammar, parses streams of tokens
 
 @header {
 	// Java header
-	// package cd.frontend.parser;
+	 package cd.frontend.parser; // TODO: Uncomment before commit!!
 }
 
 
