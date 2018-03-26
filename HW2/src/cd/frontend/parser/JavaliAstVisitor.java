@@ -1,13 +1,11 @@
 package cd.frontend.parser;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import cd.frontend.parser.JavaliParser.ClassDeclContext;
 import cd.ir.Ast;
 import cd.ir.Ast.ClassDecl;
-import org.antlr.v4.runtime.tree.TerminalNode;
 
 public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
 
