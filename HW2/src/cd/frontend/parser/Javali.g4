@@ -153,10 +153,12 @@ PrimitiveType
     : 'boolean' | 'int'
     ;
 referenceType
-    : Identifier | arrayType
+    : Identifier
+    | arrayType
     ;
 arrayType
-    : Identifier '[' ']'  |  PrimitiveType '[' ']'
+    : Identifier '[' ']'
+    | PrimitiveType '[' ']'
     ;
 
 

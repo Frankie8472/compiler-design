@@ -156,7 +156,7 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
         return new Ast.UnaryOp(getUOpFromRepr(ctx.op.getText()), (Ast.Expr) visit(ctx.expr()));
     }
 
-
+    @Override
     public Ast visitAssignmentStmt(JavaliParser.AssignmentStmtContext ctx) {
         Ast.Expr expr = null;
         if (ctx.expr() != null) {
@@ -168,6 +168,30 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
         }
         return new Ast.Assign((Ast.Expr) visit(ctx.identifierAccess()), expr);
     }
+
+    @Override
+    public Ast visitReadExpr(JavaliParser.ReadExprContext ctx) {
+        return new Ast.BuiltInRead();
+    }
+
+    @Override
+    public Ast visitNewExpr(JavaliParser.NewExprContext ctx) {
+	    if(ctx.expr() != null){
+	        String name ;
+            if (ctx.Identifier() != null){
+                name = ctx.Identifier().getText();
+            } else {
+                name = ctx.PrimitiveType().getText();
+            }
+
+            return new Ast.NewArray(name + "[]", (Ast.Expr) visit(ctx.expr()));
+
+        } else {
+
+            return new Ast.NewObject(ctx.Identifier().getText());
+        }
+    }
+
 
     @Override
     public Ast visitVarAccess(JavaliParser.VarAccessContext ctx) {
