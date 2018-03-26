@@ -2,7 +2,7 @@ grammar Javali; // parser grammar, parses streams of tokens
 
 @header {
 	// Java header
-	//package cd.frontend.parser;
+	// package cd.frontend.parser;
 }
 
 
@@ -95,6 +95,9 @@ expr
     | identifierAccess
     | '(' expr ')'
     //| ( '+' | '-' | '!') expr // TODO: Fix unary ops
+    | '+' expr
+    | '-' expr
+    | '!' expr
     | '(' referenceType ')' expr
     | expr BinaryOp expr
     ;

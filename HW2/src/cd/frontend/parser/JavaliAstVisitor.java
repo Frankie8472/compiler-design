@@ -3,16 +3,14 @@ package cd.frontend.parser;
 import java.util.ArrayList;
 import java.util.List;
 
-import cd.ToDoException;
 import cd.frontend.parser.JavaliParser.ClassDeclContext;
 import cd.ir.Ast;
 import cd.ir.Ast.ClassDecl;
-import jdk.nashorn.internal.ir.TernaryNode;
-import org.antlr.v4.runtime.tree.TerminalNode;
 
 public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
 
 	public List<ClassDecl> classDecls = new ArrayList<>();
+
 	@Override
 	public Ast visitClassDecl(ClassDeclContext ctx) {
 	    String name = ctx.Identifier().get(0).getText();
@@ -22,13 +20,9 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
         }
 
         List<Ast> children = new ArrayList<>();
-        for(JavaliParser.VarDeclContext context : ctx.memberList().varDecl()){
-            children.addAll(visit(context).children());
-        }
+        ctx.memberList().varDecl().forEach(terminalNode -> children.add(visitVarDecl(terminalNode)));
+        ctx.memberList().methodDecl().forEach(terminalNode -> children.add(visitMethodDecl(terminalNode)));
 
-	    for(JavaliParser.MethodDeclContext context : ctx.memberList().methodDecl()){
-	        children.add(visit(context));
-        }
 
 		ClassDecl decl = new ClassDecl(name, parent, children);
 
@@ -40,11 +34,7 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
     public Ast visitMethodDecl(JavaliParser.MethodDeclContext ctx) {
         String type = "void";
         if (ctx.type() != null){
-            if(ctx.type().PrimitiveType() != null){
-                type = ctx.type().PrimitiveType().getText();
-            } else if(ctx.type().referenceType().Identifier() != null){
-                type = ctx.type().referenceType().Identifier().getText();
-            }
+            type = ctx.type().getText();
         }
 
         String name = ctx.Identifier().getText();
@@ -64,12 +54,9 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
         }
 
         List<Ast> body = new ArrayList<>();
-        for(JavaliParser.StmtContext context : ctx.stmt()){
-            body.add(visit(context));
-        }
+        ctx.stmt().forEach(terminalNode -> body.add(visitStmt(terminalNode)));
 
-
-        Ast.MethodDecl decl = new Ast.MethodDecl(type, name, paramTypes, paramNames,new Ast.Seq(decls), new Ast.Seq(body));
+        Ast.MethodDecl decl = new Ast.MethodDecl(type, name, paramTypes, paramNames, new Ast.Seq(decls), new Ast.Seq(body));
 
         return decl;
     }
