@@ -98,7 +98,7 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
 
     @Override
     public Ast visitMethodCallStmt(JavaliParser.MethodCallStmtContext ctx) {
-        return visit(ctx.methodCallExpr());
+        return new Ast.MethodCall((Ast.MethodCallExpr) visit(ctx.methodCallExpr()));
     }
 
     @Override
