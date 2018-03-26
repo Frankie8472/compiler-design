@@ -6,6 +6,7 @@ import java.util.List;
 import cd.frontend.parser.JavaliParser.ClassDeclContext;
 import cd.ir.Ast;
 import cd.ir.Ast.ClassDecl;
+import org.antlr.runtime.tree.ParseTree;
 
 public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
 
@@ -20,8 +21,18 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
         }
 
         List<Ast> children = new ArrayList<>();
-        ctx.memberList().varDecl().forEach(terminalNode -> children.addAll(visit(terminalNode).rwChildren));
-        ctx.memberList().methodDecl().forEach(terminalNode -> children.add(visit(terminalNode)));
+	    if(ctx.memberList() != null && ctx.memberList().children != null) {
+            ctx.memberList().children.forEach(child -> {
+                Ast ast = visit(child);
+                if (ast instanceof Ast.Seq) {
+                    children.addAll(visit(child).rwChildren);
+                } else {
+                    children.add(visit(child));
+                }
+            });
+        }
+//        ctx.memberList().varDecl().forEach(terminalNode -> children.addAll(visit(terminalNode).rwChildren));
+//        ctx.memberList().methodDecl().forEach(terminalNode -> children.add(visit(terminalNode)));
 
 		ClassDecl decl = new ClassDecl(name, parent, children);
 
@@ -91,7 +102,13 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
 
     @Override
     public Ast visitIfStmt(JavaliParser.IfStmtContext ctx) {
-        return new Ast.IfElse((Ast.Expr) visit(ctx.expr()), visit(ctx.stmtBlock(0)), visit(ctx.stmtBlock(1)));
+	    Ast.Expr expr = (Ast.Expr) visit(ctx.expr());
+        Ast then = visit(ctx.stmtBlock(0));
+        Ast otherwiese = new Ast.Nop();
+        if (ctx.stmtBlock(1) != null){
+            otherwiese = visit(ctx.stmtBlock(1));
+        }
+        return new Ast.IfElse(expr, then, otherwiese);
     }
 
     @Override
@@ -248,7 +265,11 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
         if(ctx.Boolean() != null){
             return new Ast.BooleanConst(Boolean.parseBoolean(ctx.Boolean().getText()));
         } else if (ctx.Integer() != null){
-            return new Ast.IntConst(Integer.parseInt(ctx.Integer().getText()));
+            try {
+                return new Ast.IntConst(Integer.parseInt(ctx.Integer().getText()));
+            }catch (NumberFormatException ex){
+                throw new ParseFailure(ctx.Integer().getSymbol().getLine(),"Failed to parses int");
+            }
         } else {
             return new Ast.NullConst();
         }
