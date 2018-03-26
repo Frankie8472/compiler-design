@@ -1285,23 +1285,83 @@ public class JavaliParser extends Parser {
 	}
 
 	public static class IdentifierAccessContext extends ParserRuleContext {
+		public IdentifierAccessContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_identifierAccess; }
+	 
+		public IdentifierAccessContext() { }
+		public void copyFrom(IdentifierAccessContext ctx) {
+			super.copyFrom(ctx);
+		}
+	}
+	public static class RemoteMethodCallContext extends IdentifierAccessContext {
+		public IdentifierAccessContext identifierAccess() {
+			return getRuleContext(IdentifierAccessContext.class,0);
+		}
 		public TerminalNode Identifier() { return getToken(JavaliParser.Identifier, 0); }
 		public ActualParamListContext actualParamList() {
 			return getRuleContext(ActualParamListContext.class,0);
 		}
+		public RemoteMethodCallContext(IdentifierAccessContext ctx) { copyFrom(ctx); }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitRemoteMethodCall(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class FieldAccessContext extends IdentifierAccessContext {
+		public IdentifierAccessContext identifierAccess() {
+			return getRuleContext(IdentifierAccessContext.class,0);
+		}
+		public TerminalNode Identifier() { return getToken(JavaliParser.Identifier, 0); }
+		public FieldAccessContext(IdentifierAccessContext ctx) { copyFrom(ctx); }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitFieldAccess(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class VarAccessContext extends IdentifierAccessContext {
+		public TerminalNode Identifier() { return getToken(JavaliParser.Identifier, 0); }
+		public VarAccessContext(IdentifierAccessContext ctx) { copyFrom(ctx); }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitVarAccess(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class ThisAccessContext extends IdentifierAccessContext {
+		public ThisAccessContext(IdentifierAccessContext ctx) { copyFrom(ctx); }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitThisAccess(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class ArrayAccessContext extends IdentifierAccessContext {
 		public IdentifierAccessContext identifierAccess() {
 			return getRuleContext(IdentifierAccessContext.class,0);
 		}
 		public ExprContext expr() {
 			return getRuleContext(ExprContext.class,0);
 		}
-		public IdentifierAccessContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_identifierAccess; }
+		public ArrayAccessContext(IdentifierAccessContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitIdentifierAccess(this);
+			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitArrayAccess(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class LocalMethodCallContext extends IdentifierAccessContext {
+		public TerminalNode Identifier() { return getToken(JavaliParser.Identifier, 0); }
+		public ActualParamListContext actualParamList() {
+			return getRuleContext(ActualParamListContext.class,0);
+		}
+		public LocalMethodCallContext(IdentifierAccessContext ctx) { copyFrom(ctx); }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof JavaliVisitor ) return ((JavaliVisitor<? extends T>)visitor).visitLocalMethodCall(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -1327,18 +1387,28 @@ public class JavaliParser extends Parser {
 			switch ( getInterpreter().adaptivePredict(_input,22,_ctx) ) {
 			case 1:
 				{
+				_localctx = new VarAccessContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
+
 				setState(227);
 				match(Identifier);
 				}
 				break;
 			case 2:
 				{
+				_localctx = new ThisAccessContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
 				setState(228);
 				match(T__21);
 				}
 				break;
 			case 3:
 				{
+				_localctx = new LocalMethodCallContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
 				setState(229);
 				match(Identifier);
 				setState(230);
@@ -1372,7 +1442,7 @@ public class JavaliParser extends Parser {
 					switch ( getInterpreter().adaptivePredict(_input,24,_ctx) ) {
 					case 1:
 						{
-						_localctx = new IdentifierAccessContext(_parentctx, _parentState);
+						_localctx = new FieldAccessContext(new IdentifierAccessContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_identifierAccess);
 						setState(237);
 						if (!(precpred(_ctx, 4))) throw new FailedPredicateException(this, "precpred(_ctx, 4)");
@@ -1384,7 +1454,7 @@ public class JavaliParser extends Parser {
 						break;
 					case 2:
 						{
-						_localctx = new IdentifierAccessContext(_parentctx, _parentState);
+						_localctx = new ArrayAccessContext(new IdentifierAccessContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_identifierAccess);
 						setState(240);
 						if (!(precpred(_ctx, 3))) throw new FailedPredicateException(this, "precpred(_ctx, 3)");
@@ -1398,7 +1468,7 @@ public class JavaliParser extends Parser {
 						break;
 					case 3:
 						{
-						_localctx = new IdentifierAccessContext(_parentctx, _parentState);
+						_localctx = new RemoteMethodCallContext(new IdentifierAccessContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_identifierAccess);
 						setState(245);
 						if (!(precpred(_ctx, 1))) throw new FailedPredicateException(this, "precpred(_ctx, 1)");

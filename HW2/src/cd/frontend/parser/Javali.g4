@@ -82,12 +82,12 @@ actualParamList
     : expr ( ',' expr )*
     ;
 identifierAccess
-    : Identifier
-    | 'this'
-    | identifierAccess '.' Identifier
-    | identifierAccess '[' expr ']'
-    | Identifier '(' ( actualParamList )? ')'
-    | identifierAccess '.' Identifier '(' ( actualParamList )? ')'
+    : Identifier                                                    # varAccess
+    | 'this'                                                        # thisAccess
+    | identifierAccess '.' Identifier                               # fieldAccess
+    | identifierAccess '[' expr ']'                                 # arrayAccess
+    | Identifier '(' ( actualParamList )? ')'                       # localMethodCall
+    | identifierAccess '.' Identifier '(' ( actualParamList )? ')'  # remoteMethodCall
     ;
 
 expr

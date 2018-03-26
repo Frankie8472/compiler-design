@@ -123,11 +123,47 @@ public interface JavaliVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitActualParamList(JavaliParser.ActualParamListContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link JavaliParser#identifierAccess}.
+	 * Visit a parse tree produced by the {@code remoteMethodCall}
+	 * labeled alternative in {@link JavaliParser#identifierAccess}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitIdentifierAccess(JavaliParser.IdentifierAccessContext ctx);
+	T visitRemoteMethodCall(JavaliParser.RemoteMethodCallContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code fieldAccess}
+	 * labeled alternative in {@link JavaliParser#identifierAccess}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFieldAccess(JavaliParser.FieldAccessContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code varAccess}
+	 * labeled alternative in {@link JavaliParser#identifierAccess}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitVarAccess(JavaliParser.VarAccessContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code thisAccess}
+	 * labeled alternative in {@link JavaliParser#identifierAccess}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitThisAccess(JavaliParser.ThisAccessContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code arrayAccess}
+	 * labeled alternative in {@link JavaliParser#identifierAccess}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitArrayAccess(JavaliParser.ArrayAccessContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code localMethodCall}
+	 * labeled alternative in {@link JavaliParser#identifierAccess}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLocalMethodCall(JavaliParser.LocalMethodCallContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link JavaliParser#expr}.
 	 * @param ctx the parse tree

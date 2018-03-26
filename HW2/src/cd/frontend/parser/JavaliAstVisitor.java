@@ -10,13 +10,13 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
 
-	public List<ClassDecl> classDecls = new ArrayList<>();
+    public List<ClassDecl> classDecls = new ArrayList<>();
 
-	@Override
-	public Ast visitClassDecl(ClassDeclContext ctx) {
-	    String name = ctx.Identifier().get(0).getText();
-	    String parent = "Object";
-	    if (ctx.Identifier().size() > 1) {
+    @Override
+    public Ast visitClassDecl(ClassDeclContext ctx) {
+        String name = ctx.Identifier().get(0).getText();
+        String parent = "Object";
+        if (ctx.Identifier().size() > 1) {
             parent = ctx.Identifier().get(1).getText(); // No Interface and no multiple inheritance so only one parent
         }
 
@@ -24,16 +24,16 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
         ctx.memberList().varDecl().forEach(terminalNode -> children.addAll(visit(terminalNode).rwChildren));
         ctx.memberList().methodDecl().forEach(terminalNode -> children.add(visit(terminalNode)));
 
-		ClassDecl decl = new ClassDecl(name, parent, children);
+        ClassDecl decl = new ClassDecl(name, parent, children);
 
-		classDecls.add(decl);
-		return decl;
-	}
+        classDecls.add(decl);
+        return decl;
+    }
 
     @Override
     public Ast visitMethodDecl(JavaliParser.MethodDeclContext ctx) {
         String type = "void";
-        if (ctx.type() != null){
+        if (ctx.type() != null) {
             type = ctx.type().getText();
         }
 
@@ -42,7 +42,7 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
         List<String> paramNames = new ArrayList<>();
         List<String> paramTypes = new ArrayList<>();
 
-        if(ctx.formalParamList() != null) {
+        if (ctx.formalParamList() != null) {
             ctx.formalParamList().Identifier().forEach(terminalNode -> paramNames.add(terminalNode.getText()));
             ctx.formalParamList().type().forEach(terminalNode -> paramTypes.add(terminalNode.getText()));
         }
@@ -101,13 +101,76 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
     }
 
     @Override
-    public Ast visitExpr(JavaliParser.ExprContext ctx) {
-        System.out.println(ctx.start.getText());
+    public Ast visitExpr(JavaliParser.ExprContext ctx){
+            System.out.println(ctx.start.getText());
 
-	    //return new Ast.Expr();
-        //return new Ast.ArgExpr();
-        //return new Ast.LeftRightExpr();
-        return null;
+            //return new Ast.Expr();
+            //return new Ast.ArgExpr();
+            //return new Ast.LeftRightExpr();
+            return null;
+        }
+
+    @Override
+    public Ast visitAssignmentStmt(JavaliParser.AssignmentStmtContext ctx) {
+//        Ast.Expr expr = null;
+//        if (ctx.expr() != null) {
+//            expr = (Ast.Expr) visit(ctx.expr());
+//        } else if (ctx.newExpr() != null) {
+//            expr = (Ast.Expr) visit(ctx.newExpr());
+//        } else if (ctx.readExpr() != null) {
+//            expr = (Ast.Expr) visit(ctx.readExpr());
+//        }
+        return new Ast.Assign((Ast.Expr) visit(ctx.identifierAccess()), new Ast.ThisRef());
+    }
+
+    @Override
+    public Ast visitVarAccess(JavaliParser.VarAccessContext ctx) {
+        return new Ast.Var(ctx.Identifier().getText());
+    }
+
+    @Override
+    public Ast visitThisAccess(JavaliParser.ThisAccessContext ctx) {
+        return new Ast.ThisRef();
+    }
+
+    @Override
+    public Ast visitFieldAccess(JavaliParser.FieldAccessContext ctx) {
+        Ast.Expr expr = (Ast.Expr) visit(ctx.identifierAccess());
+        return new Ast.Field(expr, ctx.Identifier().getText());
+    }
+
+    @Override
+    public Ast visitArrayAccess(JavaliParser.ArrayAccessContext ctx) {
+        Ast.Expr expr = (Ast.Expr) visit(ctx.expr());
+        Ast.Expr array = (Ast.Expr) visit(ctx.identifierAccess());
+        return new Ast.Index(array, expr);
+    }
+
+    @Override
+    public Ast visitLocalMethodCall(JavaliParser.LocalMethodCallContext ctx) {
+        String methodName = ctx.Identifier().getText();
+        List<Ast.Expr> arg = new ArrayList<>();
+        visit(ctx.actualParamList()).rwChildren.forEach(ast -> arg.add((Ast.Expr) ast));
+
+        return new Ast.MethodCallExpr(new Ast.ThisRef(), methodName, arg);
+    }
+
+    @Override
+    public Ast visitRemoteMethodCall(JavaliParser.RemoteMethodCallContext ctx) {
+        Ast.Expr receiver = (Ast.Expr) visit(ctx.identifierAccess());
+        String methodName = ctx.Identifier().getText();
+        List<Ast.Expr> arg = new ArrayList<>();
+        visit(ctx.actualParamList()).rwChildren.forEach(ast -> arg.add((Ast.Expr) ast));
+
+        return new Ast.MethodCallExpr(receiver, methodName, arg);
+    }
+
+    @Override
+    public Ast visitActualParamList(JavaliParser.ActualParamListContext ctx) {
+        List<Ast> args = new ArrayList<>();
+        ctx.expr().forEach(exprContext -> args.add(visit(exprContext)));
+
+        return new Ast.Seq(args); // Returning Seq as workaround due to multiple arguments.
     }
 
 }
