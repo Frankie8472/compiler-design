@@ -6,6 +6,7 @@ import java.util.List;
 import cd.frontend.parser.JavaliParser.ClassDeclContext;
 import cd.ir.Ast;
 import cd.ir.Ast.ClassDecl;
+import com.sun.org.apache.bcel.internal.generic.NOP;
 import org.antlr.runtime.tree.ParseTree;
 
 public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
@@ -25,9 +26,9 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
             ctx.memberList().children.forEach(child -> {
                 Ast ast = visit(child);
                 if (ast instanceof Ast.Seq) {
-                    children.addAll(visit(child).rwChildren);
+                    children.addAll(ast.rwChildren);
                 } else {
-                    children.add(visit(child));
+                    children.add(ast);
                 }
             });
         }
@@ -63,9 +64,7 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
         List<Ast> body = new ArrayList<>();
         ctx.stmt().forEach(terminalNode -> body.add(visit(terminalNode)));
 
-        Ast.MethodDecl decl = new Ast.MethodDecl(type, name, paramTypes, paramNames, new Ast.Seq(decls), new Ast.Seq(body));
-
-        return decl;
+        return new Ast.MethodDecl(type, name, paramTypes, paramNames, new Ast.Seq(decls), new Ast.Seq(body));
     }
 
     @Override
@@ -92,7 +91,11 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
 
     @Override
     public Ast visitReturnStmt(JavaliParser.ReturnStmtContext ctx) {
-        return new Ast.ReturnStmt((Ast.Expr) visit(ctx.expr()));
+	    Ast.Expr expr = null;
+	    if(ctx.expr() != null){
+            expr = (Ast.Expr) visit(ctx.expr());
+        }
+        return new Ast.ReturnStmt(expr);
     }
 
     @Override
@@ -104,11 +107,11 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
     public Ast visitIfStmt(JavaliParser.IfStmtContext ctx) {
 	    Ast.Expr expr = (Ast.Expr) visit(ctx.expr());
         Ast then = visit(ctx.stmtBlock(0));
-        Ast otherwiese = new Ast.Nop();
+        Ast otherwise = new Ast.Nop();
         if (ctx.stmtBlock(1) != null){
-            otherwiese = visit(ctx.stmtBlock(1));
+            otherwise = visit(ctx.stmtBlock(1));
         }
-        return new Ast.IfElse(expr, then, otherwiese);
+        return new Ast.IfElse(expr, then, otherwise);
     }
 
     @Override
@@ -266,7 +269,7 @@ public final class JavaliAstVisitor extends JavaliBaseVisitor<Ast> {
             return new Ast.BooleanConst(Boolean.parseBoolean(ctx.Boolean().getText()));
         } else if (ctx.Integer() != null){
             try {
-                return new Ast.IntConst(Integer.parseInt(ctx.Integer().getText()));
+                return new Ast.IntConst(Integer.decode(ctx.Integer().getText()));
             }catch (NumberFormatException ex){
                 throw new ParseFailure(ctx.Integer().getSymbol().getLine(),"Failed to parses int");
             }

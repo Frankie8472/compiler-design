@@ -1,10 +1,11 @@
 class main{
     void main(){
-        super parent;
+        super parent, other;
         sub child;
 
         parent = new sub();
         child = (sub) parent;
+        other = (super) child;
     }
 }
 class super{

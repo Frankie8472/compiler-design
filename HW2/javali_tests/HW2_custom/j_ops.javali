@@ -1,0 +1,26 @@
+class Main{
+    void main(){
+        int a,b;
+        boolean c,d;
+        a = 1+2;
+        b = 1-b;
+        a = a*b;
+        b = 26731%a;
+        a = b / a;
+        a = -a;
+        b = +b;
+        a = 1+2*3%+4/6-2--3;
+
+        c = true;
+        d = !c;
+        c = c && c;
+        d = d || false;
+        c = a < b;
+        d = a > b;
+        c = a <= b;
+        d = a >= b;
+        c = a == b;
+        d = a != b;
+        c = a < b && a==b || a+b > -10-5 == false && d;
+    }
+}

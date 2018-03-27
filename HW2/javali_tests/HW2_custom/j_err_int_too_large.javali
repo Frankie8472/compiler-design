@@ -1,0 +1,6 @@
+class main{
+    void main(){
+        int i;
+        i = 2147483648;
+    }
+}

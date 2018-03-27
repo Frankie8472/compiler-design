@@ -8,6 +8,7 @@ class two extends one{
 
 class Main{
     void main(){
-
+        one my;
+        my = new one();
     }
 }

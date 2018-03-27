@@ -1,0 +1,47 @@
+class Parent{
+    int b;
+    int m(int number){
+        b = 0xfa4;
+        array = new boolean[3];
+        return b;
+    }
+    boolean[] array;
+}
+
+class Child extends Parent{
+    int m(int number){
+        return 1;
+    }
+    boolean notmy;
+
+    int g(){
+        int a;
+        a = 6/4*3-0xFa35C--2;
+        number = a;
+        return 0X1+2+3+4;
+    }
+    int number;
+}
+
+class main{
+    Parent parent;
+    void main(){
+        Parent b;
+        Child c;
+        int g,h;
+
+        parent = new Parent();
+        parent.array[0] = true;
+        b = new Child();
+        c = b;
+        c.notmy = false;
+        b.array[1] = false;
+        c.array[2] = false;
+        g = a.m();
+        h = b.m();
+
+        if(h == c.m()){
+            write(c.g());
+        }
+    }
+}

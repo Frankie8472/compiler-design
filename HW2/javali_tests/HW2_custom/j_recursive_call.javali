@@ -1,0 +1,19 @@
+class Main{
+    void main(){
+        int c;
+        c = read();
+        c = recur(c);
+        write(c);
+        writeln();
+    }
+
+    int recur(int i){
+        int rea;
+        if(i < 100000){
+            res = recur(i*i) + recur(1/i);
+            return res;
+        } else {
+            return i;
+        }
+    }
+}

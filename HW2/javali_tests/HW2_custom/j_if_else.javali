@@ -5,9 +5,28 @@ class main{
         b = a * 5;
         v = 8;
         if(b > v){
-            v = a;
+            if(v < 100){
+                v = a;
+            }
         } else {
             v = b;
+        }
+        if (b == 5){
+            a = 2;
+        }
+        if (b < 9){
+           if (a >= 5){
+                if (v <= 5){
+                    a = 2;
+                } else {
+
+                }
+           }
+        }
+        if(8 == b){
+
+        } else {
+            b = 5;
         }
     }
 }

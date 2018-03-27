@@ -1,14 +1,9 @@
 class main{
+    int a;
     void main(){
-        fun = new Fun();
-        write(fun.hui);
-        write(this.a);
-        if(this.fun.hui > a){
-            write(this.fun.hui);
-        }
+
     }
 
-    int a;
     boolean c;
     Fun fun;
 }

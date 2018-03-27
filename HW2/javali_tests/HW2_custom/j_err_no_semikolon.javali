@@ -1,6 +1,10 @@
 class main{
     void main(){
-        int a;
+        int a
         a = 5
+        blub()
+    }
+    void blub(){
+
     }
 }

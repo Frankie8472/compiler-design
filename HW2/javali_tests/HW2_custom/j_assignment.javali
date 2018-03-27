@@ -1,0 +1,41 @@
+class Main{
+    void main(){
+        int i,j;
+        int[] c;
+        Main m;
+        b g;
+
+        g = new b();
+        i = 4;
+        i = read();
+        m = this;
+        i = g.f;
+        j = i;
+        c = new int[3];
+        i = hui();
+        j = g.hau();
+        i = this.arr()[0].hau();
+        i = this.arr()[0].f;
+
+        j = i + i;
+        j = 2*3;
+        i = 234 * (2345 - c[1]) / (this.arr()[0].f % ((-5 + j) / hui()));
+    }
+    int hui(){
+        return 0;
+    }
+
+    b[] arr(){
+        b[] l;
+        l = new b[3];
+        l[0] = new b();
+        return l;
+    }
+}
+
+class b{
+    int f;
+    int hau(){
+        return 3;
+    }
+}

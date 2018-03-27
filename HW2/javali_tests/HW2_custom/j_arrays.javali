@@ -1,25 +1,28 @@
 class main{
     void main(){
         int[] a;
-        int[] b;
+        int i;
         Hui[] hau;
         a = new int[8];
         a[0] = -1;
-        b = a;
         hau = new Hui[4];
         hau[0] = new Hui();
-        hau[0].blob(b);
-        write(hau[0].int);
+        a[3] = hau[0].field;
+        write(hau[0].field);
         a[1] = -1 + 2;
         a[2] = a[1] - -3;
+        a[4] = i;
+        a[5] = number;
+        a[6] = hau[0].mas(a[0]);
+        a[7] = a[hau[0].mas(a[i * 3])];
     }
+    int number;
 }
 
 class Hui{
-    int[] na;
-    int int;
-    void blob(int[] blub){
-        this.na = blub;
-    }
+    int field;
 
+    int mas(int d){
+        return 9 * d;
+    }
 }

@@ -1,0 +1,10 @@
+class main{
+    void main(){
+        int a;
+        a = -6 * (new foo()).bar;
+    }
+}
+
+class foo{
+    int bar;
+}

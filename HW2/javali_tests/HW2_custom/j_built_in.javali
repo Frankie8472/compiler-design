@@ -1,11 +1,11 @@
 class Main{
     void main(){
         int i;
-        boolean b;
         write(5);
+        writeln();
         write(8+34*(234%(74345643/567)));
         i = read();
-        i = 2147483647;
-        b = true;
+        writeln();
+        write(i);
     }
 }

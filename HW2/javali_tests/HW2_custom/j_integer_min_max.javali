@@ -1,0 +1,7 @@
+class Main{
+    void main(){
+        int max, min;
+        max = 2147483647;
+        min = -2147483647;
+    }
+}

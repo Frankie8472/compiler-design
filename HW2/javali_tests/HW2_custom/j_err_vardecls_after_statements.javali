@@ -1,0 +1,8 @@
+class main{
+    void main(){
+        int i;
+        i = 1;
+        int b;
+        b = 2;
+    }
+}
