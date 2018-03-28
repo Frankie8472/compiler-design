@@ -1,8 +1,8 @@
-// Generated from /run/media/Josua/Daten/Josua/Uni/6. Semester/Compiler Design/compiler-design/HW2/src/cd/frontend/parser/Javali.g4 by ANTLR 4.7
+// Generated from /home/frankie/Dropbox/ETH/INFK/2018 FS/Compiler Design/compiler-design/HW2/src/cd/frontend/parser/Javali.g4 by ANTLR 4.7
 package cd.frontend.parser;
 
 	// Java header
-	 //package cd.frontend.parser; // TODO: Remove before commit!!
+	 //package cd.frontend.parser; // TODO: Uncomment before commit!!
 
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;

@@ -1,0 +1,14 @@
+//test04  one class, multiple features
+class wubwub{
+    void ba(){
+
+    }
+
+    int dum(boolean b){
+
+    }
+
+    boolean tss(int i){
+
+    }
+}

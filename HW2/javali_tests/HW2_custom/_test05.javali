@@ -1,0 +1,28 @@
+//test05  multiple classes, multiple features
+class wubwub{
+    void ba(){
+
+    }
+
+    int dum(boolean b){
+
+    }
+
+    boolean tss(int i){
+
+    }
+}
+
+class wabwab{
+    void pa(){
+
+    }
+
+    int pum(boolean b){
+
+    }
+
+    boolean pss(int i){
+
+    }
+}

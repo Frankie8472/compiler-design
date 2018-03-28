@@ -1,0 +1,18 @@
+//test07  while
+class main{
+
+    int makamaka(){
+        int a = 5;
+        while(True){
+            if(a==0){return a+10;}
+            a = a-1;
+        }
+    }
+
+    void main(){
+        write(makamaka())
+        while(False){
+            write("chacka");
+        }
+    }
+}

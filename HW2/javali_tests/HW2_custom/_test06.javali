@@ -1,0 +1,26 @@
+//test06  Inheritance with features
+class wubwub{
+    void ba(){
+
+    }
+
+    int dum(boolean b){
+        if(b){return 5;}
+        return 7;
+    }
+
+    boolean tss(int i){
+        if(i<0){return True;}
+        return False;
+    }
+}
+
+class wabwab extends wubwub{
+    int a;
+    boolean b;
+    b = False;
+    a = 0;
+    ba();
+    write(tss(c));
+    write(dum(b));
+}

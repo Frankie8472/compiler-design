@@ -4,7 +4,7 @@ class main{
         a = 4;
         b = a * 5;
         v = 8;
-        if(b > v){
+        if(b > v) {
             if(v < 100){
                 v = a;
             }
