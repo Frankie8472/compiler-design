@@ -7,6 +7,6 @@ class Main{
     }
 
     void main(){
-        return makamaka()+10;
+        write(makamaka()+10);
     }
 }

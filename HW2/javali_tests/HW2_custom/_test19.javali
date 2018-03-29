@@ -5,16 +5,12 @@ class doge{
 
 class raptor extends doge{
     boolean eat(boolean herbs, boolean meat){
-        return herbs || meat;
+        return (herbs || meat);
     }
 }
 
 class Main{
-    int aqua;
-
     int makamaka(){
-        raptor r;
-        doge p;
         int a, b, ret;
         int[] l;
         boolean c, d;
@@ -28,7 +24,6 @@ class Main{
     }
 
     void main(){
-        this.aqua = 6;
-        return makamaka()+this.aqua;
+        return makamaka();
     }
 }

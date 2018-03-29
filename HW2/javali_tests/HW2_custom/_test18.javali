@@ -10,7 +10,6 @@ class raptor extends doge{
 }
 
 class Main{
-    int aqua;
 
     int makamaka(){
         raptor r;
@@ -28,7 +27,6 @@ class Main{
     }
 
     void main(){
-        this.aqua = 6;
-        return makamaka()+this.aqua;
+        return makamaka()+10;
     }
 }

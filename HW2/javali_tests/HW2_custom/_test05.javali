@@ -2,7 +2,7 @@
 class Main{
     void main(){
         wabwab w;
-        write(wabwab.pum());
+        write(w.pum(true));
         write(dum(true));
         write(tss(5));
 

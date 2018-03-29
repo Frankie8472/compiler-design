@@ -2,16 +2,20 @@
 class Main{
 
     int makamaka(){
-        int a = 5;
+        int a;
+        a = 5;
         while(true){
-            if(a==0){return a+10;}
-            a = a-1;
+            if(a <= 0){
+            return a+10;
+            }
+
+            a = a - 1;
         }
         return 6;
     }
 
     void main(){
-        write(makamaka())
+        write(makamaka());
         while(false){
             write(3141);
         }

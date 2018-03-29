@@ -3,7 +3,7 @@ class Main{
 
     boolean makamaka(){
         boolean[] a,b,c;
-        c = [true, false, true]
+        c = [true, false, true];
         return c[1];
     }
 

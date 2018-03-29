@@ -13,6 +13,6 @@ class Main{
     }
 
     void main(){
-        return makamaka()+aqua;
+        return makamaka();
     }
 }
