@@ -9,7 +9,7 @@ class Main{
         writeln();
         write(a);
         writeln();
-        write(b);
+        write(5);
 
     }
 }

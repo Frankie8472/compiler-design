@@ -2,6 +2,7 @@
 class Main{
     void main(){
         wabwab w;
+        w.pa();
         write(w.pum(true));
         write(dum(true));
         write(tss(5));
@@ -12,8 +13,8 @@ class Main{
         return 6;
     }
 
-    boolean tss(int i){
-        return true;
+    int tss(int i){
+        return 5;
     }
 }
 
@@ -26,7 +27,7 @@ class wabwab{
         return 8;
     }
 
-    boolean pss(int i){
-
+    int pss(int i){
+        return 7;
     }
 }
