@@ -3,11 +3,14 @@ class Main{
 
     boolean makamaka(){
         boolean[] a,b,c;
-        c = [true, false, true];
+        c = new boolean[3];
+        c[0] = true;
+        c[1] = false;
+        c[2] = true;
         return c[1];
     }
 
-    void gogo(int b) extends makamaka{
+    void gogo(int b){
         boolean a,b,c;
         b = true;
         c = false;

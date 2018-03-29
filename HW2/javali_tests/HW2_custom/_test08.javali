@@ -1,11 +1,13 @@
-//test08  while without braces
+//test08  while without braces -> Parsefailure
 class Main{
 
     int makamaka(){
-        int a = 5;
+        int a;
+        a = 5;
         while(true)
             if(a==0){return a+10;}
             a = a-1;
+
         return 5;
     }
 

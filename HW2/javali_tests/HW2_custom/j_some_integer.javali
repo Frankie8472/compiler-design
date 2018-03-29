@@ -1,0 +1,15 @@
+class Main{
+    void main(){
+        int a;
+        a = 1;
+        a = -324;
+        a = 0xfff;
+        a = 0xabcdef;
+        a = 0XEADBEEF;
+        a = 12371236;
+        a = 0;
+        a = 0XaB3E0F;
+        a = 0x00000;
+        a = 0xaB3D6F;
+    }
+}

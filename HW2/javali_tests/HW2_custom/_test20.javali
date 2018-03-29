@@ -8,7 +8,9 @@ class Main{
         aqua = 10;
         b = 6;
         a = b;
-        l = [a,b];
+        l = new int[2];
+        l[0] = a;
+        l[1] = b;
         return l[1];
     }
 

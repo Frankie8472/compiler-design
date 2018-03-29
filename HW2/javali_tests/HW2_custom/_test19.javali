@@ -15,7 +15,7 @@ class Main{
         int[] l;
         boolean c, d;
         r = null;
-        l = null
+        l = null;
         a = null;
         b = 6;
         c = true;
