@@ -1,0 +1,13 @@
+//test12  assign
+class Main{
+
+    int main(){
+        int a, b;
+        boolean c, d;
+        a = 1;
+        b = a + a;
+        c = true;
+        d = c || c;
+        write(b);
+    }
+}

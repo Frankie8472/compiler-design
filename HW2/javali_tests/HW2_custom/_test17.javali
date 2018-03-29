@@ -1,0 +1,42 @@
+//test17  expressions
+class doge{
+
+}
+
+class raptor extends doge{
+
+}
+
+class Main{
+
+    int makamaka(){
+        raptor r;
+        doge p;
+        int a, b, ret;
+        boolean c, d;
+        c = true;
+        d = false;
+        a = 5;
+        b = 6;
+        a = (a + 1);
+        a = a - 1;
+        a = (a * b);
+        a = a * 3;
+        a = a / 3;
+        a = a / b;
+        p = (doge) r;
+        if(a<b){ret = 1;}
+        if(a>b){ret = 2;}
+        if(a<=b){ret = 3;}
+        if(a>=b){ret = 4;}
+        if(a!=b){ret = 5;}
+        if(a==b){ret = 6;}
+        if(c || d){ret = 7;}
+        if(c && d){ret = 8;}
+        return ret;
+    }
+
+    void main(){
+        return makamaka()+10;
+    }
+}

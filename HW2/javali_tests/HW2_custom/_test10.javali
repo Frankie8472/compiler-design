@@ -1,0 +1,18 @@
+//test10  arrays
+class Main{
+
+    int makamaka(){
+        int[] a,b,c;
+        c = [1,5,7,3,5]
+    }
+
+    void gogo(int b) extends makamaka{
+        boolean[] a,b,c;
+        b = [true, false, true, true]
+    }
+
+    void main(){
+        int[] a,b,c;
+        a = [1,2,3,4,5];
+    }
+}

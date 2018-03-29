@@ -1,0 +1,18 @@
+//test20  integer
+
+class Main{
+
+    int makamaka(){
+        int a, b, ret;
+        int[] l;
+        aqua = 10;
+        b = 6;
+        a = b;
+        l = [a,b];
+        return l[1];
+    }
+
+    void main(){
+        return makamaka()+aqua;
+    }
+}

@@ -1,0 +1,16 @@
+//test09  variable initialization
+class Main{
+
+    int makamaka(){
+        int a,b,c;
+
+    }
+
+    void gogo(int b) extends makamaka{
+        boolean a,b,c;
+    }
+
+    void main(){
+        int a,b,c;
+    }
+}

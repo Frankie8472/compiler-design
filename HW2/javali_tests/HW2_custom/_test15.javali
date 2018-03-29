@@ -1,0 +1,15 @@
+//test15  write, writeln
+class Main{
+
+    void main(){
+        int a;
+        boolean b;
+        a = 5;
+        b = false;
+        writeln();
+        write(a);
+        writeln();
+        write(b);
+
+    }
+}

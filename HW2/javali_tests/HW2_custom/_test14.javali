@@ -1,0 +1,10 @@
+//test14  read
+class Main{
+
+    void main(){
+        int a;
+        boolean b;
+        a = read();
+        b = read();
+    }
+}

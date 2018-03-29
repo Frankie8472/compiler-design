@@ -1,17 +1,17 @@
-//test08  while without braces // under construction
-class main{
+//test08  while without braces
+class Main{
 
     int makamaka(){
         int a = 5;
-        while(True){
+        while(true)
             if(a==0){return a+10;}
             a = a-1;
-        }
+
     }
 
     void main(){
         write(makamaka())
-        while(False){
+        while(false){
             write("chacka");
         }
     }

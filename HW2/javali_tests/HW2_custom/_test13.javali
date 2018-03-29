@@ -1,0 +1,11 @@
+//test13  if else
+class Main{
+
+    void main(){
+        if(true){
+            if(false){} else {
+                write(0);
+            }
+        }
+    }
+}

@@ -1,14 +1,14 @@
 //test04  one class, multiple features
-class wubwub{
-    void ba(){
-
+class Main{
+    boolean ba(){
+        return true;
     }
 
     int dum(boolean b){
-
+        return 5;
     }
 
-    boolean tss(int i){
+    void main(){
 
     }
 }

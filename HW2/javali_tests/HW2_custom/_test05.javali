@@ -1,15 +1,19 @@
 //test05  multiple classes, multiple features
-class wubwub{
-    void ba(){
+class Main{
+    void main(){
+        wabwab w;
+        write(wabwab.pum());
+        write(dum(true));
+        write(tss(5));
 
     }
 
     int dum(boolean b){
-
+        return 6;
     }
 
     boolean tss(int i){
-
+        return true;
     }
 }
 
@@ -19,7 +23,7 @@ class wabwab{
     }
 
     int pum(boolean b){
-
+        return 8;
     }
 
     boolean pss(int i){

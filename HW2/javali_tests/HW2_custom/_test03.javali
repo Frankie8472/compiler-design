@@ -3,6 +3,8 @@ class wubwub{
 
 }
 
-class wabwab{
-
+class Main{
+    void main(){
+        wubwub a;
+    }
 }

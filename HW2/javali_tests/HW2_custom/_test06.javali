@@ -16,11 +16,21 @@ class wubwub{
 }
 
 class wabwab extends wubwub{
-    int a;
-    boolean b;
-    b = False;
-    a = 0;
-    ba();
-    write(tss(c));
-    write(dum(b));
+    int do(){
+        int a;
+        boolean b;
+        b = false;
+        a = 0;
+        ba();
+        write(tss(c));
+        write(dum(b));
+        return 6;
+    }
+}
+
+class Main{
+    void main(){
+        wabwab w;
+        return w.do();
+    }
 }

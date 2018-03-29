@@ -1,0 +1,12 @@
+//test16  return
+class Main{
+
+    int makamaka(){
+       return 5;
+        
+    }
+
+    void main(){
+        return makamaka()+10;
+    }
+}

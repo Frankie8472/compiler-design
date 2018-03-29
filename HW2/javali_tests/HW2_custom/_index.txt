@@ -18,3 +18,4 @@ test17  expressions
 test18  accesses
 test19  null
 test20  integer
+test21  no main

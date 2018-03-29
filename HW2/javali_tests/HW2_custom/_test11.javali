@@ -1,0 +1,20 @@
+//test11  boolean
+class Main{
+
+    boolean makamaka(){
+        boolean[] a,b,c;
+        c = [true, false, true]
+        return c[1];
+    }
+
+    void gogo(int b) extends makamaka{
+        boolean a,b,c;
+        b = true;
+        c = false;
+    }
+
+    void main(){
+        gogo(5);
+        write(makamaka());
+    }
+}

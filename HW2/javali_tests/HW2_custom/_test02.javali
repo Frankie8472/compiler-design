@@ -1,4 +1,6 @@
 //test02  one class
-class wubwub{
+class Main{
+    void main(){
 
+    }
 }

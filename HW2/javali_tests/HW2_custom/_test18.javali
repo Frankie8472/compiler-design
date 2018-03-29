@@ -1,0 +1,34 @@
+//test18  accesses
+class doge{
+
+}
+
+class raptor extends doge{
+    boolean eat(boolean herbs, boolean meat){
+        return herbs || meat;
+    }
+}
+
+class Main{
+    int aqua;
+
+    int makamaka(){
+        raptor r;
+        doge p;
+        int a, b, ret;
+        int[] l;
+        boolean c, d;
+        r = r.eat(true, false);
+        l = [1,2,3];
+        a = 5;
+        b = 6;
+        c = true;
+        d = false;
+        return l[2];
+    }
+
+    void main(){
+        this.aqua = 6;
+        return makamaka()+this.aqua;
+    }
+}
