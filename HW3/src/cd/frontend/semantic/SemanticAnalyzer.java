@@ -1,9 +1,7 @@
 package cd.frontend.semantic;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import cd.Main;
 import cd.ir.Ast;
@@ -12,14 +10,11 @@ import cd.ir.Ast.VarDecl;
 import cd.ir.Ast.ClassDecl;
 import cd.ir.AstVisitor;
 import cd.ir.Symbol;
-import cd.ir.Symbol.TypeSymbol;
 import cd.ir.Symbol.MethodSymbol;
-import cd.ir.Symbol.ArrayTypeSymbol;
-import cd.ir.Symbol.PrimitiveTypeSymbol;
 import cd.ir.Symbol.ClassSymbol;
 import cd.ir.Symbol.VariableSymbol;
 
-public class SemanticAnalyzer extends AstVisitor<Void, SymbolWrapper> {
+public class SemanticAnalyzer extends AstVisitor<Void, CurrentContext> {
 
     public final Main main;
 
@@ -70,14 +65,15 @@ public class SemanticAnalyzer extends AstVisitor<Void, SymbolWrapper> {
     }
 
     @Override
-    public Void classDecl(ClassDecl ast, SymbolWrapper arg) {
+    public Void classDecl(ClassDecl ast, CurrentContext arg) {
         ClassSymbol classSymbol = new ClassSymbol(ast);
-        SymbolWrapper wrapper = new SymbolWrapper(classSymbol, null);
+        CurrentContext context = new CurrentContext(classSymbol);
+
         for (VarDecl varDecl : ast.fields()) {
             if(classSymbol.fields.containsKey(varDecl.name)){
                 throw new SemanticFailure(SemanticFailure.Cause.DOUBLE_DECLARATION);
             }
-            visit(varDecl, wrapper);
+            visit(varDecl, context);
             classSymbol.fields.put(varDecl.name, varDecl.sym);
         }
 
@@ -85,7 +81,7 @@ public class SemanticAnalyzer extends AstVisitor<Void, SymbolWrapper> {
             if(classSymbol.methods.containsKey(methodDecl.name)){
                 throw new SemanticFailure(SemanticFailure.Cause.DOUBLE_DECLARATION);
             }
-            visit(methodDecl, wrapper);
+            visit(methodDecl, context);
             classSymbol.methods.put(methodDecl.name, methodDecl.sym);
         }
         ast.sym = classSymbol;
@@ -93,10 +89,12 @@ public class SemanticAnalyzer extends AstVisitor<Void, SymbolWrapper> {
     }
 
     @Override
-    public Void methodDecl(MethodDecl ast, SymbolWrapper arg) {
+    public Void methodDecl(MethodDecl ast, CurrentContext arg) {
         MethodSymbol methodSymbol = new MethodSymbol(ast);
-        SymbolWrapper wrapper = new SymbolWrapper(methodSymbol, arg);
+        CurrentContext context = new CurrentContext(arg, methodSymbol);
+
         methodSymbol.returnType = typeManager.stringToTypeSymbol(ast.returnType);
+
         for (int i = 0; i < ast.argumentNames.size(); i++) {
             String name = ast.argumentNames.get(i);
             String type = ast.argumentTypes.get(i);
@@ -105,13 +103,14 @@ public class SemanticAnalyzer extends AstVisitor<Void, SymbolWrapper> {
             }
             methodSymbol.parameters.put(name, new VariableSymbol(name, typeManager.stringToTypeSymbol(type), VariableSymbol.Kind.PARAM));
         }
+
         for (Ast var : ast.decls().rwChildren())
         {
             VarDecl decl = (VarDecl) var;
             if (methodSymbol.parameters.containsKey(decl.name) || methodSymbol.locals.containsKey(decl.name)){
                 throw new SemanticFailure(SemanticFailure.Cause.DOUBLE_DECLARATION);
             }
-            visit(decl, wrapper);
+            visit(decl, context);
             methodSymbol.locals.put(decl.name, decl.sym);
         }
 
@@ -120,19 +119,17 @@ public class SemanticAnalyzer extends AstVisitor<Void, SymbolWrapper> {
     }
 
     @Override
-    public Void varDecl(VarDecl ast, SymbolWrapper arg) {
-        VariableSymbol variableSymbol = null;
-        if (arg.symbol instanceof ClassSymbol) {
+    public Void varDecl(VarDecl ast, CurrentContext arg) {
+        VariableSymbol variableSymbol;
+        if (arg.methodSymbol == null) {
             variableSymbol = new VariableSymbol(ast.name, typeManager.stringToTypeSymbol(ast.type), VariableSymbol.Kind.FIELD);
-        } else if (arg.symbol instanceof MethodSymbol) {
+        } else {
             variableSymbol = new VariableSymbol(ast.name, typeManager.stringToTypeSymbol(ast.type), VariableSymbol.Kind.LOCAL);
         }
 
         ast.sym = variableSymbol;
         return null;
     }
-
-    // -------------- Helper Functions ---------------
 
 
 }

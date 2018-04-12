@@ -11,10 +11,12 @@ public class TypeManager {
     private Map<String, Symbol.ClassSymbol> classes = new HashMap<>();
 
     /**
-     *
-     * @param type
+     * Adds a type to the known types. Arrays don't count as a new type.
+     * @param type The type that should be added.
+     * @throws SemanticFailure with cause DOUBLE_DECLARATION if the type already exists in the lists of types
+     * @throws SemanticFailure with cause OBJECT_CLASS_DEFINED if a type tries to declare Object
      */
-    public void addType(Symbol.ClassSymbol type) {
+    public void addType(Symbol.ClassSymbol type)  throws SemanticFailure {
         if (classes.containsKey(type.name)) {
             throw new SemanticFailure(SemanticFailure.Cause.DOUBLE_DECLARATION);
         }
@@ -25,7 +27,7 @@ public class TypeManager {
     }
 
     /**
-     *
+     * Returns the list of all defined types.
      * @return
      */
     public Collection<Symbol.ClassSymbol> getTypes() {
@@ -33,12 +35,13 @@ public class TypeManager {
     }
 
     /**
-     *
+     * Checks whether a type is assignable to another.
      * @param variable
      * @param expr
-     * @return
+     * @return True if ...
+     * @throws SemanticFailure with cause TYPE_ERROR
      */
-    public boolean isAssignable(Symbol.TypeSymbol variable, Symbol.TypeSymbol expr) {
+    public boolean isAssignable(Symbol.TypeSymbol variable, Symbol.TypeSymbol expr) throws SemanticFailure {
         if (variable instanceof Symbol.PrimitiveTypeSymbol){
             if(expr instanceof Symbol.PrimitiveTypeSymbol){
                 return true;
@@ -61,12 +64,14 @@ public class TypeManager {
     }
 
     /**
-     *
-     * @param name
-     * @param receiver
-     * @return
+     * Get a method of a class
+     * @param name The name of the method
+     * @param receiver The receiver object symbol on which the method should be executed.
+     * @return The found method symbol
+     * @throws SemanticFailure with cause TYPE_ERROR if a method is called on a primitive type or if the method was not
+     * found
      */
-    public Symbol.MethodSymbol getMethod(String name, Symbol.TypeSymbol receiver) {
+    public Symbol.MethodSymbol getMethod(String name, Symbol.TypeSymbol receiver) throws SemanticFailure {
         if (receiver instanceof Symbol.PrimitiveTypeSymbol) {
             throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
         } else {
@@ -86,11 +91,12 @@ public class TypeManager {
     }
 
     /**
-     *
-     * @param typeName
-     * @return
+     * Converts a string to a type symbol.
+     * @param typeName The name of the type.
+     * @return The corresponding type
+     * @throws SemanticFailure if the requested type does not exist.
      */
-    public Symbol.TypeSymbol stringToTypeSymbol(String typeName) {
+    public Symbol.TypeSymbol stringToTypeSymbol(String typeName) throws SemanticFailure {
         Symbol.TypeSymbol type;
 
         boolean isArray = false;

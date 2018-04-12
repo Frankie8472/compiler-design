@@ -6,12 +6,11 @@ import cd.ir.Ast.ClassDecl;
 import cd.ir.AstVisitor;
 import cd.ir.Symbol;
 import cd.ir.Symbol.TypeSymbol;
-import cd.ir.Symbol.VariableSymbol;
 import cd.ir.Symbol.MethodSymbol;
 
 import java.util.List;
 
-public class SemanticChecker extends AstVisitor<Void, SymbolWrapper> {
+public class SemanticChecker extends AstVisitor<Void, CurrentContext> {
 
     private TypeManager typeManager; // FIELD!
 
@@ -27,25 +26,25 @@ public class SemanticChecker extends AstVisitor<Void, SymbolWrapper> {
     }
 
     @Override
-    public Void classDecl(ClassDecl ast, SymbolWrapper arg) {
-        visitChildren(ast, new SymbolWrapper(ast.sym, null));
+    public Void classDecl(ClassDecl ast, CurrentContext arg) {
+        visitChildren(ast, new CurrentContext(ast.sym));
         return null;
     }
 
     @Override
-    public Void varDecl(Ast.VarDecl ast, SymbolWrapper arg) {
+    public Void varDecl(Ast.VarDecl ast, CurrentContext arg) {
         // Ignore that one
         return null;
     }
 
     @Override
-    public Void methodDecl(Ast.MethodDecl ast, SymbolWrapper arg) {
-        visit(ast.body(), new SymbolWrapper(ast.sym, arg));
+    public Void methodDecl(Ast.MethodDecl ast, CurrentContext arg) {
+        visit(ast.body(), new CurrentContext(arg, ast.sym));
         return null;
     }
 
     @Override
-    public Void methodCall(Ast.MethodCall ast, SymbolWrapper arg) {
+    public Void methodCall(Ast.MethodCall ast, CurrentContext arg) {
         visit(ast.getMethodCallExpr(), arg);
         return null;
     }
@@ -58,7 +57,7 @@ public class SemanticChecker extends AstVisitor<Void, SymbolWrapper> {
      *
      */
     @Override
-    public Void methodCall(Ast.MethodCallExpr ast, SymbolWrapper arg) {
+    public Void methodCall(Ast.MethodCallExpr ast, CurrentContext arg) {
 
         MethodSymbol methodSymbol;
         Symbol.TypeSymbol receiverTypeSymbol;
@@ -68,7 +67,7 @@ public class SemanticChecker extends AstVisitor<Void, SymbolWrapper> {
         if (ast.receiver() != null) {
             receiverTypeSymbol = ast.receiver().type;
         } else {
-            receiverTypeSymbol = (TypeSymbol) arg.parentSymbol.symbol;
+            receiverTypeSymbol = arg.classSymbol;
         }
 
         methodSymbol = typeManager.getMethod(ast.methodName, receiverTypeSymbol);
@@ -91,7 +90,7 @@ public class SemanticChecker extends AstVisitor<Void, SymbolWrapper> {
     }
 
     @Override
-    public Void assign(Ast.Assign ast, SymbolWrapper arg) {
+    public Void assign(Ast.Assign ast, CurrentContext arg) {
         visitChildren(ast, null);
         if (!typeManager.isAssignable(ast.left().type, ast.right().type)) {
             throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR); // todo: choose correct cause
@@ -101,14 +100,14 @@ public class SemanticChecker extends AstVisitor<Void, SymbolWrapper> {
     }
 
     @Override
-    public Void builtInWrite(Ast.BuiltInWrite ast, SymbolWrapper arg) {
-        visit(ast.arg(), null);
+    public Void builtInWrite(Ast.BuiltInWrite ast, CurrentContext arg) {
+        visit(ast.arg(), arg);
         // todo: check for failure
         return null;
     }
 
     @Override
-    public Void builtInWriteln(Ast.BuiltInWriteln ast, SymbolWrapper arg) {
+    public Void builtInWriteln(Ast.BuiltInWriteln ast, CurrentContext arg) {
         if (ast.children() != null) {
             throw new SemanticFailure(SemanticFailure.Cause.WRONG_NUMBER_OF_ARGUMENTS); //todo: choose correct cause
         }
@@ -116,7 +115,7 @@ public class SemanticChecker extends AstVisitor<Void, SymbolWrapper> {
     }
 
     @Override
-    public Void ifElse(Ast.IfElse ast, SymbolWrapper arg) {
+    public Void ifElse(Ast.IfElse ast, CurrentContext arg) {
         visit(ast.condition(), null);
         visit(ast.then(), null);
         visit(ast.otherwise(), null);
@@ -125,14 +124,14 @@ public class SemanticChecker extends AstVisitor<Void, SymbolWrapper> {
     }
 
     @Override
-    public Void returnStmt(Ast.ReturnStmt ast, SymbolWrapper arg) {
+    public Void returnStmt(Ast.ReturnStmt ast, CurrentContext arg) {
         visit(ast.arg(), null);
         //todo: check for failure
         return null;
     }
 
     @Override
-    public Void whileLoop(Ast.WhileLoop ast, SymbolWrapper arg) {
+    public Void whileLoop(Ast.WhileLoop ast, CurrentContext arg) {
         visit(ast.condition(), null);
         visit(ast.body(), null);
         // todo: check for failure
@@ -140,7 +139,7 @@ public class SemanticChecker extends AstVisitor<Void, SymbolWrapper> {
     }
 
     @Override
-    public Void binaryOp(Ast.BinaryOp ast, SymbolWrapper arg) {
+    public Void binaryOp(Ast.BinaryOp ast, CurrentContext arg) {
         visit(ast.left(), null);
         visit(ast.right(), null);
         // todo: check for failure
@@ -151,32 +150,32 @@ public class SemanticChecker extends AstVisitor<Void, SymbolWrapper> {
 	/*
 	todo: needed?!
 	@Override
-	public Void methodCall(Ast.MethodCall ast, SymbolWrapper arg) {
+	public Void methodCall(Ast.MethodCall ast, CurrentContext arg) {
 		return super.methodCall(ast, arg);
 	}*/
 
     @Override
-    public Void booleanConst(Ast.BooleanConst ast, SymbolWrapper arg) {
+    public Void booleanConst(Ast.BooleanConst ast, CurrentContext arg) {
         ast.type = Symbol.PrimitiveTypeSymbol.booleanType;
         //todo: do we have to check if true or false is wrong written?
         return null;
     }
 
     @Override
-    public Void intConst(Ast.IntConst ast, SymbolWrapper arg) {
+    public Void intConst(Ast.IntConst ast, CurrentContext arg) {
         ast.type = Symbol.PrimitiveTypeSymbol.intType;
         //todo: do we have to check if it actually is an integer?!
         return null;
     }
 
     @Override
-    public Void nullConst(Ast.NullConst ast, SymbolWrapper arg) {
+    public Void nullConst(Ast.NullConst ast, CurrentContext arg) {
         ast.type = Symbol.ClassSymbol.nullType; // todo: is this correct?
         return null;
     }
 
     @Override
-    public Void builtInRead(Ast.BuiltInRead ast, SymbolWrapper arg) {
+    public Void builtInRead(Ast.BuiltInRead ast, CurrentContext arg) {
         ast.type = Symbol.PrimitiveTypeSymbol.intType;
         if (ast.children() != null) {
             throw new SemanticFailure(SemanticFailure.Cause.WRONG_NUMBER_OF_ARGUMENTS);
@@ -185,7 +184,7 @@ public class SemanticChecker extends AstVisitor<Void, SymbolWrapper> {
     }
 
     @Override
-    public Void unaryOp(Ast.UnaryOp ast, SymbolWrapper arg) {
+    public Void unaryOp(Ast.UnaryOp ast, CurrentContext arg) {
         visit(ast.arg(), null);
 //        if ((ast.operator.equals(Ast.UnaryOp.UOp.U_BOOL_NOT) && !ast.arg().type.equals(PrimitiveTypeSymbol.booleanType)
 //                ||) {
@@ -199,7 +198,7 @@ public class SemanticChecker extends AstVisitor<Void, SymbolWrapper> {
 
     //todo: is this needed?!
     @Override
-    public Void var(Ast.Var ast, SymbolWrapper arg) {
+    public Void var(Ast.Var ast, CurrentContext arg) {
 //        ((MethodSymbol) arg).
         //ast.sym - VariableSymbol
         //ast.type - TypeSymbol
