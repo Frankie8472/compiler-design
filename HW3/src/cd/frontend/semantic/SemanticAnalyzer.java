@@ -47,8 +47,7 @@ public class SemanticAnalyzer extends AstVisitor<Void, SymbolWrapper> {
         }
 
         // Check for circular inheritance
-        for(String className : classes.keySet()){
-            Symbol.ClassSymbol currentSymbol =  classes.get(className);
+        for(Symbol.ClassSymbol currentSymbol : typeManager.getTypes()){
             List<ClassSymbol> foundClasses = new ArrayList<>();
             while (currentSymbol.superClass != Symbol.ClassSymbol.objectType) {
                 if (foundClasses.contains(currentSymbol)) {
@@ -56,7 +55,7 @@ public class SemanticAnalyzer extends AstVisitor<Void, SymbolWrapper> {
                 }
                 foundClasses.add(currentSymbol);
                 currentSymbol = currentSymbol.superClass;
-                if (!classes.containsValue(currentSymbol)) {
+                if (!typeManager.getTypes().contains(currentSymbol)) {
                     throw  new SemanticFailure(SemanticFailure.Cause.NO_SUCH_TYPE);
                 }
             }
@@ -81,7 +80,7 @@ public class SemanticAnalyzer extends AstVisitor<Void, SymbolWrapper> {
         ClassSymbol classSymbol = new ClassSymbol(ast);
         SymbolWrapper wrapper = new SymbolWrapper(classSymbol, null);
         for (VarDecl varDecl : ast.fields()) {
-            if(classSymbol.methods.containsKey(varDecl.name)){
+            if(classSymbol.fields.containsKey(varDecl.name)){
                 throw new SemanticFailure(SemanticFailure.Cause.DOUBLE_DECLARATION);
             }
             visit(varDecl, wrapper);
@@ -107,11 +106,20 @@ public class SemanticAnalyzer extends AstVisitor<Void, SymbolWrapper> {
         for (int i = 0; i < ast.argumentNames.size(); i++) {
             String name = ast.argumentNames.get(i);
             String type = ast.argumentTypes.get(i);
-            methodSymbol.parameters.add(new VariableSymbol(name, typeManager.stringToTypeSymbol(type), VariableSymbol.Kind.PARAM));
+            if(methodSymbol.parameters.containsKey(name)){
+                throw new SemanticFailure(SemanticFailure.Cause.DOUBLE_DECLARATION);
+            }
+            methodSymbol.parameters.put(name, new VariableSymbol(name, typeManager.stringToTypeSymbol(type), VariableSymbol.Kind.PARAM));
         }
-        //TODO: Check method name uniqueness
-
-        visit(ast.decls(), wrapper);
+        for (Ast var : ast.decls().rwChildren())
+        {
+            VarDecl decl = (VarDecl) var;
+            if (methodSymbol.parameters.containsKey(decl.name) || methodSymbol.locals.containsKey(decl.name)){
+                throw new SemanticFailure(SemanticFailure.Cause.DOUBLE_DECLARATION);
+            }
+            visit(decl, wrapper);
+            methodSymbol.locals.put(decl.name, decl.sym);
+        }
 
         ast.sym = methodSymbol;
         return null;
@@ -120,12 +128,10 @@ public class SemanticAnalyzer extends AstVisitor<Void, SymbolWrapper> {
     @Override
     public Void varDecl(VarDecl ast, SymbolWrapper arg) {
         VariableSymbol variableSymbol = null;
-        if (arg.parentSymbol.symbol instanceof ClassSymbol) {
+        if (arg.symbol instanceof ClassSymbol) {
             variableSymbol = new VariableSymbol(ast.name, typeManager.stringToTypeSymbol(ast.type), VariableSymbol.Kind.FIELD);
-            ((ClassSymbol) arg.parentSymbol.symbol).fields.put(ast.name, variableSymbol);
-        } else if (arg.parentSymbol.symbol instanceof MethodSymbol) {
+        } else if (arg.symbol instanceof MethodSymbol) {
             variableSymbol = new VariableSymbol(ast.name, typeManager.stringToTypeSymbol(ast.type), VariableSymbol.Kind.LOCAL);
-            ((MethodSymbol) arg.parentSymbol.symbol).locals.put(ast.name, variableSymbol);
         }
 
         ast.sym = variableSymbol;
