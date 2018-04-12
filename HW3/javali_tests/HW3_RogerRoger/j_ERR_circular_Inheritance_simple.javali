@@ -1,0 +1,16 @@
+/* Test that the circular inheritance between Foo and Bar is detected */
+class Foo extends Bar { }
+class Bar extends Bla { }
+class Bla extends Hui { }
+class Hui extends Sa { }
+class Sa extends Kudo { }
+class Kudo extends Sudo { }
+class Sudo extends Fudo { }
+class Fudo extends Mado { }
+class Mado extends Foo { }
+
+class Main {
+   void main() {
+      writeln();
+   }
+}

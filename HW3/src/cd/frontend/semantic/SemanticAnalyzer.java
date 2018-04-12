@@ -1,6 +1,9 @@
 package cd.frontend.semantic;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import cd.Main;
 import cd.ir.Ast;
@@ -16,187 +19,222 @@ import cd.ir.Symbol.PrimitiveTypeSymbol;
 import cd.ir.Symbol.ClassSymbol;
 import cd.ir.Symbol.VariableSymbol;
 
-public class SemanticAnalyzer extends AstVisitor<Void ,Symbol> {
-	
-	public final Main main;
-	
-	public SemanticAnalyzer(Main main) {
-		this.main = main;
-	}
-	
-	public void check(List<ClassDecl> classDecls) 
-	throws SemanticFailure {
-		{
-			for(ClassDecl decl : classDecls) {
-				visit(decl, null);
-			}
-		}
-	}
+public class SemanticAnalyzer extends AstVisitor<Void, SymbolWrapper> {
 
-	@Override
-	public Void classDecl(ClassDecl ast, Symbol arg) {
-		ClassSymbol classSymbol = new ClassSymbol(ast);
-		for (VarDecl varDecl : ast.fields()) {
-			visit(varDecl, classSymbol);
-		}
+    public final Main main;
 
-		for (MethodDecl methodDecl : ast.methods()) {
-			visit(methodDecl, classSymbol);
-		}
-		ast.sym = classSymbol;
-		//todo: check for failure
-		return null;
-	}
+    private Map<String, ClassSymbol> classes = new HashMap<>();
 
-	@Override
-	public Void methodDecl(MethodDecl ast, Symbol arg) {
-		MethodSymbol methodSymbol = new MethodSymbol(ast);
-		methodSymbol.returnType = stringToTypeSymbol(ast.returnType);
-		for (int i = 0; i < ast.argumentNames.size(); i++) {
-			String name = ast.argumentNames.get(i);
-			String type = ast.argumentTypes.get(i);
-			methodSymbol.parameters.add(new VariableSymbol(name, stringToTypeSymbol(type), VariableSymbol.Kind.PARAM));
-		}
+    public SemanticAnalyzer(Main main) {
+        this.main = main;
+    }
 
-		visit(ast.decls(), methodSymbol);
-		visit(ast.body(), arg);
+    public void check(List<ClassDecl> classDecls) throws SemanticFailure {
+        // Transform classes to symbols
+        for (ClassDecl decl : classDecls) {
+            if (classes.containsKey(decl.name)) {
+                throw new SemanticFailure(SemanticFailure.Cause.DOUBLE_DECLARATION);
+            }
+            if (decl.name.equals("Object")){
+                throw new SemanticFailure(SemanticFailure.Cause.OBJECT_CLASS_DEFINED);
+            }
+            ClassSymbol symbol = new ClassSymbol(decl);
+            decl.sym = symbol;
+            classes.put(decl.name, symbol);
+        }
 
-		((ClassSymbol) arg).methods.put(ast.name, methodSymbol);
-		ast.sym = methodSymbol;
-		//todo: check for failure
-		return null;
-	}
+        // Fill out superclass
+        for (ClassDecl decl : classDecls) {
+            decl.sym.superClass = (ClassSymbol) stringToTypeSymbol(decl.superClass);
+        }
 
-	@Override
-	public Void varDecl(VarDecl ast, Symbol arg) {
-		VariableSymbol variableSymbol = null;
-		if (arg instanceof ClassSymbol) {
-			variableSymbol = new VariableSymbol(ast.name, stringToTypeSymbol(ast.type), VariableSymbol.Kind.FIELD);
-			((ClassSymbol) arg).fields.put(ast.name, variableSymbol);
-		} else if (arg instanceof MethodSymbol){
-			variableSymbol = new VariableSymbol(ast.name, stringToTypeSymbol(ast.type), VariableSymbol.Kind.LOCAL);
-			((MethodSymbol) arg).locals.put(ast.name, variableSymbol);
-		}
+        // Check for circular inheritance
+        for(String className : classes.keySet()){
+            Symbol.ClassSymbol currentSymbol =  classes.get(className);
+            List<ClassSymbol> foundClasses = new ArrayList<>();
+            while (currentSymbol.superClass != Symbol.ClassSymbol.objectType) {
+                if (foundClasses.contains(currentSymbol)) {
+                    throw new SemanticFailure(SemanticFailure.Cause.CIRCULAR_INHERITANCE);
+                }
+                foundClasses.add(currentSymbol);
+                currentSymbol = currentSymbol.superClass;
+                if (!classes.containsValue(currentSymbol)) {
+                    throw  new SemanticFailure(SemanticFailure.Cause.NO_SUCH_TYPE);
+                }
+            }
+        }
 
-		ast.sym = variableSymbol;
-		//todo: check for failure
-		return null;
-	}
+        for(ClassDecl decl : classDecls){
+            visit(decl, null);
+        }
+    }
 
-	@Override
-	public Void assign(Ast.Assign ast, Symbol arg) {
-		visitChildren(ast, null);
-		if (!ast.left().type.equals(ast.right().type)) {	// todo: fix subtyping
-			throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR); // todo: choose correct cause
-		}
+    @Override
+    public Void classDecl(ClassDecl ast, SymbolWrapper arg) {
+        ClassSymbol classSymbol = new ClassSymbol(ast);
+        SymbolWrapper wrapper = new SymbolWrapper(classSymbol, null);
+        for (VarDecl varDecl : ast.fields()) {
+            visit(varDecl, wrapper);
+        }
 
-		return null;
-	}
+        for (MethodDecl methodDecl : ast.methods()) {
+            visit(methodDecl, wrapper);
+        }
+        ast.sym = classSymbol;
+        //todo: check for failure
+        return null;
+    }
 
-	@Override
-	public Void builtInWrite(Ast.BuiltInWrite ast, Symbol arg) {
-		visit(ast.arg(), null);
-		// todo: check for failure
-		return null;
-	}
+    @Override
+    public Void methodDecl(MethodDecl ast, SymbolWrapper arg) {
+        MethodSymbol methodSymbol = new MethodSymbol(ast);
+        SymbolWrapper wrapper = new SymbolWrapper(methodSymbol, arg);
+        methodSymbol.returnType = stringToTypeSymbol(ast.returnType);
+        for (int i = 0; i < ast.argumentNames.size(); i++) {
+            String name = ast.argumentNames.get(i);
+            String type = ast.argumentTypes.get(i);
+            methodSymbol.parameters.add(new VariableSymbol(name, stringToTypeSymbol(type), VariableSymbol.Kind.PARAM));
+        }
 
-	@Override
-	public Void builtInWriteln(Ast.BuiltInWriteln ast, Symbol arg) {
-		if (ast.children() != null) {
-			throw new SemanticFailure(SemanticFailure.Cause.WRONG_NUMBER_OF_ARGUMENTS); //todo: choose correct cause
-		}
-		return null;
-	}
+        visit(ast.decls(), wrapper);
+        visit(ast.body(), arg);
 
-	@Override
-	public Void ifElse(Ast.IfElse ast, Symbol arg) {
-		visit(ast.condition(), null);
-		visit(ast.then(), null);
-		visit(ast.otherwise(), null);
-		// todo: check for failure
-		return null;
-	}
+        ((ClassSymbol) arg.parentSymbol.symbol).methods.put(ast.name, methodSymbol);
+        ast.sym = methodSymbol;
+        //todo: check for failure
+        return null;
+    }
 
-	@Override
-	public Void returnStmt(Ast.ReturnStmt ast, Symbol arg) {
-		visit(ast.arg(), null);
-		//todo: check for failure
-		return null;
-	}
+    @Override
+    public Void varDecl(VarDecl ast, SymbolWrapper arg) {
+        VariableSymbol variableSymbol = null;
+        if (arg.parentSymbol.symbol instanceof ClassSymbol) {
+            variableSymbol = new VariableSymbol(ast.name, stringToTypeSymbol(ast.type), VariableSymbol.Kind.FIELD);
+            ((ClassSymbol) arg.parentSymbol.symbol).fields.put(ast.name, variableSymbol);
+        } else if (arg.parentSymbol.symbol instanceof MethodSymbol) {
+            variableSymbol = new VariableSymbol(ast.name, stringToTypeSymbol(ast.type), VariableSymbol.Kind.LOCAL);
+            ((MethodSymbol) arg.parentSymbol.symbol).locals.put(ast.name, variableSymbol);
+        }
 
-	@Override
-	public Void whileLoop(Ast.WhileLoop ast, Symbol arg) {
-		visit(ast.condition(), null);
-		visit(ast.body(), null);
-		// todo: check for failure
-		return null;
-	}
+        ast.sym = variableSymbol;
+        //todo: check for failure
+        return null;
+    }
 
-	@Override
-	public Void binaryOp(Ast.BinaryOp ast, Symbol arg) {
-		visit(ast.left(), null);
-		visit(ast.right(), null);
-		// todo: check for failure
-		return null;
-	}
+    @Override
+    public Void assign(Ast.Assign ast, SymbolWrapper arg) {
+        visitChildren(ast, null);
+        if (!ast.left().type.equals(ast.right().type)) {    // todo: fix subtyping
+            throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR); // todo: choose correct cause
+        }
+
+        return null;
+    }
+
+    @Override
+    public Void builtInWrite(Ast.BuiltInWrite ast, SymbolWrapper arg) {
+        visit(ast.arg(), null);
+        // todo: check for failure
+        return null;
+    }
+
+    @Override
+    public Void builtInWriteln(Ast.BuiltInWriteln ast, SymbolWrapper arg) {
+        if (ast.children() != null) {
+            throw new SemanticFailure(SemanticFailure.Cause.WRONG_NUMBER_OF_ARGUMENTS); //todo: choose correct cause
+        }
+        return null;
+    }
+
+    @Override
+    public Void ifElse(Ast.IfElse ast, SymbolWrapper arg) {
+        visit(ast.condition(), null);
+        visit(ast.then(), null);
+        visit(ast.otherwise(), null);
+        // todo: check for failure
+        return null;
+    }
+
+    @Override
+    public Void returnStmt(Ast.ReturnStmt ast, SymbolWrapper arg) {
+        visit(ast.arg(), null);
+        //todo: check for failure
+        return null;
+    }
+
+    @Override
+    public Void whileLoop(Ast.WhileLoop ast, SymbolWrapper arg) {
+        visit(ast.condition(), null);
+        visit(ast.body(), null);
+        // todo: check for failure
+        return null;
+    }
+
+    @Override
+    public Void binaryOp(Ast.BinaryOp ast, SymbolWrapper arg) {
+        visit(ast.left(), null);
+        visit(ast.right(), null);
+        // todo: check for failure
+        return null;
+    }
 
 	/*
 	todo: needed?!
 	@Override
-	public Void methodCall(Ast.MethodCall ast, Symbol arg) {
+	public Void methodCall(Ast.MethodCall ast, SymbolWrapper arg) {
 		return super.methodCall(ast, arg);
 	}*/
 
-	@Override
-	public Void booleanConst(Ast.BooleanConst ast, Symbol arg) {
-		ast.type = PrimitiveTypeSymbol.booleanType;
-		//todo: do we have to check if true or false is wrong written?
-		return null;
-	}
+    @Override
+    public Void booleanConst(Ast.BooleanConst ast, SymbolWrapper arg) {
+        ast.type = PrimitiveTypeSymbol.booleanType;
+        //todo: do we have to check if true or false is wrong written?
+        return null;
+    }
 
-	@Override
-	public Void intConst(Ast.IntConst ast, Symbol arg) {
-		ast.type = PrimitiveTypeSymbol.intType;
-		//todo: do we have to check if it actually is an integer?!
-		return null;
-	}
+    @Override
+    public Void intConst(Ast.IntConst ast, SymbolWrapper arg) {
+        ast.type = PrimitiveTypeSymbol.intType;
+        //todo: do we have to check if it actually is an integer?!
+        return null;
+    }
 
-	@Override
-	public Void nullConst(Ast.NullConst ast, Symbol arg) {
-		ast.type = ClassSymbol.nullType; // todo: is this correct?
-		return null;
-	}
+    @Override
+    public Void nullConst(Ast.NullConst ast, SymbolWrapper arg) {
+        ast.type = ClassSymbol.nullType; // todo: is this correct?
+        return null;
+    }
 
-	@Override
-	public Void builtInRead(Ast.BuiltInRead ast, Symbol arg) {
-		ast.type = PrimitiveTypeSymbol.intType;
-		if (ast.children() != null) {
-			throw new SemanticFailure(SemanticFailure.Cause.WRONG_NUMBER_OF_ARGUMENTS);
-		}
-		return null;
-	}
+    @Override
+    public Void builtInRead(Ast.BuiltInRead ast, SymbolWrapper arg) {
+        ast.type = PrimitiveTypeSymbol.intType;
+        if (ast.children() != null) {
+            throw new SemanticFailure(SemanticFailure.Cause.WRONG_NUMBER_OF_ARGUMENTS);
+        }
+        return null;
+    }
 
-	@Override
-	public Void unaryOp(Ast.UnaryOp ast, Symbol arg) {
-		visit(ast.arg(), null);
-		if ((ast.operator.equals(Ast.UnaryOp.UOp.U_BOOL_NOT) && !ast.arg().type.equals(PrimitiveTypeSymbol.booleanType)
-			|| ){
-			throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
-		}
+    @Override
+    public Void unaryOp(Ast.UnaryOp ast, SymbolWrapper arg) {
+        visit(ast.arg(), null);
+//        if ((ast.operator.equals(Ast.UnaryOp.UOp.U_BOOL_NOT) && !ast.arg().type.equals(PrimitiveTypeSymbol.booleanType)
+//                ||) {
+//            throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
+//        }
 
-		ast.type = ast.arg().type;
-		return null;
-	}
+        ast.type = ast.arg().type;
+        return null;
+    }
 
 
-	//todo: is this needed?!
-	@Override
-	public Void var(Ast.Var ast, Symbol arg) {
-		((MethodSymbol) arg).
-		//ast.sym - VariableSymbol
-		//ast.type - TypeSymbol
-		return null;
-	}
+    //todo: is this needed?!
+    @Override
+    public Void var(Ast.Var ast, SymbolWrapper arg) {
+//        ((MethodSymbol) arg).
+        //ast.sym - VariableSymbol
+        //ast.type - TypeSymbol
+        return null;
+    }
 
     // -------------- Helper Functions ---------------
 
@@ -224,7 +262,10 @@ public class SemanticAnalyzer extends AstVisitor<Void ,Symbol> {
                 type = ClassSymbol.objectType;
                 break;
             default:
-                type = new ClassSymbol(typeName);
+                if(!classes.containsKey(typeName)){
+                    throw new SemanticFailure(SemanticFailure.Cause.NO_SUCH_TYPE);
+                }
+                type = classes.get(typeName);
                 break;
         }
 
