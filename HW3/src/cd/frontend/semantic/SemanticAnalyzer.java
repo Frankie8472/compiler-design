@@ -9,13 +9,12 @@ import cd.ir.Ast.VarDecl;
 import cd.ir.Ast.ClassDecl;
 import cd.ir.AstVisitor;
 import cd.ir.Symbol;
+import cd.ir.Symbol.TypeSymbol;
 import cd.ir.Symbol.MethodSymbol;
 import cd.ir.Symbol.ArrayTypeSymbol;
 import cd.ir.Symbol.PrimitiveTypeSymbol;
-import cd.ir.Symbol.TypeSymbol;
 import cd.ir.Symbol.ClassSymbol;
 import cd.ir.Symbol.VariableSymbol;
-import com.sun.java.util.jar.pack.Instruction;
 
 public class SemanticAnalyzer extends AstVisitor<Void ,Symbol> {
 	
@@ -59,7 +58,8 @@ public class SemanticAnalyzer extends AstVisitor<Void ,Symbol> {
 			methodSymbol.parameters.add(new VariableSymbol(name, stringToTypeSymbol(type), VariableSymbol.Kind.PARAM));
 		}
 
-		visitChildren(ast, methodSymbol);
+		visit(ast.decls(), methodSymbol);
+		visit(ast.body(), arg);
 
 		((ClassSymbol) arg).methods.put(ast.name, methodSymbol);
 		ast.sym = methodSymbol;
@@ -188,19 +188,20 @@ public class SemanticAnalyzer extends AstVisitor<Void ,Symbol> {
 		return null;
 	}
 
-	/*
+
 	//todo: is this needed?!
 	@Override
 	public Void var(Ast.Var ast, Symbol arg) {
+		((MethodSymbol) arg).
 		//ast.sym - VariableSymbol
 		//ast.type - TypeSymbol
 		return null;
-	}*/
+	}
 
     // -------------- Helper Functions ---------------
 
-    private Symbol.TypeSymbol stringToTypeSymbol(String typeName) {
-        Symbol.TypeSymbol type;
+    private TypeSymbol stringToTypeSymbol(String typeName) {
+        TypeSymbol type;
 
         boolean isArray = false;
 
@@ -211,24 +212,24 @@ public class SemanticAnalyzer extends AstVisitor<Void ,Symbol> {
 
         switch (typeName) {
             case "int":
-                type = Symbol.PrimitiveTypeSymbol.intType;
+                type = PrimitiveTypeSymbol.intType;
                 break;
             case "void":
-                type = Symbol.PrimitiveTypeSymbol.voidType;
+                type = PrimitiveTypeSymbol.voidType;
                 break;
             case "boolean":
-                type = Symbol.PrimitiveTypeSymbol.booleanType;
+                type = PrimitiveTypeSymbol.booleanType;
                 break;
             case "Object":
-                type = Symbol.ClassSymbol.objectType;
+                type = ClassSymbol.objectType;
                 break;
             default:
-                type = new Symbol.ClassSymbol(typeName);
+                type = new ClassSymbol(typeName);
                 break;
         }
 
         if (isArray) {
-            type = new Symbol.ArrayTypeSymbol(type);
+            type = new ArrayTypeSymbol(type);
         }
 
         return type;
