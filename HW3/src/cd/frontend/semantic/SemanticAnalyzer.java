@@ -61,18 +61,12 @@ public class SemanticAnalyzer extends AstVisitor<Void, SymbolWrapper> {
             }
         }
 
-        for(ClassDecl classDecl : classDecls){
-            for(MethodDecl methodDecl : classDecl.methods()){
-                methodDecl.
-            }
-            for (VarDecl varDecl : classDecl.fields()){
-
-            }
-        }
-
         for(ClassDecl decl : classDecls){
             visit(decl, null);
         }
+
+        SemanticChecker checker = new SemanticChecker(typeManager);
+        checker.check(classDecls);
     }
 
     @Override
