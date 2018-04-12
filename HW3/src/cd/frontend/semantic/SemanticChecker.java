@@ -54,7 +54,7 @@ public class SemanticChecker extends AstVisitor<Void, SymbolWrapper> {
     public Void methodCall(Ast.MethodCallExpr ast, SymbolWrapper arg) {
 
         MethodSymbol methodSymbol;
-        Symbol receiverTypeSymbol;
+        Symbol.TypeSymbol receiverTypeSymbol;
 
         for (Expr expr : ast.argumentsWithoutReceiver()){
             visit(expr, arg);
@@ -64,7 +64,7 @@ public class SemanticChecker extends AstVisitor<Void, SymbolWrapper> {
             visit(ast.receiver(), arg);
             receiverTypeSymbol = ast.receiver().type;
         } else {
-            receiverTypeSymbol = arg.parentSymbol.symbol;
+            receiverTypeSymbol = (TypeSymbol) arg.parentSymbol.symbol;
         }
 
         methodSymbol = typeManager.getMethod(ast.methodName, receiverTypeSymbol);
