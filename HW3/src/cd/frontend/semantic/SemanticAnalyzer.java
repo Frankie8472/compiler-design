@@ -32,6 +32,7 @@ public class SemanticAnalyzer extends AstVisitor<Void, SymbolWrapper> {
     }
 
     public void check(List<ClassDecl> classDecls) throws SemanticFailure {
+
         // Transform classes to symbols
         for (ClassDecl decl : classDecls) {
             ClassSymbol symbol = new ClassSymbol(decl);
@@ -58,6 +59,15 @@ public class SemanticAnalyzer extends AstVisitor<Void, SymbolWrapper> {
                 if (!classes.containsValue(currentSymbol)) {
                     throw  new SemanticFailure(SemanticFailure.Cause.NO_SUCH_TYPE);
                 }
+            }
+        }
+
+        for(ClassDecl classDecl : classDecls){
+            for(MethodDecl methodDecl : classDecl.methods()){
+                methodDecl.
+            }
+            for (VarDecl varDecl : classDecl.fields()){
+
             }
         }
 

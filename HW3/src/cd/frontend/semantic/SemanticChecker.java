@@ -1,16 +1,94 @@
 package cd.frontend.semantic;
 
 import cd.ir.Ast;
+import cd.ir.Ast.Expr;
+import cd.ir.Ast.ClassDecl;
 import cd.ir.AstVisitor;
 import cd.ir.Symbol;
+import cd.ir.Symbol.TypeSymbol;
+import cd.ir.Symbol.VariableSymbol;
+import cd.ir.Symbol.MethodSymbol;
 
 import java.util.List;
 
 public class SemanticChecker extends AstVisitor<Void, SymbolWrapper> {
 
+    private TypeManager typeManager;
+
+    public SemanticChecker(TypeManager typeManager){
+        this.typeManager = typeManager;
+    }
 
     public void check(List<Ast.ClassDecl> classDecls) throws SemanticFailure {
+        for (ClassDecl classDecl : classDecls){
+            visit(classDecl, null);
+        }
 
+    }
+
+    @Override
+    public Void classDecl(ClassDecl ast, SymbolWrapper arg) {
+        visitChildren(ast, new SymbolWrapper(ast.sym, null));
+        return null;
+    }
+
+    @Override
+    public Void varDecl(Ast.VarDecl ast, SymbolWrapper arg) {
+        // Ignore that one
+        return null;
+    }
+
+    @Override
+    public Void methodDecl(Ast.MethodDecl ast, SymbolWrapper arg) {
+        visit(ast.body(), new SymbolWrapper(ast.sym, arg));
+        return null;
+    }
+
+    @Override
+    public Void methodCall(Ast.MethodCall ast, SymbolWrapper arg) {
+        visit(ast.getMethodCallExpr(), arg);
+        return null;
+    }
+
+    @Override
+    public Void methodCall(Ast.MethodCallExpr ast, SymbolWrapper arg) {
+
+        MethodSymbol methodSymbol;
+        Symbol receiverTypeSymbol;
+
+        for (Expr expr : ast.argumentsWithoutReceiver()){
+            visit(expr, arg);
+        }
+
+        if (ast.receiver() != null) {
+            visit(ast.receiver(), arg);
+            receiverTypeSymbol = ast.receiver().type;
+        } else {
+            receiverTypeSymbol = arg.parentSymbol.symbol;
+        }
+
+        methodSymbol = typeManager.getMethod(ast.methodName, receiverTypeSymbol);
+
+        ast.type = methodSymbol.returnType;
+
+        if (methodSymbol == null) {
+            throw new SemanticFailure(SemanticFailure.Cause.NO_SUCH_METHOD);
+        }
+
+        if (methodSymbol.parameters.size() != ast.argumentsWithoutReceiver().size()) {
+            throw new SemanticFailure(SemanticFailure.Cause.WRONG_NUMBER_OF_ARGUMENTS);
+        }
+
+        for (int i = 0; i < methodSymbol.parameters.size(); i++) {
+            visit(ast.argumentsWithoutReceiver().get(i), arg);
+            TypeSymbol should_be_symbol = methodSymbol.parameters.get(i).type;
+            TypeSymbol is_symbol = ast.argumentsWithoutReceiver().get(i).type;
+            if (typeManager.isAssignable(should_be_symbol, is_symbol)) {
+                throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
+            }
+        }
+
+        return null;
     }
 
     @Override
@@ -67,6 +145,7 @@ public class SemanticChecker extends AstVisitor<Void, SymbolWrapper> {
         visit(ast.left(), null);
         visit(ast.right(), null);
         // todo: check for failure
+
         return null;
     }
 
