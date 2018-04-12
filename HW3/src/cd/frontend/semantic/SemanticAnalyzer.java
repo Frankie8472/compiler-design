@@ -197,33 +197,41 @@ public class SemanticAnalyzer extends AstVisitor<Void ,Symbol> {
 		return null;
 	}*/
 
-	// Helper functions
-	public TypeSymbol stringToTypeSymbol(String type) {
-		if (type == null) {
-			return PrimitiveTypeSymbol.voidType;
-		}else if (type.equals("int")){
-			return PrimitiveTypeSymbol.intType;
-		} else if (type.equals("boolean")){
-			return PrimitiveTypeSymbol.booleanType;
-		} else if (type.equals("int[]")){
-			return new ArrayTypeSymbol(PrimitiveTypeSymbol.intType);
-		} else if (type.equals("boolean[]")){
-			return new ArrayTypeSymbol(PrimitiveTypeSymbol.booleanType);
-		} else if (type.contains("[]")){
-			return new ArrayTypeSymbol(new TypeSymbol(type.substring(0, type.length()-3)) {
-				@Override
-				public boolean isReferenceType() {
-					return true;
-				}
-			});
-		} else {
-			return new TypeSymbol(type) {
-				@Override
-				public boolean isReferenceType() {
-					return true;
-				}
-			};
-		}
-	}
+    // -------------- Helper Functions ---------------
+
+    private Symbol.TypeSymbol stringToTypeSymbol(String typeName) {
+        Symbol.TypeSymbol type;
+
+        boolean isArray = false;
+
+        if (typeName.endsWith("[]")) {
+            isArray = true;
+            typeName = typeName.substring(0, typeName.length() - 2);
+        }
+
+        switch (typeName) {
+            case "int":
+                type = Symbol.PrimitiveTypeSymbol.intType;
+                break;
+            case "void":
+                type = Symbol.PrimitiveTypeSymbol.voidType;
+                break;
+            case "boolean":
+                type = Symbol.PrimitiveTypeSymbol.booleanType;
+                break;
+            case "Object":
+                type = Symbol.ClassSymbol.objectType;
+                break;
+            default:
+                type = new Symbol.ClassSymbol(typeName);
+                break;
+        }
+
+        if (isArray) {
+            type = new Symbol.ArrayTypeSymbol(type);
+        }
+
+        return type;
+    }
 
 }
