@@ -6,6 +6,7 @@ import cd.ir.Ast.ClassDecl;
 import cd.ir.AstVisitor;
 import cd.ir.Symbol;
 import cd.ir.Symbol.TypeSymbol;
+import cd.ir.Symbol.VariableSymbol;
 import cd.ir.Symbol.MethodSymbol;
 
 import java.util.List;

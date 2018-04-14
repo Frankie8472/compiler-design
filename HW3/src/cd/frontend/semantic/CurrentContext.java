@@ -10,11 +10,11 @@ public final class CurrentContext {
     /**
      * The Class this context is in.
      */
-    public final Symbol.ClassSymbol classSymbol;
+    private final Symbol.ClassSymbol classSymbol;
     /**
      * The Method this context is in. If this is null, the scope is the entire class and not in a method.
      */
-    public final Symbol.MethodSymbol methodSymbol;
+    private final Symbol.MethodSymbol methodSymbol;
 
     public CurrentContext(CurrentContext context, Symbol.MethodSymbol methodSymbol){
         this.classSymbol = context.classSymbol;
@@ -31,5 +31,11 @@ public final class CurrentContext {
         this.methodSymbol = methodSymbol;
     }
 
+    public Symbol.MethodSymbol getMethodSymbol() {
+        return methodSymbol;
+    }
 
+    public Symbol.ClassSymbol getClassSymbol() {
+        return classSymbol;
+    }
 }
