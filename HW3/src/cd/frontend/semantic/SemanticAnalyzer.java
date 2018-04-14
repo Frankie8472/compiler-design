@@ -9,7 +9,6 @@ import cd.ir.Ast.MethodDecl;
 import cd.ir.Ast.VarDecl;
 import cd.ir.Ast.ClassDecl;
 import cd.ir.AstVisitor;
-import cd.ir.Symbol;
 import cd.ir.Symbol.MethodSymbol;
 import cd.ir.Symbol.ClassSymbol;
 import cd.ir.Symbol.VariableSymbol;
@@ -20,7 +19,6 @@ public class SemanticAnalyzer extends AstVisitor<Void, CurrentContext> {
 
     private TypeManager typeManager;
 
-
     public SemanticAnalyzer(Main main) {
         this.main = main;
         this.typeManager = new TypeManager();
@@ -30,10 +28,10 @@ public class SemanticAnalyzer extends AstVisitor<Void, CurrentContext> {
 
         // Transform classes to symbols
         for (ClassDecl decl : classDecls) {
-            ClassSymbol symbol = new ClassSymbol(decl);
-            typeManager.addType(symbol);
-
-            decl.sym = symbol;
+            ClassSymbol classSymbol = new ClassSymbol(decl);
+            typeManager.addType(classSymbol);
+            //todo: chunnt double declaration dur de parser dure?
+            decl.sym = classSymbol;
         }
 
         // Fill out superclass
@@ -42,21 +40,24 @@ public class SemanticAnalyzer extends AstVisitor<Void, CurrentContext> {
         }
 
         // Check for circular inheritance
-        for(Symbol.ClassSymbol currentSymbol : typeManager.getTypes()){
+        for (ClassSymbol currentSymbol : typeManager.getTypes()) {
             List<ClassSymbol> foundClasses = new ArrayList<>();
-            while (currentSymbol.superClass != Symbol.ClassSymbol.objectType) {
+
+            while (currentSymbol.superClass != ClassSymbol.objectType) {
                 if (foundClasses.contains(currentSymbol)) {
                     throw new SemanticFailure(SemanticFailure.Cause.CIRCULAR_INHERITANCE);
                 }
+
                 foundClasses.add(currentSymbol);
                 currentSymbol = currentSymbol.superClass;
+
                 if (!typeManager.getTypes().contains(currentSymbol)) {
-                    throw  new SemanticFailure(SemanticFailure.Cause.NO_SUCH_TYPE);
+                    throw new SemanticFailure(SemanticFailure.Cause.NO_SUCH_TYPE);
                 }
             }
         }
 
-        for(ClassDecl decl : classDecls){
+        for (ClassDecl decl : classDecls) {
             visit(decl, null);
         }
 
@@ -70,7 +71,7 @@ public class SemanticAnalyzer extends AstVisitor<Void, CurrentContext> {
         CurrentContext context = new CurrentContext(classSymbol);
 
         for (VarDecl varDecl : ast.fields()) {
-            if(classSymbol.fields.containsKey(varDecl.name)){
+            if (classSymbol.fields.containsKey(varDecl.name)) {
                 throw new SemanticFailure(SemanticFailure.Cause.DOUBLE_DECLARATION);
             }
             visit(varDecl, context);
@@ -78,7 +79,7 @@ public class SemanticAnalyzer extends AstVisitor<Void, CurrentContext> {
         }
 
         for (MethodDecl methodDecl : ast.methods()) {
-            if(classSymbol.methods.containsKey(methodDecl.name)){
+            if (classSymbol.methods.containsKey(methodDecl.name)) {
                 throw new SemanticFailure(SemanticFailure.Cause.DOUBLE_DECLARATION);
             }
             visit(methodDecl, context);
@@ -98,16 +99,15 @@ public class SemanticAnalyzer extends AstVisitor<Void, CurrentContext> {
         for (int i = 0; i < ast.argumentNames.size(); i++) {
             String name = ast.argumentNames.get(i);
             String type = ast.argumentTypes.get(i);
-            if(methodSymbol.parameters.containsKey(name)){
+            if (methodSymbol.parameters.containsKey(name)) {
                 throw new SemanticFailure(SemanticFailure.Cause.DOUBLE_DECLARATION);
             }
             methodSymbol.parameters.put(name, new VariableSymbol(name, typeManager.stringToTypeSymbol(type), VariableSymbol.Kind.PARAM));
         }
 
-        for (Ast var : ast.decls().rwChildren())
-        {
+        for (Ast var : ast.decls().rwChildren()) {
             VarDecl decl = (VarDecl) var;
-            if (methodSymbol.parameters.containsKey(decl.name) || methodSymbol.locals.containsKey(decl.name)){
+            if (methodSymbol.parameters.containsKey(decl.name) || methodSymbol.locals.containsKey(decl.name)) {
                 throw new SemanticFailure(SemanticFailure.Cause.DOUBLE_DECLARATION);
             }
             visit(decl, context);
