@@ -18,7 +18,7 @@ public final class CurrentContext {
     private final MethodSymbol methodSymbol;
 
     public CurrentContext(CurrentContext context, MethodSymbol methodSymbol) {
-        this.classSymbol = context.classSymbol;
+        this.classSymbol = context.getClassSymbol();
         this.methodSymbol = methodSymbol;
     }
 

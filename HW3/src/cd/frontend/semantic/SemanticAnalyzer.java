@@ -28,6 +28,9 @@ public class SemanticAnalyzer extends AstVisitor<Void, CurrentContext> {
 
         // Transform classes to symbols
         for (ClassDecl decl : classDecls) {
+            if(decl.name.equals("Object")){
+                throw new SemanticFailure(SemanticFailure.Cause.OBJECT_CLASS_DEFINED);
+            }
             ClassSymbol classSymbol = new ClassSymbol(decl);
             typeManager.addType(classSymbol);
             //todo: chunnt double declaration dur de parser dure?
@@ -51,6 +54,8 @@ public class SemanticAnalyzer extends AstVisitor<Void, CurrentContext> {
                 foundClasses.add(currentSymbol);
                 currentSymbol = currentSymbol.superClass;
 
+                //todo: how can this happen if we fill out all superclasses?
+                //todo: is already checked in typemanager stringtotypesymbol, not?
                 if (!typeManager.getTypes().contains(currentSymbol)) {
                     throw new SemanticFailure(SemanticFailure.Cause.NO_SUCH_TYPE);
                 }
@@ -67,30 +72,35 @@ public class SemanticAnalyzer extends AstVisitor<Void, CurrentContext> {
 
     @Override
     public Void classDecl(ClassDecl ast, CurrentContext arg) {
-        ClassSymbol classSymbol = new ClassSymbol(ast);
-        CurrentContext context = new CurrentContext(classSymbol);
+        CurrentContext context = new CurrentContext(ast.sym);
 
         for (VarDecl varDecl : ast.fields()) {
-            if (classSymbol.fields.containsKey(varDecl.name)) {
+            if (ast.sym.fields.containsKey(varDecl.name)) {
                 throw new SemanticFailure(SemanticFailure.Cause.DOUBLE_DECLARATION);
             }
             visit(varDecl, context);
-            classSymbol.fields.put(varDecl.name, varDecl.sym);
+            ast.sym.fields.put(varDecl.name, varDecl.sym);
         }
 
         for (MethodDecl methodDecl : ast.methods()) {
-            if (classSymbol.methods.containsKey(methodDecl.name)) {
+            if (ast.sym.methods.containsKey(methodDecl.name)) {
                 throw new SemanticFailure(SemanticFailure.Cause.DOUBLE_DECLARATION);
             }
             visit(methodDecl, context);
-            classSymbol.methods.put(methodDecl.name, methodDecl.sym);
+            ast.sym.methods.put(methodDecl.name, methodDecl.sym);
         }
-        ast.sym = classSymbol;
+
         return null;
     }
 
     @Override
     public Void methodDecl(MethodDecl ast, CurrentContext arg) {
+        /* namespace_0: class
+         * namespace_1: field
+         * namespace_2: method
+         * namespace_3: parameter and local
+         * shadowing is active with prio 3 to 0 and then this to all following superclasses
+         */
         MethodSymbol methodSymbol = new MethodSymbol(ast);
         CurrentContext context = new CurrentContext(arg, methodSymbol);
 
@@ -105,13 +115,22 @@ public class SemanticAnalyzer extends AstVisitor<Void, CurrentContext> {
             methodSymbol.parameters.put(name, new VariableSymbol(name, typeManager.stringToTypeSymbol(type), VariableSymbol.Kind.PARAM));
         }
 
-        for (Ast var : ast.decls().rwChildren()) {
+        for (Ast var : ast.decls().children()) {
             VarDecl decl = (VarDecl) var;
             if (methodSymbol.parameters.containsKey(decl.name) || methodSymbol.locals.containsKey(decl.name)) {
                 throw new SemanticFailure(SemanticFailure.Cause.DOUBLE_DECLARATION);
             }
             visit(decl, context);
             methodSymbol.locals.put(decl.name, decl.sym);
+        }
+
+        ClassSymbol current = arg.getClassSymbol();
+        while(current != ClassSymbol.objectType){
+            if (current.methods.containsKey(ast.name) && (
+                    (current.methods.get(ast.name).returnType != methodSymbol.returnType) ||
+                    (current.methods.get(ast.name).parameters.equals(methodSymbol.parameters)))){
+                throw new SemanticFailure(SemanticFailure.Cause.INVALID_OVERRIDE);
+            }
         }
 
         ast.sym = methodSymbol;
@@ -121,7 +140,7 @@ public class SemanticAnalyzer extends AstVisitor<Void, CurrentContext> {
     @Override
     public Void varDecl(VarDecl ast, CurrentContext arg) {
         VariableSymbol variableSymbol;
-        if (arg.methodSymbol == null) {
+        if (arg.getMethodSymbol() == null) {
             variableSymbol = new VariableSymbol(ast.name, typeManager.stringToTypeSymbol(ast.type), VariableSymbol.Kind.FIELD);
         } else {
             variableSymbol = new VariableSymbol(ast.name, typeManager.stringToTypeSymbol(ast.type), VariableSymbol.Kind.LOCAL);
@@ -130,6 +149,5 @@ public class SemanticAnalyzer extends AstVisitor<Void, CurrentContext> {
         ast.sym = variableSymbol;
         return null;
     }
-
 
 }

@@ -47,9 +47,20 @@ public class TypeManager {
      * @throws SemanticFailure with cause TYPE_ERROR
      */
     public boolean isAssignable(TypeSymbol variable, TypeSymbol expr) throws SemanticFailure {
+
+        if(variable.equals(ClassSymbol.nullType) || expr.equals(ClassSymbol.nullType)){
+            return true;
+        }
+
         if (variable instanceof PrimitiveTypeSymbol) {
             if (expr instanceof PrimitiveTypeSymbol) {
-                return true; //todo: chönnd all primitive types vonenand erbe?
+                if ((variable.equals(PrimitiveTypeSymbol.booleanType) && !expr.equals(PrimitiveTypeSymbol.booleanType)) ||
+                    (variable.equals(PrimitiveTypeSymbol.intType) && !expr.equals(PrimitiveTypeSymbol.intType)) ||
+                    (variable.equals(PrimitiveTypeSymbol.voidType) && ! expr.equals(PrimitiveTypeSymbol.voidType))
+                    ){
+                    throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
+                }
+                //return true; // no casts between primitive types
             } else {
                 throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
             }
@@ -72,8 +83,18 @@ public class TypeManager {
         throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
     }
 
+    public ClassSymbol getClassSymbol(String name){
+        if(!classes.containsKey(name)){
+            if (name.equals("Main")){
+                throw new SemanticFailure(SemanticFailure.Cause.INVALID_START_POINT);
+            }
+            throw new SemanticFailure(SemanticFailure.Cause.NO_SUCH_TYPE);
+        }
+        return classes.get(name);
+    }
+
     /**
-     * Get a method of a class
+     * Get a method of a class, also checking for inheritance
      *
      * @param name     The name of the method
      * @param receiver The receiver object symbol on which the method should be executed.
@@ -82,13 +103,13 @@ public class TypeManager {
      *                         found.
      */
     public MethodSymbol getMethod(String name, TypeSymbol receiver) throws SemanticFailure {
-        if (receiver instanceof PrimitiveTypeSymbol) {
+        if (receiver instanceof PrimitiveTypeSymbol || receiver instanceof ArrayTypeSymbol) {
             throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
         }
 
         ClassSymbol classSymbol = (ClassSymbol) receiver;
 
-        if (!classes.containsValue(receiver)) {
+        if (!classes.containsKey(receiver.name)) {
             throw new SemanticFailure(SemanticFailure.Cause.NO_SUCH_TYPE);
         }
 
@@ -100,7 +121,7 @@ public class TypeManager {
 
         }
 
-        throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
+        throw new SemanticFailure(SemanticFailure.Cause.NO_SUCH_METHOD);
 
     }
 
@@ -114,7 +135,6 @@ public class TypeManager {
      */
     public TypeSymbol stringToTypeSymbol(String typeName) throws SemanticFailure {
         TypeSymbol type;
-
         boolean isArray = false;
 
         if (typeName.endsWith("[]")) {
