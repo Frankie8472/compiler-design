@@ -284,7 +284,7 @@ public class SemanticChecker extends AstVisitor<Void, CurrentContext> {
 
     @Override
     public Void unaryOp(Ast.UnaryOp ast, CurrentContext arg) {
-        visit(ast.arg(), null);
+        visit(ast.arg(), arg);
         switch(ast.operator){
             case U_PLUS:
             case U_MINUS:
