@@ -104,9 +104,12 @@ public abstract class Symbol {
 		public final Map<String, VariableSymbol> locals =
 			new HashMap<String, VariableSymbol>();
 		//Changed to use Map
-		public final Map<String, VariableSymbol> parameters =
-			new HashMap<>();
-		
+		//public final Map<String, VariableSymbol> parameters =
+		//	new HashMap<>();
+
+		public final List<VariableSymbol> parameters =
+				new ArrayList<>();
+
 		public TypeSymbol returnType;
 		
 		public MethodSymbol(Ast.MethodDecl ast) {

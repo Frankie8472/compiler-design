@@ -105,17 +105,27 @@ public class SemanticAnalyzer extends AstVisitor<Void, CurrentContext> {
         for (int i = 0; i < ast.argumentNames.size(); i++) {
             String name = ast.argumentNames.get(i);
             String type = ast.argumentTypes.get(i);
-            if (methodSymbol.parameters.containsKey(name)) {
-                throw new SemanticFailure(SemanticFailure.Cause.DOUBLE_DECLARATION);
+            for(VariableSymbol sym : methodSymbol.parameters){
+                if(sym.name.equals(name)){
+                    throw new SemanticFailure(SemanticFailure.Cause.DOUBLE_DECLARATION);
+                }
             }
-            methodSymbol.parameters.put(name, new VariableSymbol(name, typeManager.stringToTypeSymbol(type), VariableSymbol.Kind.PARAM));
+            methodSymbol.parameters.add(new VariableSymbol(name, typeManager.stringToTypeSymbol(type), VariableSymbol.Kind.PARAM));
         }
 
         for (Ast var : ast.decls().children()) {
             VarDecl decl = (VarDecl) var;
-            if (methodSymbol.parameters.containsKey(decl.name) || methodSymbol.locals.containsKey(decl.name)) {
+
+            if (methodSymbol.locals.containsKey(decl.name)){
                 throw new SemanticFailure(SemanticFailure.Cause.DOUBLE_DECLARATION);
             }
+
+            for(VariableSymbol sym : methodSymbol.parameters){
+                if(sym.name.equals(decl.name)){
+                    throw new SemanticFailure(SemanticFailure.Cause.DOUBLE_DECLARATION);
+                }
+            }
+
             visit(decl, context);
             methodSymbol.locals.put(decl.name, decl.sym);
         }

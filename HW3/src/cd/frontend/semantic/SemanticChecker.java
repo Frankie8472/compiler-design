@@ -3,6 +3,7 @@ package cd.frontend.semantic;
 import cd.ir.Ast;
 import cd.ir.Ast.ClassDecl;
 import cd.ir.AstVisitor;
+import cd.ir.Symbol;
 import cd.ir.Symbol.TypeSymbol;
 import cd.ir.Symbol.ClassSymbol;
 import cd.ir.Symbol.PrimitiveTypeSymbol;
@@ -87,7 +88,7 @@ public class SemanticChecker extends AstVisitor<Void, CurrentContext> {
         if (methodSymbol.parameters.size() != ast.argumentsWithoutReceiver().size()) {
             throw new SemanticFailure(SemanticFailure.Cause.WRONG_NUMBER_OF_ARGUMENTS);
         }
-
+/*
         for (int i = 0; i < methodSymbol.parameters.size(); i++) {
             TypeSymbol should_be_symbol = methodSymbol.parameters.get(i).type;
             TypeSymbol is_symbol = ast.argumentsWithoutReceiver().get(i).type;
@@ -95,7 +96,15 @@ public class SemanticChecker extends AstVisitor<Void, CurrentContext> {
                 throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
             }
         }//todo: fix acces on parameters... get(i) does not the job
-
+*/
+        for (int i = 0; i < methodSymbol.parameters.size(); i++) {
+            TypeSymbol is_symbol = ast.argumentsWithoutReceiver().get(i).type;
+            TypeSymbol should_be_symbol = methodSymbol.parameters.get(i).type;
+            if (!typeManager.isAssignable(should_be_symbol, is_symbol)) {
+                throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
+            }
+        }
+        // todo: is a copy of todo
         return null;
     }
 
@@ -122,7 +131,7 @@ public class SemanticChecker extends AstVisitor<Void, CurrentContext> {
 
     @Override
     public Void builtInWriteln(Ast.BuiltInWriteln ast, CurrentContext arg) {
-        if (ast.children() != null) {
+        if (ast.children().size() != 0) {
             throw new SemanticFailure(SemanticFailure.Cause.WRONG_NUMBER_OF_ARGUMENTS);
         }
         return null;
@@ -267,7 +276,7 @@ public class SemanticChecker extends AstVisitor<Void, CurrentContext> {
     @Override
     public Void builtInRead(Ast.BuiltInRead ast, CurrentContext arg) {
         ast.type = PrimitiveTypeSymbol.intType;
-        if (ast.children() != null) {
+        if (ast.children().size() != 0) {
             throw new SemanticFailure(SemanticFailure.Cause.WRONG_NUMBER_OF_ARGUMENTS);
         }
         return null;
@@ -302,10 +311,14 @@ public class SemanticChecker extends AstVisitor<Void, CurrentContext> {
         if (arg.getMethodSymbol().locals.containsKey(ast.name)) {
             ast.type = arg.getMethodSymbol().locals.get(ast.name).type;
             return null;
-        } else if (arg.getMethodSymbol().parameters.containsKey(ast.name)) {
-            ast.type = arg.getMethodSymbol().parameters.get(ast.name).type;
-            return null;
         } else {
+            for(Symbol.VariableSymbol symbol : arg.getMethodSymbol().parameters){
+                if (symbol.name.equals(ast.name)){
+                    ast.type = symbol.type;
+                    return null;
+                }
+            }
+
             ClassSymbol current = arg.getClassSymbol();
             while (current != ClassSymbol.objectType){
                 if (current.fields.containsKey(ast.name)){
