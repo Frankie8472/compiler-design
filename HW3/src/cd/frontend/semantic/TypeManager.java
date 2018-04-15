@@ -39,6 +39,15 @@ public class TypeManager {
     }
 
     /**
+     * Checks if used type exists/was initialized
+     * @param typeName name of the new type
+     * @return true if type exists, otherwise false
+     */
+    public Boolean isAvailableType(String typeName){
+        return classes.containsKey(typeName);
+    }
+
+    /**
      * Checks whether a type is assignable to another.
      *
      * @param variable Type it should be
@@ -60,7 +69,7 @@ public class TypeManager {
                     ){
                     throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
                 }
-                //return true; // no casts between primitive types
+                return true; // no casts between primitive types
             } else {
                 throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
             }

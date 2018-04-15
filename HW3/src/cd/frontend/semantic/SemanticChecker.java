@@ -1,14 +1,11 @@
 package cd.frontend.semantic;
 
 import cd.ir.Ast;
-import cd.ir.Ast.Expr;
 import cd.ir.Ast.ClassDecl;
 import cd.ir.AstVisitor;
-import cd.ir.Symbol;
 import cd.ir.Symbol.TypeSymbol;
 import cd.ir.Symbol.ClassSymbol;
 import cd.ir.Symbol.PrimitiveTypeSymbol;
-import cd.ir.Symbol.VariableSymbol;
 import cd.ir.Symbol.ArrayTypeSymbol;
 import cd.ir.Symbol.MethodSymbol;
 
@@ -97,7 +94,7 @@ public class SemanticChecker extends AstVisitor<Void, CurrentContext> {
             if (!typeManager.isAssignable(should_be_symbol, is_symbol)) {
                 throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
             }
-        }
+        }//todo: fix acces on parameters... get(i) does not the job
 
         return null;
     }
@@ -133,10 +130,38 @@ public class SemanticChecker extends AstVisitor<Void, CurrentContext> {
 
     @Override
     public Void ifElse(Ast.IfElse ast, CurrentContext arg) {
-        arg.setInsideIfStmt(true);
-        arg.setIsThereAnIfStmt(true);
-        visitChildren(ast, arg);
-        arg.setInsideIfStmt();
+
+        if(ast.condition() != null){
+            visit(ast.condition(), arg);
+        }
+
+        if(arg.getCorrectReturn()){
+
+            if(ast.then() != null){
+                visit(ast.then(), arg);
+            }
+
+            if(ast.otherwise() != null) {
+                visit(ast.otherwise(), arg);
+            }
+
+        } else {
+
+            if(ast.then() != null){
+                visit(ast.then(), arg);
+            }
+
+            if(arg.getCorrectReturn() && ast.otherwise() != null){
+                arg.setCorrectReturn(false);
+                visit(ast.otherwise(), arg);
+                arg.setCorrectReturn(arg.getCorrectReturn());
+            } else if(ast.otherwise() != null){
+                visit(ast.otherwise(), arg);
+                arg.setCorrectReturn(false);
+            }
+        }
+
+
         if (!typeManager.isAssignable(PrimitiveTypeSymbol.booleanType, ast.condition().type)){
             throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
         }
@@ -145,6 +170,9 @@ public class SemanticChecker extends AstVisitor<Void, CurrentContext> {
 
     @Override
     public Void returnStmt(Ast.ReturnStmt ast, CurrentContext arg) {
+
+        arg.setCorrectReturn(true);
+
         visitChildren(ast, arg);
         if (arg.getMethodSymbol().returnType.equals(PrimitiveTypeSymbol.voidType)){
             throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
@@ -337,7 +365,7 @@ public class SemanticChecker extends AstVisitor<Void, CurrentContext> {
 
     @Override
     public Void newObject(Ast.NewObject ast, CurrentContext arg) {
-        if(!typeManager.getTypes().contains(new ClassSymbol(ast.typeName))){
+        if(!typeManager.isAvailableType(ast.typeName)){
             throw new SemanticFailure(SemanticFailure.Cause.NO_SUCH_TYPE);
         }
         ast.type = typeManager.getClassSymbol(ast.typeName);
