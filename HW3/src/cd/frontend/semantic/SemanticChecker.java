@@ -57,7 +57,7 @@ public class SemanticChecker extends AstVisitor<Void, CurrentContext> {
                     ret = true;
                     return null;
                 } else if(ex instanceof Ast.IfElse){
-                    if(((Ast.IfElse) ex).)
+//                    if(((Ast.IfElse) ex).)
                 }
             }
         }
