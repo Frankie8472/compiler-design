@@ -49,17 +49,13 @@ public class SemanticChecker extends AstVisitor<Void, CurrentContext> {
 
     @Override
     public Void methodDecl(Ast.MethodDecl ast, CurrentContext arg) {
-        visitChildren(ast, new CurrentContext(arg, ast.sym));
-        if(!ast.sym.equals(PrimitiveTypeSymbol.voidType)) {
-            boolean ret = false;
-            for (Ast ex : ast.body().children()) {
-                if(ex instanceof Ast.ReturnStmt){
-                    ret = true;
-                    return null;
-                } else if(ex instanceof Ast.IfElse){
-//                    if(((Ast.IfElse) ex).)
-                }
-            }
+        CurrentContext current = new CurrentContext(arg, ast.sym);
+        visitChildren(ast, current);
+        if((ast.returnType.equals("void") && current.getCorrectReturn()) ||
+           (!ast.returnType.equals("void") && !current.getCorrectReturn())) {
+            throw new SemanticFailure(SemanticFailure.Cause.MISSING_RETURN);
+            //todo: not sure if "if void, no return stmt" is necessary!
+
         }
 
         return null;
@@ -137,7 +133,10 @@ public class SemanticChecker extends AstVisitor<Void, CurrentContext> {
 
     @Override
     public Void ifElse(Ast.IfElse ast, CurrentContext arg) {
+        arg.setInsideIfStmt(true);
+        arg.setIsThereAnIfStmt(true);
         visitChildren(ast, arg);
+        arg.setInsideIfStmt();
         if (!typeManager.isAssignable(PrimitiveTypeSymbol.booleanType, ast.condition().type)){
             throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
         }
