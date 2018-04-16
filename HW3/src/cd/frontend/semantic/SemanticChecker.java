@@ -49,13 +49,9 @@ public class SemanticChecker extends AstVisitor<Void, CurrentContext> {
     public Void methodDecl(Ast.MethodDecl ast, CurrentContext arg) {
         CurrentContext current = new CurrentContext(arg, ast.sym);
         visitChildren(ast, current);
-        if((ast.returnType.equals("void") && current.getCorrectReturn()) ||
-           (!ast.returnType.equals("void") && !current.getCorrectReturn())) {
+        if(current.getCorrectReturn()){
             throw new SemanticFailure(SemanticFailure.Cause.MISSING_RETURN);
-            //todo: not sure if "if void, no return stmt" is necessary!
-
         }
-
         return null;
     }
 
@@ -175,11 +171,12 @@ public class SemanticChecker extends AstVisitor<Void, CurrentContext> {
         arg.setCorrectReturn(true);
 
         visitChildren(ast, arg);
-        if (arg.getMethodSymbol().returnType.equals(PrimitiveTypeSymbol.voidType)){
+        if ((arg.getMethodSymbol().returnType.equals(PrimitiveTypeSymbol.voidType)) &&
+            (ast.children().size() != 0)){
             throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
         }
 
-        if (!typeManager.isAssignable(arg.getMethodSymbol().returnType, ast.arg().type)){
+        if ((ast.children().size() != 0) && !typeManager.isAssignable(arg.getMethodSymbol().returnType, ast.arg().type)){
             throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
         }
         return null;
