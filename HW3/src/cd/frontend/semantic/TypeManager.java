@@ -40,10 +40,11 @@ public class TypeManager {
 
     /**
      * Checks if used type exists/was initialized
+     *
      * @param typeName name of the new type
      * @return true if type exists, otherwise false
      */
-    public Boolean isAvailableType(String typeName){
+    public Boolean isAvailableType(String typeName) {
         return classes.containsKey(typeName);
     }
 
@@ -57,16 +58,16 @@ public class TypeManager {
      */
     public boolean isAssignable(TypeSymbol variable, TypeSymbol expr) throws SemanticFailure {
 
-        if(variable.equals(ClassSymbol.nullType) || expr.equals(ClassSymbol.nullType)){
+        if (variable.equals(ClassSymbol.nullType) || expr.equals(ClassSymbol.nullType)) {
             return true;
         }
 
         if (variable instanceof PrimitiveTypeSymbol) {
             if (expr instanceof PrimitiveTypeSymbol) {
                 if ((variable.equals(PrimitiveTypeSymbol.booleanType) && !expr.equals(PrimitiveTypeSymbol.booleanType)) ||
-                    (variable.equals(PrimitiveTypeSymbol.intType) && !expr.equals(PrimitiveTypeSymbol.intType)) ||
-                    (variable.equals(PrimitiveTypeSymbol.voidType) && ! expr.equals(PrimitiveTypeSymbol.voidType))
-                    ){
+                        (variable.equals(PrimitiveTypeSymbol.intType) && !expr.equals(PrimitiveTypeSymbol.intType)) ||
+                        (variable.equals(PrimitiveTypeSymbol.voidType) && !expr.equals(PrimitiveTypeSymbol.voidType))
+                        ) {
                     throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
                 }
                 return true; // no casts between primitive types
@@ -92,9 +93,9 @@ public class TypeManager {
         throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
     }
 
-    public ClassSymbol getClassSymbol(String name){
-        if(!classes.containsKey(name)){
-            if (name.equals("Main")){
+    public ClassSymbol getClassSymbol(String name) {
+        if (!classes.containsKey(name)) {
+            if (name.equals("Main")) {
                 throw new SemanticFailure(SemanticFailure.Cause.INVALID_START_POINT);
             }
             throw new SemanticFailure(SemanticFailure.Cause.NO_SUCH_TYPE);

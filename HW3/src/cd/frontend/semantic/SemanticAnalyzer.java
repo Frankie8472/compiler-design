@@ -62,6 +62,7 @@ public class SemanticAnalyzer extends AstVisitor<Void, CurrentContext> {
             visit(decl, null);
         }
 
+
         SemanticChecker checker = new SemanticChecker(typeManager);
         checker.check(classDecls);
     }
@@ -105,8 +106,8 @@ public class SemanticAnalyzer extends AstVisitor<Void, CurrentContext> {
         for (int i = 0; i < ast.argumentNames.size(); i++) {
             String name = ast.argumentNames.get(i);
             String type = ast.argumentTypes.get(i);
-            for(VariableSymbol sym : methodSymbol.parameters){
-                if(sym.name.equals(name)){
+            for (VariableSymbol sym : methodSymbol.parameters) {
+                if (sym.name.equals(name)) {
                     throw new SemanticFailure(SemanticFailure.Cause.DOUBLE_DECLARATION);
                 }
             }
@@ -116,12 +117,12 @@ public class SemanticAnalyzer extends AstVisitor<Void, CurrentContext> {
         for (Ast var : ast.decls().children()) {
             VarDecl decl = (VarDecl) var;
 
-            if (methodSymbol.locals.containsKey(decl.name)){
+            if (methodSymbol.locals.containsKey(decl.name)) {
                 throw new SemanticFailure(SemanticFailure.Cause.DOUBLE_DECLARATION);
             }
 
-            for(VariableSymbol sym : methodSymbol.parameters){
-                if(sym.name.equals(decl.name)){
+            for (VariableSymbol sym : methodSymbol.parameters) {
+                if (sym.name.equals(decl.name)) {
                     throw new SemanticFailure(SemanticFailure.Cause.DOUBLE_DECLARATION);
                 }
             }
@@ -131,10 +132,10 @@ public class SemanticAnalyzer extends AstVisitor<Void, CurrentContext> {
         }
 
         ClassSymbol current = arg.getClassSymbol();
-        while(current != ClassSymbol.objectType){
+        while (current != ClassSymbol.objectType) {
             if (current.methods.containsKey(ast.name) && (
                     (current.methods.get(ast.name).returnType != methodSymbol.returnType) ||
-                    (current.methods.get(ast.name).parameters.equals(methodSymbol.parameters)))){
+                            (current.methods.get(ast.name).parameters.equals(methodSymbol.parameters)))) {
                 throw new SemanticFailure(SemanticFailure.Cause.INVALID_OVERRIDE);
             }
             current = current.superClass;
