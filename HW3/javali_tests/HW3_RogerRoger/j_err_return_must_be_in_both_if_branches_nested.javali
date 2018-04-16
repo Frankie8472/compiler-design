@@ -1,0 +1,92 @@
+class Main{
+    void main(){
+        boolean b;
+        if(b){
+            return;
+        } else {
+            return;
+        }
+    }
+}
+
+class A{
+    int foo(){
+        int i;
+        boolean b;
+        if(b){
+            return i;
+        } else {
+            return i;
+        }
+    }
+}
+
+class B{
+    int foo(){
+            int i;
+            boolean b;
+            if(b){
+                if(b){
+                    return i;
+                } else {
+                    return i;
+                }
+            } else {
+                if(b){
+                    if(b){
+                        return i;
+                    } else {
+                        if(b){
+                            return i;
+                        } else {
+                            //missing return stmt
+                        }
+                    }
+                } else {
+                    return i;
+                }
+            }
+        }
+}
+
+class C{
+    int foo(){
+        int i;
+        boolean b;
+        if(b){
+            //missing return stmt
+        } else {
+            return i;
+        }
+        return i; // fixed
+    }
+}
+
+class D{
+    int foo(){
+            int i;
+            boolean b;
+            if(b){
+                if(b){
+                    return i;
+                } else {
+                    return i;
+                }
+            } else {
+                if(b){
+                    if(b){
+                        return i;
+                    } else {
+                        if(b){
+                            return i;
+                        } else {
+                         // missing return
+                        }
+                    }
+                } else {
+                    return i;
+                }
+            }
+            return i; // fixed
+        }
+}

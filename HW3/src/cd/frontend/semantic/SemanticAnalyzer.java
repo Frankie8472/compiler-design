@@ -28,13 +28,8 @@ public class SemanticAnalyzer extends AstVisitor<Void, CurrentContext> {
 
         // Transform classes to symbols
         for (ClassDecl decl : classDecls) {
-//            if(decl.name.equals("Object")){
-//                throw new SemanticFailure(SemanticFailure.Cause.OBJECT_CLASS_DEFINED);
-//            }  TODO: Done in type manager
             ClassSymbol classSymbol = new ClassSymbol(decl);
             typeManager.addType(classSymbol);
-            //todo: chunnt double declaration dur de parser dure?
-            //TODO: Answer: JA!
             decl.sym = classSymbol;
         }
 
@@ -143,7 +138,10 @@ public class SemanticAnalyzer extends AstVisitor<Void, CurrentContext> {
                         throw new SemanticFailure(SemanticFailure.Cause.INVALID_OVERRIDE);
                     }
                 }
+                break;
             }
+
+
             current = current.superClass;
         }
 

@@ -1,0 +1,53 @@
+class Main{
+    void main(){
+        boolean b;
+        while(b){
+            //missing return stmt, not necessary
+        }
+        while(true){
+            return;
+        }
+
+        while(false){
+            return;
+        }
+    }
+}
+
+class A{
+    int foo(){
+        int i;
+        boolean b;
+        while(b){
+            while(b){
+                return i; // never reached, but we do not check
+            }
+        }
+    }
+}
+
+/*
+class B{
+    int foo(){
+        int i;
+        boolean b;
+        while(b){
+            while(true){
+            }
+            return i;
+        }
+    }
+}
+*/
+/*
+class C{
+     int foo(){
+         int i;
+         boolean b;
+         while(true){
+             while(true){
+             }
+             return i;  //never reached but we do not check
+         }
+     }
+ }*/

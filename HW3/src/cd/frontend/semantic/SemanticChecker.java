@@ -197,9 +197,17 @@ public class SemanticChecker extends AstVisitor<Void, CurrentContext> {
 
     @Override
     public Void whileLoop(Ast.WhileLoop ast, CurrentContext arg) {
-        visitChildren(ast, arg);
-        if (!typeManager.isAssignable(PrimitiveTypeSymbol.booleanType, ast.condition().type)) {
-            throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
+        if (arg.getCorrectReturn()) {
+            visitChildren(ast, arg);
+            if (!typeManager.isAssignable(PrimitiveTypeSymbol.booleanType, ast.condition().type)) {
+                throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
+            }
+        } else {
+            visitChildren(ast, arg);
+            if (!typeManager.isAssignable(PrimitiveTypeSymbol.booleanType, ast.condition().type)) {
+                throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
+            }
+            arg.setCorrectReturn(false);
         }
         return null;
     }

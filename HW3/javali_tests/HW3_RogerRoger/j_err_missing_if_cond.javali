@@ -1,0 +1,10 @@
+class Main{
+    void main(){
+        boolean b;
+        if(){
+            //missing return stmt, not necessary
+        } else {
+            return;
+        }
+    }
+}

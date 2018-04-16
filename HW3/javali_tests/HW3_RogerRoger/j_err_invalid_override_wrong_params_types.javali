@@ -28,17 +28,17 @@ class Main {
 
 }
 
-class A extends B {
-
-    void method(int a, int b) {
-        write(a);
-    }
-
-}
 
 class B {
 
     void method(int a, boolean b) {
+        write(a);
+    }
+
+}
+class A extends B {
+
+    void method(int a, int b) {
         write(a);
     }
 
