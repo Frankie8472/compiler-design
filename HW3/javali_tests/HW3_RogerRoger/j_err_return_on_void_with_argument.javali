@@ -1,5 +1,5 @@
 class Main{
     void main(){
-        writeln(1);
+        return 5;
     }
 }

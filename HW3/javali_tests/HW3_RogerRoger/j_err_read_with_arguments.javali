@@ -1,6 +1,0 @@
-class Main{
-    void main(){
-        int a;
-        a = read(1337, 42, a);
-    }
-}

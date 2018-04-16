@@ -1,0 +1,12 @@
+class Main{
+    void main(){
+        foo();
+    }
+
+    int foo(){
+        if(true){
+            return 7;
+        }
+
+    }
+}

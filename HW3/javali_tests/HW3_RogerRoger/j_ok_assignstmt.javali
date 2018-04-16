@@ -35,12 +35,16 @@ class B extends A{
     }
 
     C deepfathom(){
-        return new C();
+        C c;
+        c = new C();
+        return c;
     }
 }
 
 class C{
     int wakanda(){
-        return 5;
+        int b;
+        b = read();
+        return b;
     }
 }
