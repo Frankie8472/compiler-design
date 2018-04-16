@@ -1,0 +1,15 @@
+class Main{
+    void main(){
+        Object o;
+        A a;
+        A[] arr;
+
+        o = a;
+        o = o;
+        o = arr;
+    }
+}
+
+class A{
+
+}

@@ -58,8 +58,14 @@ public class TypeManager {
      */
     public boolean isAssignable(TypeSymbol variable, TypeSymbol expr) throws SemanticFailure {
 
-        if (variable.equals(ClassSymbol.nullType) || expr.equals(ClassSymbol.nullType)) {
-            return true;
+        if (variable.equals(ClassSymbol.nullType)) {
+            throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
+        }
+        if (expr.equals(ClassSymbol.nullType)) {
+            if (variable.isReferenceType()) {
+                return true;
+            }
+            throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
         }
 
         if (variable instanceof PrimitiveTypeSymbol) {
@@ -80,19 +86,24 @@ public class TypeManager {
             throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
         }
 
-        if (variable instanceof ArrayTypeSymbol){
-            if(expr instanceof ArrayTypeSymbol){
-                if(((ArrayTypeSymbol) variable).elementType == ((ArrayTypeSymbol) expr).elementType){
+        if (variable == ClassSymbol.objectType) {
+            if (expr.isReferenceType()) {
+                return true;
+            } else {
+                throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
+            }
+        }
+
+        if (variable instanceof ArrayTypeSymbol) {
+            if (expr instanceof ArrayTypeSymbol) {
+                if (((ArrayTypeSymbol) variable).elementType == ((ArrayTypeSymbol) expr).elementType) {
                     return true;
                 }
             }
             throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
         }
-        if(expr instanceof ArrayTypeSymbol){
-            if(variable != ClassSymbol.objectType) {
-                throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
-            }
-            return true;
+        if (expr instanceof ArrayTypeSymbol) {
+            throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
         }
 
         ClassSymbol assignedTo = (ClassSymbol) variable;

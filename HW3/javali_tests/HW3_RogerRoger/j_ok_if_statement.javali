@@ -1,0 +1,45 @@
+class Main{
+    void main(){
+        A a;
+        int b;
+        boolean d;
+
+        a = new A();
+        b = 4;
+        d = true;
+
+        if(true){
+
+        } else {
+            return;
+        }
+
+        if(false){
+            return;
+        }
+
+        if(d){
+
+        }
+        if(b < 5 && b > 3 || d && a.getBool()){
+            if(a.myField == 5 || b > a.randomNumber(1)){
+                return;
+            }
+        }
+
+        if( b != a.myField){
+            return;
+        }
+    }
+}
+
+class A{
+    int myField;
+
+    int randomNumber(int random){
+        return 4 + random;
+    }
+    boolean getBool(){
+        return false;
+    }
+}

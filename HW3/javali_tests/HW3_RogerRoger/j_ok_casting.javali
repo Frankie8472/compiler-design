@@ -1,0 +1,29 @@
+class Main{
+    void main(){
+        A a;
+        B b;
+        C c;
+        D d;
+
+        a = (A) b;
+        b = (B) a;
+        c = (C) d;
+        d = (D) c;
+    }
+}
+
+class A{
+
+}
+
+class B extends A{
+
+}
+
+class C extends A{
+
+}
+
+class D extends C{
+
+}

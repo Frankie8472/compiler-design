@@ -1,0 +1,9 @@
+class Main{
+    void main(){
+        plzDoNotAssignMe() = 1;
+    }
+
+    int plzDoNotAssignMe(){
+        return -1;
+    }
+}

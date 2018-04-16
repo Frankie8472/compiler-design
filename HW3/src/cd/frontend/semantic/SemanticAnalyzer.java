@@ -42,7 +42,7 @@ public class SemanticAnalyzer extends AstVisitor<Void, CurrentContext> {
         for (ClassSymbol currentSymbol : typeManager.getTypes()) {
             List<ClassSymbol> foundClasses = new ArrayList<>();
 
-            while (currentSymbol.superClass != ClassSymbol.objectType) {
+            while (currentSymbol != ClassSymbol.objectType) {
                 if (foundClasses.contains(currentSymbol)) {
                     throw new SemanticFailure(SemanticFailure.Cause.CIRCULAR_INHERITANCE);
                 }
@@ -95,7 +95,6 @@ public class SemanticAnalyzer extends AstVisitor<Void, CurrentContext> {
          */
         MethodSymbol methodSymbol = new MethodSymbol(ast);
         CurrentContext context = new CurrentContext(arg, methodSymbol);
-        System.out.println(context.getClassSymbol().name);
         methodSymbol.returnType = typeManager.stringToTypeSymbol(ast.returnType);
 
         for (int i = 0; i < ast.argumentNames.size(); i++) {
@@ -125,26 +124,6 @@ public class SemanticAnalyzer extends AstVisitor<Void, CurrentContext> {
             visit(decl, context);
             methodSymbol.locals.put(decl.name, decl.sym);
         }
-
-        ClassSymbol current = arg.getClassSymbol();
-        while (current != ClassSymbol.objectType) {
-            if (current.methods.containsKey(ast.name)){
-                MethodSymbol method = current.methods.get(ast.name);
-                if((method.returnType != methodSymbol.returnType) || method.parameters.size() != methodSymbol.parameters.size()){
-                    throw new SemanticFailure(SemanticFailure.Cause.INVALID_OVERRIDE);
-                }
-                for(int i = 0; i < methodSymbol.parameters.size(); i++){
-                    if(method.parameters.get(i).type != methodSymbol.parameters.get(i).type){
-                        throw new SemanticFailure(SemanticFailure.Cause.INVALID_OVERRIDE);
-                    }
-                }
-                break;
-            }
-
-
-            current = current.superClass;
-        }
-
         ast.sym = methodSymbol;
         return null;
     }
