@@ -1,0 +1,7 @@
+class Base{
+    void main(){
+
+    }
+}
+class Main extends Base{
+}

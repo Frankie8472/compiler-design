@@ -1,0 +1,28 @@
+class Main {
+    void main() {
+    }
+    int fun(){
+        return 3;
+    }
+    Super sper(){
+        Super su;
+        su = new Super();
+        return su;
+    }
+    Super spass(){
+        Child su;
+        su = new Child();
+        return su;
+    }
+    Child hui(){
+        Child child;
+        child = new Child();
+        return child;
+    }
+}
+class Super{
+
+}
+
+class Child extends Super{
+}

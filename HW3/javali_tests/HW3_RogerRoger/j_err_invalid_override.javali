@@ -1,0 +1,17 @@
+class Main{
+    void main(){
+
+    }
+}
+
+class Base{
+    int fun(int a){
+        return 5;
+    }
+}
+
+class Sub extends Base{
+    void fun(){
+        return;
+    }
+}

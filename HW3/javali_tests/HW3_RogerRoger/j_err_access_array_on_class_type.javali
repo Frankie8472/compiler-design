@@ -1,0 +1,9 @@
+class Main{
+    void main(){
+        A a;
+        a[0] = 1;
+    }
+}
+class A{
+
+}

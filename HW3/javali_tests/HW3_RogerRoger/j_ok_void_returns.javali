@@ -1,0 +1,7 @@
+class Main{
+    void main(){
+        return;
+    }
+    void fun(){
+    }
+}
