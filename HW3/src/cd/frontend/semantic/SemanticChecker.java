@@ -49,7 +49,7 @@ public class SemanticChecker extends AstVisitor<Void, CurrentContext> {
     public Void methodDecl(Ast.MethodDecl ast, CurrentContext arg) {
         CurrentContext current = new CurrentContext(arg, ast.sym);
         visitChildren(ast, current);
-        if(current.getCorrectReturn()){
+        if(!current.getCorrectReturn() && !current.getMethodSymbol().returnType.equals(PrimitiveTypeSymbol.voidType)){
             throw new SemanticFailure(SemanticFailure.Cause.MISSING_RETURN);
         }
         return null;
