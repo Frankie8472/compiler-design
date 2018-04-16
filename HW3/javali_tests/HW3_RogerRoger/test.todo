@@ -13,7 +13,3 @@ Tests:
     while statement condition not boolean
     invalid operators
     read with arguments
-    unary operators
-    access nonexistent variables (parameter, local)
-    call nonexistent method
-    this tests

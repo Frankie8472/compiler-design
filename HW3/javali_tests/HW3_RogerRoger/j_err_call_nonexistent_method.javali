@@ -1,0 +1,12 @@
+class Main{
+    void main(){
+        A a;
+        a.fuu();
+    }
+}
+
+class A{
+    void foo(){
+        write("ulumulu");
+    }
+}

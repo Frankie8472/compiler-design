@@ -1,0 +1,16 @@
+class Main{
+    void main(){
+        A a;
+        B b;
+        boolean c;
+        c = a == b;
+    }
+}
+
+class A{
+
+}
+
+class B{
+
+}

@@ -1,0 +1,12 @@
+class Main{
+    void main(){
+        A a;
+        b.foo(6, true, 8, 1337);
+    }
+}
+
+class A{
+    void foo(int a, boolean b){
+        write("ulumulu");
+    }
+}
