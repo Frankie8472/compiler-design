@@ -1,7 +1,7 @@
 class Main{
     void main(){
         boolean b;
-        if(){
+        if(b){
             //missing return stmt, not necessary
         } else {
             return;

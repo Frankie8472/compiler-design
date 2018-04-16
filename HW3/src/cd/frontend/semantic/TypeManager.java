@@ -64,13 +64,13 @@ public class TypeManager {
     public boolean isAssignable(TypeSymbol variable, TypeSymbol expr, boolean throwException) throws SemanticFailure {
 
         if (variable.equals(ClassSymbol.nullType)) {
-            return throwExeptionIfNeeded(SemanticFailure.Cause.TYPE_ERROR, throwException);
+            return throwExceptionIfNeeded(SemanticFailure.Cause.TYPE_ERROR, throwException);
         }
         if (expr.equals(ClassSymbol.nullType)) {
             if (variable.isReferenceType()) {
                 return true;
             }
-            return throwExeptionIfNeeded(SemanticFailure.Cause.TYPE_ERROR, throwException);
+            return throwExceptionIfNeeded(SemanticFailure.Cause.TYPE_ERROR, throwException);
         }
 
         if (variable instanceof PrimitiveTypeSymbol) {
@@ -79,23 +79,23 @@ public class TypeManager {
                         (variable.equals(PrimitiveTypeSymbol.intType) && !expr.equals(PrimitiveTypeSymbol.intType)) ||
                         (variable.equals(PrimitiveTypeSymbol.voidType) && !expr.equals(PrimitiveTypeSymbol.voidType))
                         ) {
-                    return throwExeptionIfNeeded(SemanticFailure.Cause.TYPE_ERROR, throwException);
+                    return throwExceptionIfNeeded(SemanticFailure.Cause.TYPE_ERROR, throwException);
                 }
                 return true; // no casts between primitive types
             } else {
-                return throwExeptionIfNeeded(SemanticFailure.Cause.TYPE_ERROR, throwException);
+                return throwExceptionIfNeeded(SemanticFailure.Cause.TYPE_ERROR, throwException);
             }
         }
 
         if (expr instanceof PrimitiveTypeSymbol) {
-            return throwExeptionIfNeeded(SemanticFailure.Cause.TYPE_ERROR, throwException);
+            return throwExceptionIfNeeded(SemanticFailure.Cause.TYPE_ERROR, throwException);
         }
 
         if (variable == ClassSymbol.objectType) {
             if (expr.isReferenceType()) {
                 return true;
             } else {
-                return throwExeptionIfNeeded(SemanticFailure.Cause.TYPE_ERROR, throwException);
+                return throwExceptionIfNeeded(SemanticFailure.Cause.TYPE_ERROR, throwException);
             }
         }
 
@@ -105,10 +105,10 @@ public class TypeManager {
                     return true;
                 }
             }
-            return throwExeptionIfNeeded(SemanticFailure.Cause.TYPE_ERROR, throwException);
+            return throwExceptionIfNeeded(SemanticFailure.Cause.TYPE_ERROR, throwException);
         }
         if (expr instanceof ArrayTypeSymbol) {
-            return throwExeptionIfNeeded(SemanticFailure.Cause.TYPE_ERROR, throwException);
+            return throwExceptionIfNeeded(SemanticFailure.Cause.TYPE_ERROR, throwException);
         }
 
         ClassSymbol assignedTo = (ClassSymbol) variable;
@@ -121,27 +121,17 @@ public class TypeManager {
             assignedType = assignedType.superClass;
         }
 
-        return throwExeptionIfNeeded(SemanticFailure.Cause.TYPE_ERROR, throwException);
+        return throwExceptionIfNeeded(SemanticFailure.Cause.TYPE_ERROR, throwException);
     }
 
 
-    private boolean throwExeptionIfNeeded(SemanticFailure.Cause cause, boolean throwException){
+    private boolean throwExceptionIfNeeded(SemanticFailure.Cause cause, boolean throwException){
         if(throwException)
             throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
         else
             return false;
     }
 
-
-    public ClassSymbol getClassSymbol(String name) {
-        if (!classes.containsKey(name)) {
-            if (name.equals("Main")) {
-                throw new SemanticFailure(SemanticFailure.Cause.INVALID_START_POINT);
-            }
-            throw new SemanticFailure(SemanticFailure.Cause.NO_SUCH_TYPE);
-        }
-        return classes.get(name);
-    }
 
     /**
      * Get a method of a class, also checking for inheritance

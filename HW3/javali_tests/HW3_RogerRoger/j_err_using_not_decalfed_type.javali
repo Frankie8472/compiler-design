@@ -2,4 +2,5 @@ class Main{
     void main(){
         A a;
         a = new A();
+    }
 }

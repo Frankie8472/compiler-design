@@ -1,4 +1,4 @@
-class Main{
+/*class Main{
     void main(){
         A a;
         int b;
@@ -42,4 +42,39 @@ class A{
     boolean getBool(){
         return false;
     }
+}*/
+/* test various if statements that should be allowed */
+
+class Main {
+
+    void main() {
+        A a;
+        boolean b;
+        int i;
+
+        if (a == (B)a) {
+        }
+
+    }
+
+}
+
+class A extends B {
+
+    boolean fieldA;
+
+    int methodA() {
+        return 5;
+    }
+
+}
+
+class B {
+
+    int fieldB;
+
+    boolean methodB() {
+        return false;
+    }
+
 }

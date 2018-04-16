@@ -1,8 +1,25 @@
 class Main{
-    void class main(){
+    void main(){
+        Object o;
         A a;
         B b;
-        A[] c;
-        A[][]
+        Object[] oar;
+        A[] c, arr;
+
+        a = new A();
+        b = new B();
+        c = new A[3];
+        o = new Object();
+        oar = new Object[5];
+        o = oar;
+        oar[1] = o;
+        arr = new A[4];
     }
+}
+
+class A{
+}
+
+class B{
+
 }
