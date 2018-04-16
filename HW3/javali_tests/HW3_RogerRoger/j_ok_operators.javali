@@ -7,10 +7,11 @@ class Main{
         int[] arr;
         A[] Aarr;
 
-        a = b + C;
-        a = b - C;
-        a = b * C;
-        a = b / C;
+        a = b + c;
+        a = b - c
+        a = b * c;
+        a = b / c;
+        a = b % c;
         a = hui() - 5 * (bla.aNumber / 0x37);
         d = a > 4;
         d = a < 4;

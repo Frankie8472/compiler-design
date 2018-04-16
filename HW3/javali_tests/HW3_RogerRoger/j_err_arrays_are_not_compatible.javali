@@ -8,6 +8,6 @@ class Main{
 class X{
 
 }
-class Y{
+class Y extends X{
 
 }

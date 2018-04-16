@@ -1,0 +1,19 @@
+class Main {
+  void main() {
+  }
+}
+
+class A {
+    int myField;
+    A someA;
+}
+
+class Y extends A {
+    boolean myField;
+    A haha;
+
+    void fun(){
+        myField = 4;
+        haha = someA;
+    }
+}

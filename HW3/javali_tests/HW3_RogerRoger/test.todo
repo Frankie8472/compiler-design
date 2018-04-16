@@ -1,19 +1,4 @@
 Tests:
-    field inheritance declaration
-    shadowing
-    returnstatement tests
-    calls on non-callable types (classes, primitive types, array
-    method call wrong argument number
-    method call wrong argument types
-    invalid write statement
-    valid write statement
-    invalid writeln statement
-    valid writeln statement
+    return statement tests
     return statement if without else
-    while statement condition not boolean
     invalid operators
-    read with arguments
-    unary operators
-    access nonexistent variables (parameter, local)
-    call nonexistent method
-    this tests
