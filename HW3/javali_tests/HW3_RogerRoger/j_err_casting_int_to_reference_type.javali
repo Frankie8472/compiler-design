@@ -1,0 +1,12 @@
+class Main{
+    void main(){
+        int a;
+        A b;
+
+        b = (A) a;
+    }
+}
+
+class A{
+
+}

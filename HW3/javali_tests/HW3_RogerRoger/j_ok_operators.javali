@@ -26,6 +26,7 @@ class Main{
         Aarr[1] = null;
         Aarr[2] = new SubA();
         Aarr[3] = new A();
+        a = Arr[0];
 
     }
 

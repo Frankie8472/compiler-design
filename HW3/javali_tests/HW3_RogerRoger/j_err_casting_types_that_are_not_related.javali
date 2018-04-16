@@ -1,0 +1,15 @@
+class Main{
+    void main(){
+        A a;
+        B b;
+        a = (A) b;
+    }
+}
+
+class A{
+
+}
+
+class B{
+
+}
