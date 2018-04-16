@@ -1,0 +1,34 @@
+class Main{
+    void main(){
+        boolean b;
+        while(b){
+            //missing return stmt, not necessary
+        }
+        while(true){
+            return;
+        }
+
+        while(false){
+            return;
+        }
+    }
+}
+
+class A{
+
+    int h;
+    boolean boo;
+
+    int foo(){
+        int i;
+        boolean b;
+        this.h = i;
+        this.boo = b;
+        while(boo){
+            while(boo){
+                return i; // never reached, but we do not check
+            }
+        }
+        return h;
+    }
+}
