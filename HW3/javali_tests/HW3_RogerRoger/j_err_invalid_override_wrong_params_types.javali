@@ -1,0 +1,18 @@
+class Main{
+    void main(){
+        writeln();
+    }
+}
+
+class Base{
+    void fun(int a, boolean b){
+        write(a);
+    }
+}
+
+class Sub extends Base{
+    void fun(int a, int b){
+        write(a);
+    }
+}
+

@@ -100,7 +100,7 @@ public class SemanticAnalyzer extends AstVisitor<Void, CurrentContext> {
          */
         MethodSymbol methodSymbol = new MethodSymbol(ast);
         CurrentContext context = new CurrentContext(arg, methodSymbol);
-
+        System.out.println(context.getClassSymbol().name);
         methodSymbol.returnType = typeManager.stringToTypeSymbol(ast.returnType);
 
         for (int i = 0; i < ast.argumentNames.size(); i++) {
@@ -135,12 +135,6 @@ public class SemanticAnalyzer extends AstVisitor<Void, CurrentContext> {
         while (current != ClassSymbol.objectType) {
             if (current.methods.containsKey(ast.name)){
                 MethodSymbol method = current.methods.get(ast.name);
-                System.out.println(method.returnType);
-                System.out.println(methodSymbol.returnType);
-                System.out.println(method.parameters);
-                System.out.println(methodSymbol.parameters);
-                System.out.println(method.returnType != methodSymbol.returnType);
-                System.out.println(method.parameters.size() == methodSymbol.parameters.size());
                 if((method.returnType != methodSymbol.returnType) || method.parameters.size() != methodSymbol.parameters.size()){
                     throw new SemanticFailure(SemanticFailure.Cause.INVALID_OVERRIDE);
                 }
