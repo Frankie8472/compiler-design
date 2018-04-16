@@ -1,0 +1,10 @@
+class Main{
+    void main(){
+        Object a;
+        A[] b;
+        a = b;
+    }
+}
+class A{
+
+}

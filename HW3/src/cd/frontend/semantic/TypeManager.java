@@ -80,6 +80,21 @@ public class TypeManager {
             throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
         }
 
+        if (variable instanceof ArrayTypeSymbol){
+            if(expr instanceof ArrayTypeSymbol){
+                if(((ArrayTypeSymbol) variable).elementType == ((ArrayTypeSymbol) expr).elementType){
+                    return true;
+                }
+            }
+            throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
+        }
+        if(expr instanceof ArrayTypeSymbol){
+            if(variable != ClassSymbol.objectType) {
+                throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
+            }
+            return true;
+        }
+
         ClassSymbol assignedTo = (ClassSymbol) variable;
         ClassSymbol assignedType = (ClassSymbol) expr;
 

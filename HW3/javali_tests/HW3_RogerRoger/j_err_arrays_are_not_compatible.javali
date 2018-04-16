@@ -1,0 +1,13 @@
+class Main{
+    void main(){
+        X[] a;
+        Y[] y;
+        a = y;
+    }
+}
+class X{
+
+}
+class Y{
+
+}

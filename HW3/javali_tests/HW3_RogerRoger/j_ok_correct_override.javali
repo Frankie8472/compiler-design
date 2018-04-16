@@ -4,7 +4,7 @@ class Main {
 }
 
 class Base {
-   int fun(int a) {
+   int fun(int b) {
     return 4;
    }
 }

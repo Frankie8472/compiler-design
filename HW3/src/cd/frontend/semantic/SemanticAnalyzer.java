@@ -133,10 +133,22 @@ public class SemanticAnalyzer extends AstVisitor<Void, CurrentContext> {
 
         ClassSymbol current = arg.getClassSymbol();
         while (current != ClassSymbol.objectType) {
-            if (current.methods.containsKey(ast.name) && (
-                    (current.methods.get(ast.name).returnType != methodSymbol.returnType) ||
-                            (current.methods.get(ast.name).parameters.equals(methodSymbol.parameters)))) {
-                throw new SemanticFailure(SemanticFailure.Cause.INVALID_OVERRIDE);
+            if (current.methods.containsKey(ast.name)){
+                MethodSymbol method = current.methods.get(ast.name);
+                System.out.println(method.returnType);
+                System.out.println(methodSymbol.returnType);
+                System.out.println(method.parameters);
+                System.out.println(methodSymbol.parameters);
+                System.out.println(method.returnType != methodSymbol.returnType);
+                System.out.println(method.parameters.size() == methodSymbol.parameters.size());
+                if((method.returnType != methodSymbol.returnType) || method.parameters.size() != methodSymbol.parameters.size()){
+                    throw new SemanticFailure(SemanticFailure.Cause.INVALID_OVERRIDE);
+                }
+                for(int i = 0; i < methodSymbol.parameters.size(); i++){
+                    if(method.parameters.get(i).type != methodSymbol.parameters.get(i).type){
+                        throw new SemanticFailure(SemanticFailure.Cause.INVALID_OVERRIDE);
+                    }
+                }
             }
             current = current.superClass;
         }
