@@ -396,9 +396,8 @@ public class SemanticChecker extends AstVisitor<Void, CurrentContext> {
     public Void index(Ast.Index ast, CurrentContext arg) {
         // left array, right index
         visitChildren(ast, arg);
-
         if (!(ast.left().type instanceof ArrayTypeSymbol)) {
-            throw new SemanticFailure(SemanticFailure.Cause.NO_SUCH_VARIABLE);
+            throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
         }
 
         ast.type = ((ArrayTypeSymbol) ast.left().type).elementType;
