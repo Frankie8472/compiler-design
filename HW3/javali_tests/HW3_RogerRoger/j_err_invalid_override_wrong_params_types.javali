@@ -1,4 +1,4 @@
-class Main{
+/*class Main{
     void main(){
         writeln();
     }
@@ -16,3 +16,30 @@ class Sub extends Base{
     }
 }
 
+*/
+
+/* test that overriding methods with different parameter types are rejected */
+
+class Main {
+
+    void main() {
+        writeln();
+    }
+
+}
+
+class A extends B {
+
+    void method(int a, int b) {
+        write(a);
+    }
+
+}
+
+class B {
+
+    void method(int a, boolean b) {
+        write(a);
+    }
+
+}
