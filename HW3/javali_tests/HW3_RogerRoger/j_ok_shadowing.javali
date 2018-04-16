@@ -1,0 +1,11 @@
+class Main{
+    Main Main;
+    void main(){
+        Main Main;
+        Main = Main();
+    }
+    Main Main(Main Main){
+        Main = new Main();
+        return Main;
+    }
+}

@@ -1,0 +1,19 @@
+class Main{
+    int hui;
+    Main bla;
+    void main(){
+        write(1);
+        write(hui);
+        write(foo());
+        write(this.och().bla.hui);
+        write(1*45 % (234 + 234));
+    }
+
+    int foo(){
+        return 5;
+    }
+
+    Main och(int d){
+        return this.bla;
+    }
+}

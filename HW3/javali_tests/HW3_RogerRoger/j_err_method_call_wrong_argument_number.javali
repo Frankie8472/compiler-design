@@ -1,0 +1,9 @@
+class Main{
+    void main(){
+        foo(1,2);
+    }
+
+    void foo(int a, int b, int c, int d){
+
+    }
+}
