@@ -88,15 +88,7 @@ public class SemanticChecker extends AstVisitor<Void, CurrentContext> {
         if (methodSymbol.parameters.size() != ast.argumentsWithoutReceiver().size()) {
             throw new SemanticFailure(SemanticFailure.Cause.WRONG_NUMBER_OF_ARGUMENTS);
         }
-/*
-        for (int i = 0; i < methodSymbol.parameters.size(); i++) {
-            TypeSymbol should_be_symbol = methodSymbol.parameters.get(i).type;
-            TypeSymbol is_symbol = ast.argumentsWithoutReceiver().get(i).type;
-            if (!typeManager.isAssignable(should_be_symbol, is_symbol)) {
-                throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
-            }
-        }//todo: fix acces on parameters... get(i) does not the job
-*/
+
         for (int i = 0; i < methodSymbol.parameters.size(); i++) {
             TypeSymbol is_symbol = ast.argumentsWithoutReceiver().get(i).type;
             TypeSymbol should_be_symbol = methodSymbol.parameters.get(i).type;
@@ -104,7 +96,7 @@ public class SemanticChecker extends AstVisitor<Void, CurrentContext> {
                 throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
             }
         }
-        // todo: is a copy of todo
+
         return null;
     }
 
