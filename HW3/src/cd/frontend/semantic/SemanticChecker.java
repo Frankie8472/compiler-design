@@ -181,14 +181,17 @@ public class SemanticChecker extends AstVisitor<Void, CurrentContext> {
         arg.setCorrectReturn(true);
 
         visitChildren(ast, arg);
-        if ((arg.getMethodSymbol().returnType.equals(PrimitiveTypeSymbol.voidType)) &&
-                (ast.children().size() != 0)) {
+
+        if(ast.children().size() == 0){
+            if(!arg.getMethodSymbol().returnType.equals(PrimitiveTypeSymbol.voidType)){
+                throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
+            }
+        } else if(arg.getMethodSymbol().returnType.equals(PrimitiveTypeSymbol.voidType)){
+            throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
+        } else if(!typeManager.isAssignable(arg.getMethodSymbol().returnType, ast.arg().type)){
             throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
         }
 
-        if ((ast.children().size() != 0) && !typeManager.isAssignable(arg.getMethodSymbol().returnType, ast.arg().type)) {
-            throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
-        }
         return null;
     }
 
