@@ -362,8 +362,8 @@ public class SemanticChecker extends AstVisitor<Void, CurrentContext> {
     public Void cast(Ast.Cast ast, CurrentContext arg) {
         visit(ast.arg(), arg);
         ast.type = typeManager.stringToTypeSymbol(ast.typeName);
-        if (!((typeManager.isAssignable(ast.type, ast.arg().type)) ||
-            (typeManager.isAssignable(ast.arg().type, ast.type)))) {
+        if (!((typeManager.isAssignable(ast.type, ast.arg().type, false)) ||
+            (typeManager.isAssignable(ast.arg().type, ast.type, false)))) {
             throw new SemanticFailure(SemanticFailure.Cause.TYPE_ERROR);
         }
         return null;

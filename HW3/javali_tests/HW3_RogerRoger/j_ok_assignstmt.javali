@@ -1,0 +1,46 @@
+class Main{
+    void main(){
+        B b;
+        int i1, i2;
+        boolean b1, b2;
+
+        i1 = i2;
+        b1 = b2;
+        b.f = i2;
+        i1 = b.f;
+        b.fi[0] = i2;
+        i1 = b.fi[0];
+        i1 = b.foo();
+        b1 = b.bar();
+        i2 = b.deepfathom().wakanda();
+
+
+
+    }
+}
+
+class A{
+    int f;
+
+    boolean bar(){
+        return true;
+    }
+}
+
+class B extends A{
+    int[] fi;
+
+    int foo(){
+        return 6;
+    }
+
+    C deepfathom(){
+        return new C();
+    }
+}
+
+class C{
+    int wakanda(){
+        return 5;
+    }
+}
