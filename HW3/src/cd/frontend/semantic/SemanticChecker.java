@@ -57,9 +57,26 @@ public class SemanticChecker extends AstVisitor<Void, CurrentContext> {
 
     @Override
     public Void methodDecl(Ast.MethodDecl ast, CurrentContext arg) {
-        CurrentContext current = new CurrentContext(arg, ast.sym);
-        visitChildren(ast, current);
-        if (!current.getCorrectReturn() && !current.getMethodSymbol().returnType.equals(PrimitiveTypeSymbol.voidType)) {
+        CurrentContext context = new CurrentContext(arg, ast.sym);
+
+        ClassSymbol current = arg.getClassSymbol();
+        while (current != ClassSymbol.objectType) {
+            if (current.methods.containsKey(ast.name)){
+                MethodSymbol method = current.methods.get(ast.name);
+                if((method.returnType != ast.sym.returnType) || method.parameters.size() != ast.sym.parameters.size()){
+                    throw new SemanticFailure(SemanticFailure.Cause.INVALID_OVERRIDE);
+                }
+                for(int i = 0; i < method.parameters.size(); i++){
+                    if(method.parameters.get(i).type != ast.sym.parameters.get(i).type){
+                        throw new SemanticFailure(SemanticFailure.Cause.INVALID_OVERRIDE);
+                    }
+                }
+            }
+            current = current.superClass;
+        }
+
+        visitChildren(ast, context);
+        if (!context.getCorrectReturn() && !context.getMethodSymbol().returnType.equals(PrimitiveTypeSymbol.voidType)) {
             throw new SemanticFailure(SemanticFailure.Cause.MISSING_RETURN);
         }
         return null;

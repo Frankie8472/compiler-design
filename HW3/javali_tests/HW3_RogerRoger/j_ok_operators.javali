@@ -1,0 +1,61 @@
+class Main{
+    void main(){
+        int a,b,c;
+        boolean d;
+        A hui;
+        B bla;
+        int[] arr;
+        A[] Aarr;
+
+        a = b + C;
+        a = b - C;
+        a = b * C;
+        a = b / C;
+        a = hui() - 5 * (bla.aNumber / 0x37);
+        d = a > 4;
+        d = a < 4;
+        d = b <= c;
+        d = b >= c;
+
+        hui = null;
+        d = hui == bla;
+        hui = new SubA();
+        a = hui.doNothing(b);
+        Aarr  = new A[4];
+        Aarr[0] = hui.getMyself();
+        Aarr[1] = null;
+        Aarr[2] = new SubA();
+        Aarr[3] = new A();
+
+    }
+
+    int hui(){
+        return 5;
+    }
+
+    boolean isOK(boolean ok){
+        return ok;
+    }
+}
+
+class A {
+    A getMyself(){
+        return this;
+    }
+
+    int doNothing(int a){
+        return a;
+    }
+}
+
+class SubA extends A{
+    int doNothing(int a){
+        return a*a;
+    }
+}
+
+class B{
+    A myA;
+    B anotherB;
+    int aNumber;
+}
