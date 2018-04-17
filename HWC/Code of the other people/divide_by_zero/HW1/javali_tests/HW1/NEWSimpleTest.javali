@@ -1,0 +1,9 @@
+/* Test expression evaluation with 2 variables */
+class Main {
+	void main() {
+		int r1, r2;
+		
+		r1 = 8;
+		r2 = r1 + 42;
+	}
+}

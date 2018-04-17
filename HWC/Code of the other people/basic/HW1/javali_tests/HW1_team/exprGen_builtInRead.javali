@@ -1,0 +1,7 @@
+/* Test builtInRead in ExprGenerator */
+class Main {
+   void main() {
+	int a;
+   	a = read();
+   }
+}

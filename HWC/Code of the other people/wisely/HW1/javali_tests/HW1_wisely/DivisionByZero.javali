@@ -1,0 +1,7 @@
+class Main{
+    void main(){
+        int a;
+        a = 13;
+        a = a / 0;
+    }
+}

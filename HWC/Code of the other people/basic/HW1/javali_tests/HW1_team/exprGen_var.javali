@@ -1,0 +1,9 @@
+/* Test var in ExprGenerator */
+class Main {
+   void main() {
+      	int a;
+	int b;
+	a = 10;
+	b = a;    
+   }
+}

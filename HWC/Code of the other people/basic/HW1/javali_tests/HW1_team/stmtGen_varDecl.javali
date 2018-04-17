@@ -1,0 +1,6 @@
+/* Test varDecl in StmtGenerator */
+class Main {
+   void main() {
+	int a;
+   }
+}

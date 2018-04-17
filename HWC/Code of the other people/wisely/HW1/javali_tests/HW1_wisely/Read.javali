@@ -1,0 +1,9 @@
+/* Test read */
+class Main {
+	void main() {
+
+		int a;
+		a = read();
+		write(a - 3); writeln();
+	}
+}

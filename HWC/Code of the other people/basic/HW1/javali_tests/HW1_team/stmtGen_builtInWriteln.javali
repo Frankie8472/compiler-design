@@ -1,0 +1,6 @@
+/* Test builtInWriteln in StmtGenerator */
+class Main {
+   void main() {
+	writeln();    
+   }
+}

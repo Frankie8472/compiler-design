@@ -1,0 +1,14 @@
+
+/*tests division */
+class Main {
+	void main() {
+		int i1,  i2;
+
+		i1 = 1;
+		i2 = 2;
+
+		i1 = i2 / i1;
+
+		write(i1); writeln();
+	}
+}

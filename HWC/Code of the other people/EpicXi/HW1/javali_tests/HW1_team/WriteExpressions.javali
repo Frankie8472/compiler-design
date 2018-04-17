@@ -1,0 +1,14 @@
+/* Test expressions inside write */
+class Main {
+	void main() {
+		int i0, i1, i2, i3;
+		
+		i0 = 3;
+		i1 = 8;
+		i2 = 9;
+		i3 = 23;
+
+        write(i0 + i3 * -(i2 - i1)); writeln();
+        write(i1 / 8 * i0 - 4 * i2); writeln();
+	}
+}

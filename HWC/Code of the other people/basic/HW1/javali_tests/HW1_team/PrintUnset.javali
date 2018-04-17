@@ -1,0 +1,7 @@
+class Main {
+   void main() {
+        int a;
+        write(a);
+        writeln();
+   }
+}

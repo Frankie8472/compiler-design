@@ -1,0 +1,23 @@
+/* Test division with fraction and more division */
+class Main {
+	void main() {
+		int a,  b, c;
+		
+		a = 9;
+		b = 2;
+		c = 23;
+		write(a / b);
+		writeln();
+		write((a * b) / a);
+		writeln();
+		write((a * b) / b / a);
+		writeln();
+
+		//fractions smaller than 1
+		write(b / a);
+        writeln();
+        write(b / (a * b) / (c * c) / c / a / a / b / (c - a) / b / c / (c * a));
+        writeln();
+
+	}
+}

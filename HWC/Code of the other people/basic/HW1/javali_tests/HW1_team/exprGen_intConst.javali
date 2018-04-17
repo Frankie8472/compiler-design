@@ -1,0 +1,7 @@
+/* Test intConst in ExprGenerator */
+class Main {
+   void main() {
+      	int a;
+	a = 10;  
+   }
+}

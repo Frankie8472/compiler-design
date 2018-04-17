@@ -1,0 +1,45 @@
+class Main{
+        void main(){
+            int z, min, max, a, b, c, d, e, f, g, h, i, j;
+            z = 0;
+            //minimum int
+            min = -2147483647;
+            //max int
+            max = 2147483647;
+            a = z - z;
+            b = 1 - 2;
+            c = min - z;
+            d = max - z;
+            e = min - max;
+            f = max - 2;
+            g = max - max;
+            h = a - a - z - z - a - a;
+            i = b - 3089 - 23 - max;
+            j = a - (b -(c - d - e) - f - f - g ) - h - i - (i - i);
+            write(z);
+            writeln();
+            write(min);
+            writeln();
+            write(max);
+            writeln();
+            write(a);
+            writeln();
+            write(b);
+            writeln();
+            write(c);
+            writeln();
+            write(d);
+            writeln();
+            write(e);
+            writeln();
+            write(f);
+            writeln();
+            write(g);
+            writeln();
+            write(h);
+            writeln();
+            write(i);
+            writeln();
+            write(j);
+        }
+}

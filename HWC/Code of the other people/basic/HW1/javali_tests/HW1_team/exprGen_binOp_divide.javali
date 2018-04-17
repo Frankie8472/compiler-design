@@ -1,0 +1,7 @@
+/* Test the division in binaryOp in ExprGenerator */
+class Main {
+   void main() {
+	int a;
+	a = (10/5);   
+   }
+}

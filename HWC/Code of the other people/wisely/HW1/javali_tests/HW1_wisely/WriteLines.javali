@@ -1,0 +1,7 @@
+/* Test writeline */
+class Main {
+	void main() {
+
+		writeln();
+	}
+}

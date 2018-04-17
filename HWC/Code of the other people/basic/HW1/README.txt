@@ -1,0 +1,1 @@
+We pushed variables onto the stack if they didn't fit in the registers.
