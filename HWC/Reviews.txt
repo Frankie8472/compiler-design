@@ -1,0 +1,56 @@
+========================================
+Review EpicXi
+
+StmtGen:
+Line 56 Strings in DATA_INT_SECTION, bad
+Line 94 use intern method emitConstantData("0")
+Line 126 & 140 used more stack than needed
+
+ExprGen: 
+Line 87 unneccesary if you swap r1 and r2 in Line 108 and replace 112 and 115 with the counterpart (r1->r2 and r2->r1)
+
+AstCodeGenerator:
+Before doing something, registers are initialized! good!
+========================================
+Review divide_by_zero
+
+ToDoException:
+wrong place for public static boolean test = false
+
+AssemblyEmitter:
+deleted emitMove(Register, String), why?
+
+AstCodeGenerator:
+emitted prologue in constructor, not the right place
+
+RegisterCounter:
+implemented a visitor for counter purpose, good!
+
+StmtGen:
+Line 103 parser is testing this
+Line 117 ugly code, but a register saved...
+Line 122 unneccessary
+Line 137 should be 8 not 4
+
+ExprGen:
+Line 38 varset static, bad! (parallel multiple trees, all have the same, bad) and write small (java convention, is no class)
+Line 82 instead of first and second, left and right would have helped I with the binary ops
+Line 105 what about an excpetion?
+Line 108 faulty implementation of minus, it is not always dest(right) - src(left)
+Line 154 just use move
+========================================
+Review basic
+
+StmtGen:
+Line 26 import static -> import, for joshi reasons
+Line 61 I like java doc
+Line 85,86 destroing bytes
+
+ExprGen:
+Line 65, 69 no accept, call visit! And you did not chekc which tree to traverse first!
+Line 66, 72 why push pop
+Line 74 use given enums, if changes made to string, you should not have to change multiple files ideally
+========================================
+
+
+
