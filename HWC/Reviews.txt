@@ -2,54 +2,75 @@
 Review EpicXi
 
 StmtGen:
-Line 56 Strings in DATA_INT_SECTION, bad
-Line 94 use intern method emitConstantData("0")
-Line 126 & 140 used more stack than needed
+    + Use of constants RegisterManager.BASE_REG etc and from Config. 
+    O Line 94: use method emitConstantData("0") of AssemlbyEmitter instead.
+    O Methods builtInWrite & builtInWriteln: more stack is allocated than needed
+    - Line 56: Strings are declared in DATA_INT_SECTION. This could be problematic on macs. 
+
 
 ExprGen: 
-Line 87 unneccesary if you swap r1 and r2 in Line 108 and replace 112 and 115 with the counterpart (r1->r2 and r2->r1)
+    O why not use 'newRegister' for storing the pointer to The position on the stack to the stack? It is not in use before the call.
+    - Line 87: It is unneccesary to swap r1 and r2 in Line 108. You could just swap the order in the arguments in cg.emit.emit(op, r1, r2); to cg.emit.emit(op, r2, r1); since it does not matter except for subtraction.
+    - r1 and r2 are not very good and descriptive names.
+    - "op" is not a valid assembly instruction. If it is not one of the cached instructions throwing an exception woult be preferable.
+
 
 AstCodeGenerator:
-Before doing something, registers are initialized! good!
+    + This is a good Place to initialize the registers.
+   
+   
+FileUtil:
+    ? Line 78: Why did you replace detectError with false? Has there been problem?
 ========================================
 Review divide_by_zero
 
+General:
+    O Use AsemblyEmitter to generate constants in assemblycode. This makes your code more platfrom independent. And you don't have to do the same string concatenation all the time.
+
+
 ToDoException:
-wrong place for public static boolean test = false
+    - wrong place for 'public static boolean test = false'. What has the ToDoException to do with a Flag taht indicates if comments should be emitted? Would fit better in Config.java or directly in the class used.
+
 
 AssemblyEmitter:
-deleted emitMove(Register, String), why?
+    ? deleted emitMove(Register, String), why?
+
 
 AstCodeGenerator:
-emitted prologue in constructor, not the right place
+    - emitted prologue in constructor. It is not a good practise to do IO (emitting does File IO) in a constructor. Here you can't initialize an AstCodeGenerator without already writing the prolpogue. If you want to write other stuff before the prologue this won't be possible with your code.
+
 
 RegisterCounter:
-implemented a visitor for counter purpose, good!
+    + implemented a visitor for counter purpose. 
+
 
 StmtGen:
-Line 103 parser is testing this
+    O Line 103 parser already tests this
 Line 117 ugly code, but a register saved...
-Line 122 unneccessary
-Line 137 should be 8 not 4
+    O Line 122 subtraction of zero is unnessecary.
+    - Line 137 Not enough stack released. allocated 8 Bytes but only released 4. This may result in a memory leak. (If the function does not return, e.g. calls other functions or use write in a loop multiple times (>500'000 times but still))
+
 
 ExprGen:
-Line 38 varset static, bad! (parallel multiple trees, all have the same, bad) and write small (java convention, is no class)
-Line 82 instead of first and second, left and right would have helped I with the binary ops
-Line 105 what about an excpetion?
-Line 108 faulty implementation of minus, it is not always dest(right) - src(left)
-Line 154 just use move
+    0 Line 154: You could just use move instead of clearing te register and adding the value afterwards.
+    - Line 38: The HashMap VarSet is static which can be problematic, For example: You want to run ExprGenerator in parallel. Now every instance of ExprGenerator use the same HashMap. since also the offset is static variables added by different threads will produce invalid offsets. Also the naming convention of java defines, that fields should start with a lower letter.
+    O Line 82 instead of first and second, left and right would have been better names for the variables.
+    - Line 108 faulty implementation of minus, it is not always dest(right) - src(left)
+    - Line 105 "Invalid Operation" is not a valid assembly instruciton. Throwing an exception would be preferable.
 ========================================
 Review basic
 
 StmtGen:
-Line 26 import static -> import, for joshi reasons
-Line 61 I like java doc
-Line 85,86 destroing bytes
-
+    + Line 61: good Idea to use Java doc. Although could be more descriptive
+    - Line 26: import static cd.Config.*; . It's not clear whrere the constants used in the code come from. If you don't have an IDE you even can't find them using search. So either import every Constant separately or do import Config.<constant> (which I prefer). This makes clear that this constant comes from the config and in your case it makes the code more understandable.
+    - Line 85,86: Why do you AND the StackPointer with '-16'? A comment would be nessecary. 
+    
+    
 ExprGen:
-Line 65, 69 no accept, call visit! And you did not chekc which tree to traverse first!
-Line 66, 72 why push pop
-Line 74 use given enums, if changes made to string, you should not have to change multiple files ideally
+    O Line 65, 69 Prefer using the visit Method of AstVisitor/ExprVisitor. It acctually does the same thing but If you later want to optimize the code for a special AST you have to change many lines instead of adding an overloaded function. (See Javadoc of AstVisitor.visit)
+    - Line 66, 72 Pushing the visited register is not nessecary. It may also be slower since memory access is way slower than accessing register.
+    - Line 74: Prefer using the given enums. Instead of a switch statement over the repr. If you decide to change the repr lateron you have to revise a lot of code.
+    - You don't use the recommended way to determine the minimum registers.
 ========================================
 
 
