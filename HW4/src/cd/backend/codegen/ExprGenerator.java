@@ -114,7 +114,7 @@ class ExprGenerator extends ExprVisitor<Register, Void> {
 				break;
 			default:
 				{
-					throw new ToDoException();
+					throw new ToDoException(); // todo
 				}
 			}
 
@@ -125,7 +125,8 @@ class ExprGenerator extends ExprVisitor<Register, Void> {
 	}
 
 	@Override
-	public Register booleanConst(BooleanConst ast, Void arg) {
+	public Register booleanConst(BooleanConst ast, Void arg) { // todo
+
 		throw new ToDoException();
 	}
 
@@ -145,12 +146,14 @@ class ExprGenerator extends ExprVisitor<Register, Void> {
 	}
 
 	@Override
-	public Register cast(Cast ast, Void arg) {
+	public Register cast(Cast ast, Void arg) { // todo
+
 		throw new ToDoException();
 	}
 
 	@Override
-	public Register index(Index ast, Void arg) {
+	public Register index(Index ast, Void arg) { // todo
+
 		throw new ToDoException();
 	}
 
@@ -164,32 +167,38 @@ class ExprGenerator extends ExprVisitor<Register, Void> {
 	}
 
 	@Override
-	public Register field(Field ast, Void arg) {
+	public Register field(Field ast, Void arg) { // todo
+
 		throw new ToDoException();
 	}
 
 	@Override
-	public Register newArray(NewArray ast, Void arg) {
+	public Register newArray(NewArray ast, Void arg) { // todo
+
 		throw new ToDoException();
 	}
 
 	@Override
-	public Register newObject(NewObject ast, Void arg) {
+	public Register newObject(NewObject ast, Void arg) { // todo
+
 		throw new ToDoException();
 	}
 
 	@Override
-	public Register nullConst(NullConst ast, Void arg) {
+	public Register nullConst(NullConst ast, Void arg) { // todo
+
 		throw new ToDoException();
 	}
 
 	@Override
-	public Register thisRef(ThisRef ast, Void arg) {
+	public Register thisRef(ThisRef ast, Void arg) { // todo
+
 		throw new ToDoException();
 	}
 
 	@Override
-	public Register methodCall(MethodCallExpr ast, Void arg) {
+	public Register methodCall(MethodCallExpr ast, Void arg) { // todo
+
 		throw new ToDoException();
 	}
 

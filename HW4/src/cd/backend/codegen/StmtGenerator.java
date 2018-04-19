@@ -51,11 +51,13 @@ class StmtGenerator extends AstVisitor<Register, Void> {
 	}
 
 	@Override
-	public Register methodCall(MethodCall ast, Void dummy) {
+	public Register methodCall(MethodCall ast, Void dummy) { // todo
+
 		throw new ToDoException();
 	}
 
-	public Register methodCall(MethodSymbol sym, List<Expr> allArguments) {
+	public Register methodCall(MethodSymbol sym, List<Expr> allArguments) { // todo
+
 		throw new RuntimeException("Not required");
 	}
 
@@ -117,12 +119,14 @@ class StmtGenerator extends AstVisitor<Register, Void> {
 	}
 
 	@Override
-	public Register ifElse(IfElse ast, Void arg) {
+	public Register ifElse(IfElse ast, Void arg) { // todo
+
 		throw new ToDoException();
 	}
 
 	@Override
-	public Register whileLoop(WhileLoop ast, Void arg) {
+	public Register whileLoop(WhileLoop ast, Void arg) { // todo
+
 		throw new ToDoException();
 	}
 
@@ -165,7 +169,8 @@ class StmtGenerator extends AstVisitor<Register, Void> {
 	}
 
 	@Override
-	public Register returnStmt(ReturnStmt ast, Void arg) {
+	public Register returnStmt(ReturnStmt ast, Void arg) { // todo
+
 		throw new ToDoException();
 	}
 
