@@ -145,6 +145,7 @@ class StmtGenerator extends AstVisitor<Register, Void> {
 			// thinking of giving fields, methods, arguments special labels:
 			// "classlabel" + "_" + "method/field"
 			// "classlabel" + "_" + "method/field" + "_" + "var_" + "varname"
+			// but then I must remember in which class/ method I am and inheritance
 			// todo: thoughts on that, j?
 		} else {
 			throw new ToDoException(); // Todo: choose right errocode
