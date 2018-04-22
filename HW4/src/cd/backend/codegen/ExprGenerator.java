@@ -2,6 +2,9 @@ package cd.backend.codegen;
 
 import static cd.Config.SCANF;
 import static cd.backend.codegen.AssemblyEmitter.constant;
+import static cd.backend.codegen.AssemblyEmitter.arrayAddress;
+import static cd.backend.codegen.AssemblyEmitter.labelAddress;
+import static cd.backend.codegen.AssemblyEmitter.registerOffset;
 import static cd.backend.codegen.RegisterManager.STACK_REG;
 
 import java.util.Arrays;
@@ -125,10 +128,16 @@ class ExprGenerator extends ExprVisitor<Register, Void> {
 	}
 
 	@Override
-	public Register booleanConst(BooleanConst ast, Void arg) { // todo
-
-		throw new ToDoException();
+	public Register booleanConst(BooleanConst ast, Void arg) { //todo: jcheck
+		Register reg = cg.rm.getRegister();
+		if(ast.value){
+			cg.emit.emitMove(constant(1), reg);
+		} else{
+			cg.emit.emitMove(constant(0), reg);
+		}
+		return reg;
 	}
+
 
 	@Override
 	public Register builtInRead(BuiltInRead ast, Void arg) {
@@ -152,16 +161,21 @@ class ExprGenerator extends ExprVisitor<Register, Void> {
 	}
 
 	@Override
-	public Register index(Index ast, Void arg) { // todo
+	// Giving value back, not address of value, remember to transform for assignments!
+	public Register index(Index ast, Void arg) { // todo: jcheck
+		Register index = visit(ast.left(), arg);
+		Register array = visit(ast.right(), arg);
 
-		throw new ToDoException();
+		cg.emit.emitMove(arrayAddress(array, index), array);
+		cg.rm.releaseRegister(index);
+		return array;
 	}
 
 	@Override
 	public Register intConst(IntConst ast, Void arg) {
 		{
 			Register reg = cg.rm.getRegister();
-			cg.emit.emit("movl", "$" + ast.value, reg);
+			cg.emit.emitMove(constant(ast.value), reg);
 			return reg;
 		}
 	}
@@ -204,7 +218,6 @@ class ExprGenerator extends ExprVisitor<Register, Void> {
 
 	@Override
 	public Register unaryOp(UnaryOp ast, Void arg) {
-		{
 			Register argReg = gen(ast.arg());
 			switch (ast.operator) {
 			case U_PLUS:
@@ -220,16 +233,13 @@ class ExprGenerator extends ExprVisitor<Register, Void> {
 				break;
 			}
 			return argReg;
-		}
 	}
 	
 	@Override
 	public Register var(Var ast, Void arg) {
-		{
 			Register reg = cg.rm.getRegister();
 			cg.emit.emit("movl", AstCodeGenerator.VAR_PREFIX + ast.name, reg);
 			return reg;
-		}
 	}
 
 }

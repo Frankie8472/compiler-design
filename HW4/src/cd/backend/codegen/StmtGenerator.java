@@ -96,9 +96,6 @@ class StmtGenerator extends AstVisitor<Register, Void> {
 			ast.decls().accept(new AstVisitor<Void, Void>() {
 				@Override
 				public Void varDecl(VarDecl ast, Void arg) {
-					if (!ast.type.equals("int"))
-						throw new RuntimeException(
-								"Only int variables expected");
 					cg.emit.emitLabel(AstCodeGenerator.VAR_PREFIX + ast.name);
 					cg.emit.emitConstantData("0");
 					return null;
