@@ -114,7 +114,7 @@ class ExprGenerator extends ExprVisitor<Register, Void> {
 				break;
 			default:
 				{
-					throw new ToDoException(); // todo
+					throw new ToDoException(); // todo: throw correct error code
 				}
 			}
 
