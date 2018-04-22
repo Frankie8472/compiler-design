@@ -10,8 +10,10 @@ import static cd.backend.codegen.RegisterManager.STACK_REG;
 import java.util.Arrays;
 import java.util.List;
 
+import cd.Config;
 import cd.ToDoException;
 import cd.backend.codegen.RegisterManager.Register;
+import cd.ir.Ast;
 import cd.ir.Ast.BinaryOp;
 import cd.ir.Ast.BooleanConst;
 import cd.ir.Ast.BuiltInRead;
@@ -41,7 +43,7 @@ class ExprGenerator extends ExprVisitor<Register, Void> {
 		cg = astCodeGenerator;
 	}
 
-	public Register gen(Expr ast) {
+	public Register gen(Expr ast) { //todo: what for?
 		return visit(ast, null);
 	}
 
@@ -188,8 +190,17 @@ class ExprGenerator extends ExprVisitor<Register, Void> {
 
 	@Override
 	public Register newArray(NewArray ast, Void arg) { // todo
+		// is the array size a given?
+		Register array_size = visit(ast.arg(), arg);
+		Register array = cg.rm.getRegister();
+		cg.emit.emit("imull", Config.SIZEOF_PTR, array_size);
+		cg.emit.emit("subl", array_size, Register.ESP); // does this work? sceptic!
+		cg.emit.emitMove(Register.ESP, array);
 
-		throw new ToDoException();
+		cg.rm.releaseRegister(array_size);
+		return array;
+
+		// can stack release be neglected?
 	}
 
 	@Override
@@ -211,9 +222,18 @@ class ExprGenerator extends ExprVisitor<Register, Void> {
 	}
 
 	@Override
-	public Register methodCall(MethodCallExpr ast, Void arg) { // todo
-
-		throw new ToDoException();
+	public Register methodCall(MethodCallExpr ast, Void arg) { // todo: jcheck
+		// put parameter in inverse queue on stack
+		Register reg;
+		for (int i = ast.allArguments().size()-1; i > 0; i--){
+			reg = visit(ast.allArguments().get(i), arg);
+			cg.emit.emit("pushl", reg);
+			cg.rm.releaseRegister(reg);
+		}
+		// jump to methodlabel, inheritance not checked
+		cg.emit.emit("call", labelAddress(ast.methodName));
+		// return eax (return register? right)
+		return Register.EAX;
 	}
 
 	@Override

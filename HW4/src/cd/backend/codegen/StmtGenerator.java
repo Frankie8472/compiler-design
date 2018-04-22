@@ -129,15 +129,31 @@ class StmtGenerator extends AstVisitor<Register, Void> {
 
 	@Override
 	public Register assign(Assign ast, Void arg) {
-		{
+		/*
 			if (!(ast.left() instanceof Var))
 				throw new RuntimeException("LHS must be var in HW1");
+			*/
+		Register lhsReg = visit(ast.left(), arg);
+		Register rhsReg = cg.eg.visit(ast.right(), arg);
+		if (ast.left() instanceof Ast.Index){
+			cg.emit.emitStore(rhsReg, 0, lhsReg);
+		} else if (ast.left() instanceof Ast.Var) {
 			Var var = (Var) ast.left();
-			Register rhsReg = cg.eg.gen(ast.right());
 			cg.emit.emit("movl", rhsReg, AstCodeGenerator.VAR_PREFIX + var.name);
 			cg.rm.releaseRegister(rhsReg);
-			return null;
+		} else if (ast.left() instanceof Ast.Field) {
+			// thinking of giving fields, methods, arguments special labels:
+			// "classlabel" + "_" + "method/field"
+			// "classlabel" + "_" + "method/field" + "_" + "var_" + "varname"
+			// todo: thoughts on that, j?
+		} else {
+			throw new ToDoException(); // Todo: choose right errocode
 		}
+
+		cg.rm.releaseRegister(rhsReg);
+		cg.rm.releaseRegister(lhsReg);
+		return null;
+
 	}
 
 	@Override
