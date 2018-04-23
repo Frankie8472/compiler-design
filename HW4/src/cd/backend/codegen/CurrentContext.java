@@ -21,82 +21,94 @@ public final class CurrentContext {
      */
     private final MethodSymbol methodSymbol;
 
+    private Integer currentLocalOffset;
+
+    private Integer currentParameterOffset;
+
     /**
      * This HashMap maps the locals and parameters to the offset of the EBP of the current stack AFTER initializing the new method.
      * Meaning after pushing ebp and mov esp ebp.
      * Negative number is for locals and positive for
      */
-    private Map<String, Integer> parameters_and_locals = new HashMap<>();
+    private Map<String, Integer> parameters_and_locals;
 
     public CurrentContext(CurrentContext context, MethodSymbol methodSymbol) {
         this.classSymbol = context.getClassSymbol();
         this.methodSymbol = methodSymbol;
+        this.parameters_and_locals = new HashMap<>();
+        this.currentLocalOffset = 0;
+        this.currentParameterOffset = 4;
     }
 
     public CurrentContext(ClassSymbol classSymbol) {
         this.classSymbol = classSymbol;
+        this.parameters_and_locals = new HashMap<>();
         this.methodSymbol = null;
+        this.currentLocalOffset = 0;
+        this.currentParameterOffset = 4;
     }
 
     public CurrentContext(ClassSymbol classSymbol, MethodSymbol methodSymbol) {
         this.classSymbol = classSymbol;
         this.methodSymbol = methodSymbol;
+        this.parameters_and_locals = new HashMap<>();
+        this.currentLocalOffset = 0;
+        this.currentParameterOffset = 4;
     }
 
     /**
      * Fetches the current MethodSymbol
+     *
      * @return the current MethodSymbol
      */
     public MethodSymbol getMethodSymbol() {
-        return methodSymbol;
+        return this.methodSymbol;
     }
 
     /**
      * Fetches the current ClassSymbol
+     *
      * @return the current ClassSymbol
      */
     public ClassSymbol getClassSymbol() {
-        return classSymbol;
+        return this.classSymbol;
     }
 
     /**
      * Add a parameter to the hashmap
+     * with the offset: current - 4 of the %EBP
+     * and updates current: current -= 4
+     *
      * @param name of the parameter as string
-     * @param offset in bytes from the %EBP
      * @return
-     * @throws Error if parameter is mapped to the current stack
      */
-    public Void addParameter(String name, Integer offset) {
-        if (offset > -8) {
-            throw new ToDoException(); // todo: choose right exception
-        }
-
-        parameters_and_locals.put(name, offset);
+    public Void addParameter(String name) {
+        this.currentParameterOffset -= 4;
+        this.parameters_and_locals.put(name, this.currentParameterOffset);
         return null;
     }
 
     /**
      * Add a local to the hashmap
+     * with the offset: current + 4 of the %EBP
+     * and updates current: current += 4
+     *
      * @param name of the local as string
-     * @param offset in bytes from the %EBP
-     * @return
-     * @throws Error if parameter is not mapped to the current stack
+     * @return nothing
      */
-    public Void addLocal(String name, Integer offset){
-        if(offset < 4) { // 4 -> 1 if boolean is handled as 1 byte not as 4
-            throw new ToDoException(); // todo: choose right exception
-        }
-
-        parameters_and_locals.put(name, offset);
+    public Void addLocal(String name) {
+        this.currentLocalOffset += 4;
+        this.parameters_and_locals.put(name, this.currentLocalOffset);
         return null;
     }
 
     /**
      * Returns the offset mapped to the given name
+     *
      * @param name of the local or parameter as a string
      * @return offset in bytes from %EBP, use AssemblyEmitter.RegisterOffset()
      */
-    public Integer getOffset(String name){
-        return parameters_and_locals.get(name);
+    public Integer getOffset(String name) {
+        return this.parameters_and_locals.get(name);
     }
 }

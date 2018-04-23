@@ -2,6 +2,7 @@ package cd.backend.codegen;
 
 import static cd.Config.MAIN;
 import static cd.backend.codegen.AssemblyEmitter.constant;
+import static cd.backend.codegen.AssemblyEmitter.labelAddress;
 import static cd.backend.codegen.RegisterManager.STACK_REG;
 
 import java.util.List;
@@ -23,9 +24,7 @@ import cd.ir.Ast.Var;
 import cd.ir.Ast.VarDecl;
 import cd.ir.Ast.WhileLoop;
 import cd.ir.AstVisitor;
-import cd.ir.Symbol;
 import cd.ir.Symbol.MethodSymbol;
-import cd.ir.Symbol.VariableSymbol.Kind;
 import cd.util.debug.AstOneLine;
 
 /**
@@ -33,6 +32,8 @@ import cd.util.debug.AstOneLine;
  */
 class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 	protected final AstCodeGenerator cg;
+
+	private Boolean first_class = true;
 
 	StmtGenerator(AstCodeGenerator astCodeGenerator) {
 		cg = astCodeGenerator;
@@ -54,62 +55,57 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 
 	@Override
 	public Register methodCall(MethodCall ast, CurrentContext dummy) { // todo
-
+		// wenn wird das ufgrüäfe? happens in exprgenerator oder?
 		throw new ToDoException();
 	}
 
-	public Register methodCall(MethodSymbol sym, List<Expr> allArguments) { // todo
-
+	public Register methodCall(MethodSymbol sym, List<Expr> allArguments) {
 		throw new RuntimeException("Not required");
 	}
 
 	// Emit vtable for arrays of this class:
 	@Override
 	public Register classDecl(ClassDecl ast, CurrentContext arg) {
-		if (!ast.name.equals("Main"))
-			throw new RuntimeException(
-					"Only expected one class, named 'main'");
-		return visitChildren(ast, arg);
+		CurrentContext current = new CurrentContext(ast.sym);
+
+		// Registers are initialized in AstCodeGenerator-constructor with method initMethodData();
+
+		if (first_class) {
+			// Emit some useful string constants:
+			cg.emit.emitRaw(Config.DATA_STR_SECTION);
+			cg.emit.emitLabel("STR_NL");
+			cg.emit.emitRaw(Config.DOT_STRING + " \"\\n\"");
+			cg.emit.emitLabel("STR_D");
+			cg.emit.emitRaw(Config.DOT_STRING + " \"%d\"");
+
+			first_class = false;
+		}
+
+		// add vptr here but only for baseclass, yet confused...
+		visitChildren(ast, current);
+		return null;
 	}
 
 	@Override
 	public Register methodDecl(MethodDecl ast, CurrentContext arg) {
-		// ------------------------------------------------------------
-		// Homework 1 Prologue Generation:
-		// Rather simplistic due to limited requirements!
+		CurrentContext current = new CurrentContext(arg, ast.sym);
+		String name = current.getClassSymbol().name + "_" + current.getMethodSymbol().name;
 
-		if (!ast.name.equals("main"))
-			throw new RuntimeException(
-					"Only expected one method named 'main'");
-
-		// Emit some useful string constants:
-		cg.emit.emitRaw(Config.DATA_STR_SECTION);
-		cg.emit.emitLabel("STR_NL");
-		cg.emit.emitRaw(Config.DOT_STRING + " \"\\n\"");
-		cg.emit.emitLabel("STR_D");
-		cg.emit.emitRaw(Config.DOT_STRING + " \"%d\"");
-
-		// Emit a label for each variable:
-		// Let the AST Visitor do the iteration for us.
-		cg.emit.emitRaw(Config.DATA_INT_SECTION);
-		ast.decls().accept(new AstVisitor<Void, Void>() {
-			@Override
-			public Void varDecl(VarDecl ast, Void arg) {
-				cg.emit.emitLabel(AstCodeGenerator.VAR_PREFIX + ast.name);
-				cg.emit.emitConstantData("0");
-				return null;
-			}
-		}, null);
-
-		// Emit the main() method:
 		cg.emit.emitRaw(Config.TEXT_SECTION);
-		cg.emit.emitRaw(".globl " + MAIN);
-		cg.emit.emitLabel(MAIN);
+		cg.emit.emitRaw(".globl " + name);
+		cg.emit.emitLabel(name);
 
 		cg.emit.emit("enter", "$8", "$0");
 		cg.emit.emit("and", -16, STACK_REG);
-		gen(ast.body());
-		cg.emitMethodSuffix(true);
+
+		for (String arg_names : ast.argumentNames){
+			arg.addParameter(name + "_" + arg_names);
+		}
+
+		visit(ast.decls(), current);
+		visit(ast.body(), current);
+
+		cg.emitMethodSuffix(true); // leave expression
 		return null;
 
 	}
@@ -133,7 +129,7 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 				throw new RuntimeException("LHS must be var in HW1");
 			*/
 		Register lhsReg = visit(ast.left(), arg);
-		Register rhsReg = cg.eg.visit(ast.right(), arg);
+		Register rhsReg = visit(ast.right(), arg);
 		if (ast.left() instanceof Ast.Index){
 			cg.emit.emitStore(rhsReg, 0, lhsReg);
 		} else if (ast.left() instanceof Ast.Var) {
@@ -158,50 +154,86 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 
 	@Override
 	public Register builtInWrite(BuiltInWrite ast, CurrentContext arg) {
-		{
-			Register reg = cg.eg.gen(ast.arg());
-			cg.emit.emit("sub", constant(16), STACK_REG);
-			cg.emit.emitStore(reg, 4, STACK_REG);
-			cg.emit.emitStore("$STR_D", 0, STACK_REG);
-			cg.emit.emit("call", Config.PRINTF);
-			cg.emit.emit("add", constant(16), STACK_REG);
-			cg.rm.releaseRegister(reg);
-			return null;
-		}
+		Register reg = visit(ast.arg(), arg);
+		cg.emit.emit("sub", constant(16), STACK_REG);
+		cg.emit.emitStore(reg, 4, STACK_REG);
+		cg.emit.emitStore("$STR_D", 0, STACK_REG);
+		cg.emit.emit("call", Config.PRINTF);
+		cg.emit.emit("add", constant(16), STACK_REG);
+		cg.rm.releaseRegister(reg);
+		return null;
 	}
 
 	@Override
 	public Register builtInWriteln(BuiltInWriteln ast, CurrentContext arg) {
-		{
-			cg.emit.emit("sub", constant(16), STACK_REG);
-			cg.emit.emitStore("$STR_NL", 0, STACK_REG);
-			cg.emit.emit("call", Config.PRINTF);
-			cg.emit.emit("add", constant(16), STACK_REG);
-			return null;
-		}
+		cg.emit.emit("sub", constant(16), STACK_REG);
+		cg.emit.emitStore("$STR_NL", 0, STACK_REG);
+		cg.emit.emit("call", Config.PRINTF);
+		cg.emit.emit("add", constant(16), STACK_REG);
+		return null;
 	}
 
 	@Override
 	public Register returnStmt(ReturnStmt ast, CurrentContext arg) { // todo
+		Register ret;
 
-		throw new ToDoException();
+		if (ast.arg() == null){
+			cg.emit.emitMove(constant(0), Register.EAX);
+		} else {
+			ret = visit(ast.arg(), arg);
+			cg.emit.emitMove(ret, Register.EAX);
+			cg.rm.releaseRegister(ret);
+		}
+
+		return Register.EAX;
 	}
 
 	@Override
 	public Register varDecl(VarDecl ast, CurrentContext arg) {
+		String name;
+
 		switch(ast.sym.kind){
 			case FIELD:
-				break;
-			case PARAM:
+				Register temp = null;
+				name = arg.getClassSymbol().name + "_" + ast.name;
+				cg.emit.emitRaw(Config.DATA_INT_SECTION);
+				cg.emit.emitRaw(".globl " + name);
+				cg.emit.emitLabel(name);
+				//should instead of 0, a ptr to the heap location of the data be saved?
+				// do I need this, if I move int here after?
+				cg.emit.emitConstantData("0");
+
+				//try for heap allocation todo: jcheck
+				if (cg.rm.isInUse(Register.EAX)){
+					temp = cg.rm.getRegister();
+					cg.emit.emitMove(Register.EAX, temp);
+				}
+
+				cg.emit.emit("pushl", constant(1));
+				cg.emit.emit("pushl", Config.SIZEOF_PTR);
+				cg.emit.emit("call", Config.CALLOC);
+				cg.emit.emit("addl", constant(2*Config.SIZEOF_PTR), Register.ESP);
+				cg.emit.emitMove(Register.EAX, labelAddress(name));
+
+				if (temp != null){
+					cg.emit.emitMove(temp, Register.EAX);
+					cg.rm.releaseRegister(temp);
+				} else {
+					cg.rm.releaseRegister(Register.EAX);
+				}
+
+				// todo: add to vtable
 				break;
 			case LOCAL:
+				name = arg.getClassSymbol().name + "_" + arg.getMethodSymbol().name + "_" + ast.name;
+				arg.addLocal(name);
+				cg.emit.emit("subl", constant(4), Register.ESP);
 				break;
 			default:
+				//todo: giz de error überhaupt?
 				break;
 		}
 
-		cg.emit.emitLabel(arg.getClassSymbol().name + arg.get+ AstCodeGenerator.VAR_PREFIX + ast.name);
-		cg.emit.emitConstantData("0");
 		return null;
 
 	}
