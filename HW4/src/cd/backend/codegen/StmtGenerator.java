@@ -23,13 +23,15 @@ import cd.ir.Ast.Var;
 import cd.ir.Ast.VarDecl;
 import cd.ir.Ast.WhileLoop;
 import cd.ir.AstVisitor;
+import cd.ir.Symbol;
 import cd.ir.Symbol.MethodSymbol;
+import cd.ir.Symbol.VariableSymbol.Kind;
 import cd.util.debug.AstOneLine;
 
 /**
  * Generates code to process statements and declarations.
  */
-class StmtGenerator extends AstVisitor<Register, Void> {
+class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 	protected final AstCodeGenerator cg;
 
 	StmtGenerator(AstCodeGenerator astCodeGenerator) {
@@ -41,7 +43,7 @@ class StmtGenerator extends AstVisitor<Register, Void> {
 	}
 
 	@Override
-	public Register visit(Ast ast, Void arg) {
+	public Register visit(Ast ast, CurrentContext arg) {
 		try {
 			cg.emit.increaseIndent("Emitting " + AstOneLine.toString(ast));
 			return super.visit(ast, arg);
@@ -51,7 +53,7 @@ class StmtGenerator extends AstVisitor<Register, Void> {
 	}
 
 	@Override
-	public Register methodCall(MethodCall ast, Void dummy) { // todo
+	public Register methodCall(MethodCall ast, CurrentContext dummy) { // todo
 
 		throw new ToDoException();
 	}
@@ -63,72 +65,69 @@ class StmtGenerator extends AstVisitor<Register, Void> {
 
 	// Emit vtable for arrays of this class:
 	@Override
-	public Register classDecl(ClassDecl ast, Void arg) {
-		{
-			if (!ast.name.equals("Main"))
-				throw new RuntimeException(
-						"Only expected one class, named 'main'");
-			return visitChildren(ast, arg);
-		}
+	public Register classDecl(ClassDecl ast, CurrentContext arg) {
+		if (!ast.name.equals("Main"))
+			throw new RuntimeException(
+					"Only expected one class, named 'main'");
+		return visitChildren(ast, arg);
 	}
 
 	@Override
-	public Register methodDecl(MethodDecl ast, Void arg) {
-		{
-			// ------------------------------------------------------------
-			// Homework 1 Prologue Generation:
-			// Rather simplistic due to limited requirements!
+	public Register methodDecl(MethodDecl ast, CurrentContext arg) {
+		// ------------------------------------------------------------
+		// Homework 1 Prologue Generation:
+		// Rather simplistic due to limited requirements!
 
-			if (!ast.name.equals("main"))
-				throw new RuntimeException(
-						"Only expected one method named 'main'");
+		if (!ast.name.equals("main"))
+			throw new RuntimeException(
+					"Only expected one method named 'main'");
 
-			// Emit some useful string constants:
-			cg.emit.emitRaw(Config.DATA_STR_SECTION);
-			cg.emit.emitLabel("STR_NL");
-			cg.emit.emitRaw(Config.DOT_STRING + " \"\\n\"");
-			cg.emit.emitLabel("STR_D");
-			cg.emit.emitRaw(Config.DOT_STRING + " \"%d\"");
+		// Emit some useful string constants:
+		cg.emit.emitRaw(Config.DATA_STR_SECTION);
+		cg.emit.emitLabel("STR_NL");
+		cg.emit.emitRaw(Config.DOT_STRING + " \"\\n\"");
+		cg.emit.emitLabel("STR_D");
+		cg.emit.emitRaw(Config.DOT_STRING + " \"%d\"");
 
-			// Emit a label for each variable:
-			// Let the AST Visitor do the iteration for us.
-			cg.emit.emitRaw(Config.DATA_INT_SECTION);
-			ast.decls().accept(new AstVisitor<Void, Void>() {
-				@Override
-				public Void varDecl(VarDecl ast, Void arg) {
-					cg.emit.emitLabel(AstCodeGenerator.VAR_PREFIX + ast.name);
-					cg.emit.emitConstantData("0");
-					return null;
-				}
-			}, null);
+		// Emit a label for each variable:
+		// Let the AST Visitor do the iteration for us.
+		cg.emit.emitRaw(Config.DATA_INT_SECTION);
+		ast.decls().accept(new AstVisitor<Void, Void>() {
+			@Override
+			public Void varDecl(VarDecl ast, Void arg) {
+				cg.emit.emitLabel(AstCodeGenerator.VAR_PREFIX + ast.name);
+				cg.emit.emitConstantData("0");
+				return null;
+			}
+		}, null);
 
-			// Emit the main() method:
-			cg.emit.emitRaw(Config.TEXT_SECTION);
-			cg.emit.emitRaw(".globl " + MAIN);
-			cg.emit.emitLabel(MAIN);
+		// Emit the main() method:
+		cg.emit.emitRaw(Config.TEXT_SECTION);
+		cg.emit.emitRaw(".globl " + MAIN);
+		cg.emit.emitLabel(MAIN);
 
-			cg.emit.emit("enter", "$8", "$0");
-			cg.emit.emit("and", -16, STACK_REG);
-			gen(ast.body());
-			cg.emitMethodSuffix(true);
-			return null;
-		}
+		cg.emit.emit("enter", "$8", "$0");
+		cg.emit.emit("and", -16, STACK_REG);
+		gen(ast.body());
+		cg.emitMethodSuffix(true);
+		return null;
+
 	}
 
 	@Override
-	public Register ifElse(IfElse ast, Void arg) { // todo
+	public Register ifElse(IfElse ast, CurrentContext arg) { // todo
 
 		throw new ToDoException();
 	}
 
 	@Override
-	public Register whileLoop(WhileLoop ast, Void arg) { // todo
+	public Register whileLoop(WhileLoop ast, CurrentContext arg) { // todo
 
 		throw new ToDoException();
 	}
 
 	@Override
-	public Register assign(Assign ast, Void arg) {
+	public Register assign(Assign ast, CurrentContext arg) {
 		/*
 			if (!(ast.left() instanceof Var))
 				throw new RuntimeException("LHS must be var in HW1");
@@ -158,7 +157,7 @@ class StmtGenerator extends AstVisitor<Register, Void> {
 	}
 
 	@Override
-	public Register builtInWrite(BuiltInWrite ast, Void arg) {
+	public Register builtInWrite(BuiltInWrite ast, CurrentContext arg) {
 		{
 			Register reg = cg.eg.gen(ast.arg());
 			cg.emit.emit("sub", constant(16), STACK_REG);
@@ -172,7 +171,7 @@ class StmtGenerator extends AstVisitor<Register, Void> {
 	}
 
 	@Override
-	public Register builtInWriteln(BuiltInWriteln ast, Void arg) {
+	public Register builtInWriteln(BuiltInWriteln ast, CurrentContext arg) {
 		{
 			cg.emit.emit("sub", constant(16), STACK_REG);
 			cg.emit.emitStore("$STR_NL", 0, STACK_REG);
@@ -183,9 +182,27 @@ class StmtGenerator extends AstVisitor<Register, Void> {
 	}
 
 	@Override
-	public Register returnStmt(ReturnStmt ast, Void arg) { // todo
+	public Register returnStmt(ReturnStmt ast, CurrentContext arg) { // todo
 
 		throw new ToDoException();
 	}
 
+	@Override
+	public Register varDecl(VarDecl ast, CurrentContext arg) {
+		switch(ast.sym.kind){
+			case FIELD:
+				break;
+			case PARAM:
+				break;
+			case LOCAL:
+				break;
+			default:
+				break;
+		}
+
+		cg.emit.emitLabel(arg.getClassSymbol().name + arg.get+ AstCodeGenerator.VAR_PREFIX + ast.name);
+		cg.emit.emitConstantData("0");
+		return null;
+
+	}
 }
