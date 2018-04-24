@@ -62,16 +62,16 @@ public class VTable {
             .int $A_my_Method4
          */
         emitter.emitRaw(Config.TEXT_SECTION);
-        emitter.emitLabel(VTableManager.generateMethodTableLabelName(this.className));
+        emitter.emitLabel(LabelUtil.generateMethodTableLabelName(this.className));
 
         if(!superClassName.equals("Object"))
-            emitter.emitConstantData(VTableManager.generateMethodTableLabelName(superClassName));
+            emitter.emitConstantData(LabelUtil.generateMethodTableLabelName(superClassName));
         else
             emitter.emitConstantData("0");
 
 
         for(String methodName : methods){
-            emitter.emitConstantData(VTableManager.generateMethodLabelName(this.className, methodName));
+            emitter.emitConstantData(LabelUtil.generateMethodLabelName(this.className, methodName));
         }
     }
 

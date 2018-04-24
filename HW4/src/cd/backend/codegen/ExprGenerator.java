@@ -4,7 +4,6 @@ import static cd.Config.SCANF;
 import static cd.backend.codegen.AssemblyEmitter.constant;
 import static cd.backend.codegen.AssemblyEmitter.arrayAddress;
 import static cd.backend.codegen.AssemblyEmitter.labelAddress;
-import static cd.backend.codegen.AssemblyEmitter.registerOffset;
 import static cd.backend.codegen.RegisterManager.STACK_REG;
 
 import java.util.Arrays;
@@ -13,7 +12,6 @@ import java.util.List;
 import cd.Config;
 import cd.ToDoException;
 import cd.backend.codegen.RegisterManager.Register;
-import cd.ir.Ast;
 import cd.ir.Ast.BinaryOp;
 import cd.ir.Ast.BooleanConst;
 import cd.ir.Ast.BuiltInRead;
@@ -206,7 +204,7 @@ class ExprGenerator extends ExprVisitor<Register,CurrentContext> {
         cg.emit.emit("call", Config.CALLOC);
         cg.emit.emit("xchg", Register.EAX, objectPointer);
         cg.emit.emit("addl", AssemblyEmitter.constant(8), RegisterManager.STACK_REG);
-        cg.emit.emitMove(AssemblyEmitter.labelAddress(VTableManager.generateMethodTableLabelName(ast.typeName)), AssemblyEmitter.registerOffset(0,objectPointer));
+        cg.emit.emitMove(AssemblyEmitter.labelAddress(LabelUtil.generateMethodTableLabelName(ast.typeName)), AssemblyEmitter.registerOffset(0,objectPointer));
         return objectPointer;
     }
 
@@ -259,7 +257,7 @@ class ExprGenerator extends ExprVisitor<Register,CurrentContext> {
     @Override
     public Register var(Var ast, CurrentContext arg) {
         Register reg = cg.rm.getRegister();
-        cg.emit.emit("movl", AstCodeGenerator.VAR_PREFIX + ast.name, reg);
+        cg.emit.emit("movl", AssemblyEmitter.registerOffset(arg.getOffset(LabelUtil.generateLocalLabelName(ast.name, arg)), Register.EBP), reg);
         return reg;
     }
 

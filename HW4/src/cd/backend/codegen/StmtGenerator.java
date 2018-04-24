@@ -4,9 +4,7 @@ import static cd.backend.codegen.AssemblyEmitter.constant;
 import static cd.backend.codegen.AssemblyEmitter.labelAddress;
 import static cd.backend.codegen.RegisterManager.STACK_REG;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import cd.Config;
 import cd.ToDoException;
@@ -82,7 +80,7 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 	@Override
 	public Register methodDecl(MethodDecl ast, CurrentContext arg) {
 		CurrentContext current = new CurrentContext(arg, ast.sym);
-		String name = VTableManager.generateMethodLabelName(current.getClassSymbol().name, ast.name);
+		String name = LabelUtil.generateMethodLabelName(current.getClassSymbol().name, ast.name);
 
 		cg.emit.emitRaw(Config.TEXT_SECTION);
 		cg.emit.emitLabel(name);
@@ -215,14 +213,12 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 				if (temp != null){
 					cg.emit.emitMove(temp, Register.EAX);
 					cg.rm.releaseRegister(temp);
-				} else {
-					cg.rm.releaseRegister(Register.EAX);
 				}
 
 				// todo: add to vtable
 				break;
 			case LOCAL:
-				name = arg.getClassSymbol().name + "_" + arg.getMethodSymbol().name + "_" + ast.name;
+				name = LabelUtil.generateLocalLabelName(ast.name, arg);
 				arg.addLocal(name);
 				cg.emit.emit("subl", constant(4), Register.ESP);
 				break;

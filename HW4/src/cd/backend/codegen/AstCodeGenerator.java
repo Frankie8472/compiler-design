@@ -1,7 +1,6 @@
 package cd.backend.codegen;
 
 import java.io.Writer;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,7 +88,7 @@ public class AstCodeGenerator {
 
         // Call Main function
         emit.emitLabel(Config.MAIN);
-        emit.emit("call", VTableManager.generateMethodLabelName("Main", "main"));
+        emit.emit("call", LabelUtil.generateMethodLabelName("Main", "main"));
 
     }
 
