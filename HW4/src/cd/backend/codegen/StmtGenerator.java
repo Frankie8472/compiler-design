@@ -1,11 +1,12 @@
 package cd.backend.codegen;
 
-import static cd.Config.MAIN;
 import static cd.backend.codegen.AssemblyEmitter.constant;
 import static cd.backend.codegen.AssemblyEmitter.labelAddress;
 import static cd.backend.codegen.RegisterManager.STACK_REG;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import cd.Config;
 import cd.ToDoException;
@@ -34,6 +35,10 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 	protected final AstCodeGenerator cg;
 
 	private Boolean first_class = true;
+
+	private static Map<String, Map<String, Integer>> utable = new HashMap<>();
+
+	private Integer currentVTableOffset = 0;
 
 	StmtGenerator(AstCodeGenerator astCodeGenerator) {
 		cg = astCodeGenerator;
@@ -67,7 +72,8 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 	@Override
 	public Register classDecl(ClassDecl ast, CurrentContext arg) {
 		CurrentContext current = new CurrentContext(ast.sym);
-
+		currentVTableOffset = 4;
+		Map<String, Integer> vtable = new HashMap<>();
 		// Registers are initialized in AstCodeGenerator-constructor with method initMethodData();
 
 		if (first_class) {
@@ -81,8 +87,23 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 			first_class = false;
 		}
 
+		// Create offset table for vtables
+		for (VarDecl varDecl : ast.fields()){
+			vtable.put(varDecl.name, currentVTableOffset);
+			currentVTableOffset += 4;
+		}
+
+		for (MethodDecl methodDecl : ast.methods()){
+			vtable.put(methodDecl.name, currentVTableOffset);
+			currentVTableOffset += 4;
+		}
+
+		utable.put(ast.name, vtable);
+
 		// add vptr here but only for baseclass, yet confused...
 		visitChildren(ast, current);
+
+
 		return null;
 	}
 
