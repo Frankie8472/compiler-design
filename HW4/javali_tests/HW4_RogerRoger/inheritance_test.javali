@@ -1,0 +1,26 @@
+class Main{
+    void main(){
+        B b;
+        A a;
+        a = new A();
+        write(a.m());
+        b = new B();
+        write(b.m());
+        a = new B();
+        write(a.m());
+    }
+}
+
+class B extends A{
+    int m(){
+        return 1;
+    }
+}
+
+
+class A{
+    int m(){
+        return 0;
+    }
+}
+

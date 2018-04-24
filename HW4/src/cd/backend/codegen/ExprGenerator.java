@@ -159,8 +159,8 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
     @Override
     // Giving value back, not address of value, remember to transform for assignments!
     public Register index(Index ast, CurrentContext arg) { // todo: jcheck
-        Register index = visit(ast.left(), arg);
-        Register array = visit(ast.right(), arg);
+        Register array = visit(ast.left(), arg);
+        Register index = visit(ast.right(), arg);
 
         cg.emit.emitMove(arrayAddress(array, index), array);
         cg.rm.releaseRegister(index);
@@ -214,8 +214,9 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
 
     @Override
     public Register nullConst(NullConst ast, CurrentContext arg) { // todo
-
-        throw new ToDoException();
+        Register reg = cg.rm.getRegister();
+        cg.emit.emitMove("0", reg);
+        return reg;
     }
 
     @Override
@@ -228,7 +229,7 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
     @Override
     public Register methodCall(MethodCallExpr ast, CurrentContext arg) { // todo: jcheck
         // put parameter in inverse queue on stack
-        Register reg = null; //TODO Hack?
+        Register reg;
 
         for (int i = ast.allArguments().size() - 1; i > 0; i--) {
             reg = visit(ast.allArguments().get(i), arg);
@@ -241,9 +242,17 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
 //        reg = visit(ast.receiver(), arg); //TODO: Not nice!
 
         // jump to methodlabel, inheritance not checked
-        cg.emit.emitLoad(0, reg, reg);
+//        cg.emit.emitLoad(0, reg, reg);
         // It needs a '*' because it's an indirect call
-        Integer methodOffset = cg.vTables.get(arg.getClassSymbol().name).getMethodOffset(ast.methodName);
+        Symbol.ClassSymbol currentClass = (Symbol.ClassSymbol) ast.receiver().type; //TODO unsafe Cast
+        Integer methodOffset = null;
+
+        while(methodOffset == null){
+            cg.emit.emitLoad(0, reg, reg);
+            VTable table =  cg.vTables.get(currentClass.name);
+            methodOffset = table.getMethodOffset(ast.methodName);
+            currentClass = currentClass.superClass;
+        }
 
         //TODO if methodOffset == null check super class
 

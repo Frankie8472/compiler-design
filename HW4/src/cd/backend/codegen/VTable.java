@@ -34,10 +34,14 @@ public class VTable {
     }
 
     public Integer getMethodOffset(String methodName){
+        if(!methods.contains(methodName))
+            return null;
         return (methods.indexOf(methodName) + 1) * Config.SIZEOF_PTR;
     }
 
     public Integer getFieldOffset(String fieldName){
+        if(!fields.contains(fieldName))
+            return null;
         return (fields.lastIndexOf(fieldName) + 1) * Config.SIZEOF_PTR;
     }
 

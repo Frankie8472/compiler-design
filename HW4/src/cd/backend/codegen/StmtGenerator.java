@@ -131,9 +131,13 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 		Register rhsReg = cg.eg.visit(ast.right(), arg);
 
 		if (ast.left() instanceof Ast.Index){
-		    Register lhsReg = cg.eg.visit(ast.left(), arg);
-			cg.emit.emitStore(rhsReg, 0, lhsReg);
-            cg.rm.releaseRegister(lhsReg);
+            Ast.Index index = (Ast.Index) ast.left();
+		    Register arrayAddr = cg.eg.visit(index.left(), arg);
+		    Register arrayIndex = cg.eg.visit(index.right(), arg);
+
+            cg.emit.emitMove(rhsReg, AssemblyEmitter.arrayAddress(arrayAddr, arrayIndex));
+//			cg.emit.emitStore(rhsReg, 0, lhsReg);
+//            cg.rm.releaseRegister(lhsReg);
 
 		} else if (ast.left() instanceof Ast.Var) {
 			Var var = (Var) ast.left();

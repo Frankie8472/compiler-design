@@ -88,7 +88,7 @@ public class AstCodeGenerator {
 
         // Call Main function
         emit.emitLabel(Config.MAIN);
-
+        emit.increaseIndent("Call startpoint");
         // Allocate Memory on Heap
         emit.emit("pushl", AssemblyEmitter.constant(Config.SIZEOF_PTR));
         emit.emit("pushl", AssemblyEmitter.constant(vTables.get("Main").getFieldCount()));
@@ -105,6 +105,7 @@ public class AstCodeGenerator {
 //        emit.emit("xorl", Register.EAX, Register.EAX);
         emit.emitRaw("ret");
 
+        emit.decreaseIndent();
 
     }
 
