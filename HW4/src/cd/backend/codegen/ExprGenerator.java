@@ -199,7 +199,15 @@ class ExprGenerator extends ExprVisitor<Register,CurrentContext> {
     @Override
     public Register newObject(NewObject ast, CurrentContext arg) { // todo
         // TODO: Allocate Heap in sizeof(ast.type as class), set Pointer to vtable of the corresponding class
-        throw new ToDoException();
+        Register objectPointer = cg.rm.getRegister();
+        VTable table = cg.vTables.get(ast.typeName);
+        cg.emit.emit("pushl", AssemblyEmitter.constant(Config.SIZEOF_PTR));
+        cg.emit.emit("pushl", AssemblyEmitter.constant(table.getFieldCount()));
+        cg.emit.emit("call", Config.CALLOC);
+        cg.emit.emit("xchg", Register.EAX, objectPointer);
+        cg.emit.emit("addl", AssemblyEmitter.constant(8), RegisterManager.STACK_REG);
+        cg.emit.emitMove(AssemblyEmitter.labelAddress(VTableManager.generateMethodTableLabelName(ast.typeName)), AssemblyEmitter.registerOffset(0,objectPointer));
+        return objectPointer;
     }
 
     @Override

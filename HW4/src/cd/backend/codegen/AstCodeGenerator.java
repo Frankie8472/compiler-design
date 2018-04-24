@@ -1,7 +1,10 @@
 package cd.backend.codegen;
 
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import cd.Config;
 import cd.Main;
@@ -20,14 +23,18 @@ public class AstCodeGenerator {
     protected final AssemblyEmitter emit;
     protected final RegisterManager rm = new RegisterManager();
 
+    protected final Map<String, VTable> vTables;
+
     AstCodeGenerator(Main main, Writer out) {
         initMethodData();
         this.emit = new AssemblyEmitter(out);
         this.main = main;
         this.rnv = new RegsNeededVisitor();
 
+
         this.eg = new ExprGenerator(this);
         this.sg = new StmtGenerator(this);
+        vTables = new HashMap<>();
     }
 
     protected void debug(String format, Object... args) {
@@ -66,9 +73,24 @@ public class AstCodeGenerator {
         emit.emitLabel(DECIMAL_FORMAT_LABEL);
         emit.emitRaw(Config.DOT_STRING + " \"%d\"");
 
+        //DEBUG
+        emit.emitLabel("var_test");
+        emit.emitConstantData("0");
+
+        for (ClassDecl ast : astRoots) {
+            VTable table = new VTable(ast.sym);
+            vTables.put(ast.name, table);
+
+        }
+
         for (ClassDecl ast : astRoots) {
             sg.gen(ast);
         }
+
+        // Call Main function
+        emit.emitLabel(Config.MAIN);
+        emit.emit("call", VTableManager.generateMethodLabelName("Main", "main"));
+
     }
 
 

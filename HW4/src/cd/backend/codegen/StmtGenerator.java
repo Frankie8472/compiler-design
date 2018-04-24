@@ -25,6 +25,7 @@ import cd.ir.Ast.Var;
 import cd.ir.Ast.VarDecl;
 import cd.ir.Ast.WhileLoop;
 import cd.ir.AstVisitor;
+import cd.ir.Symbol;
 import cd.ir.Symbol.MethodSymbol;
 import cd.util.debug.AstOneLine;
 
@@ -34,11 +35,6 @@ import cd.util.debug.AstOneLine;
 class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 	protected final AstCodeGenerator cg;
 
-	private Boolean first_class = true;
-
-	private static Map<String, Map<String, Integer>> utable = new HashMap<>();
-
-	private Integer currentVTableOffset = 0;
 
 	StmtGenerator(AstCodeGenerator astCodeGenerator) {
 		cg = astCodeGenerator;
@@ -74,25 +70,11 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 	@Override
 	public Register classDecl(ClassDecl ast, CurrentContext arg) {
 		CurrentContext current = new CurrentContext(ast.sym);
-		currentVTableOffset = 4;
-		Map<String, Integer> vtable = new HashMap<>();
-		// Registers are initialized in AstCodeGenerator-constructor with method initMethodData();
-		// Create offset table for vtables
-		for (VarDecl varDecl : ast.fields()){
-			vtable.put(varDecl.name, currentVTableOffset);
-			currentVTableOffset += 4;
-		}
 
-		for (MethodDecl methodDecl : ast.methods()){
-			vtable.put(methodDecl.name, currentVTableOffset);
-			currentVTableOffset += 4;
-		}
-
-		utable.put(ast.name, vtable);
+		cg.vTables.get(ast.name).emitStaticMethodVTable(cg.emit);
 
 		// add vptr here but only for baseclass, yet confused...
 		visitChildren(ast, current);
-
 
 		return null;
 	}
@@ -100,7 +82,7 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 	@Override
 	public Register methodDecl(MethodDecl ast, CurrentContext arg) {
 		CurrentContext current = new CurrentContext(arg, ast.sym);
-		String name = current.getClassSymbol().name + "_" + current.getMethodSymbol().name;
+		String name = VTableManager.generateMethodLabelName(current.getClassSymbol().name, ast.name);
 
 		cg.emit.emitRaw(Config.TEXT_SECTION);
 		cg.emit.emitLabel(name);
@@ -117,7 +99,10 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 		visit(ast.decls(), current);
 		visit(ast.body(), current);
 
-		cg.emitMethodSuffix(true); // leave expression
+		if(ast.sym.returnType != Symbol.PrimitiveTypeSymbol.voidType)
+		    cg.emitMethodSuffix(true); // leave expression
+        else
+            cg.emitMethodSuffix(false); // leave expression
 		return null;
 
 	}
@@ -140,14 +125,14 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 			if (!(ast.left() instanceof Var))
 				throw new RuntimeException("LHS must be var in HW1");
 			*/
-		Register lhsReg = visit(ast.left(), arg);
-		Register rhsReg = visit(ast.right(), arg);
+		Register lhsReg = cg.eg.visit(ast.left(), arg);
+		Register rhsReg = cg.eg.visit(ast.right(), arg);
 		if (ast.left() instanceof Ast.Index){
 			cg.emit.emitStore(rhsReg, 0, lhsReg);
 		} else if (ast.left() instanceof Ast.Var) {
 			Var var = (Var) ast.left();
 			cg.emit.emit("movl", rhsReg, AstCodeGenerator.VAR_PREFIX + var.name);
-			cg.rm.releaseRegister(rhsReg);
+//			cg.rm.releaseRegister(rhsReg);
 		} else if (ast.left() instanceof Ast.Field) {
 			// thinking of giving fields, methods, arguments special labels:
 			// "classlabel" + "_" + "method/field"
@@ -166,7 +151,7 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 
 	@Override
 	public Register builtInWrite(BuiltInWrite ast, CurrentContext arg) {
-		Register reg = visit(ast.arg(), arg);
+		Register reg = cg.eg.visit(ast.arg(), arg);
 		cg.emit.emit("sub", constant(16), STACK_REG);
 		cg.emit.emitStore(reg, 4, STACK_REG);
 		cg.emit.emitStore(AssemblyEmitter.labelAddress(AstCodeGenerator.DECIMAL_FORMAT_LABEL), 0, STACK_REG);
@@ -192,7 +177,7 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 		if (ast.arg() == null){
 			cg.emit.emitMove(constant(0), Register.EAX);
 		} else {
-			ret = visit(ast.arg(), arg);
+			ret = cg.eg.visit(ast.arg(), arg);
 			cg.emit.emitMove(ret, Register.EAX);
 			cg.rm.releaseRegister(ret);
 		}
