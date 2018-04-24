@@ -1,5 +1,6 @@
 package cd.backend.codegen;
 
+import cd.Config;
 import cd.ToDoException;
 import cd.ir.Symbol.MethodSymbol;
 import cd.ir.Symbol.ClassSymbol;
@@ -32,28 +33,22 @@ public final class CurrentContext {
      */
     private Map<String, Integer> parameters_and_locals;
 
+
     public CurrentContext(CurrentContext context, MethodSymbol methodSymbol) {
-        this.classSymbol = context.getClassSymbol();
-        this.methodSymbol = methodSymbol;
-        this.parameters_and_locals = new HashMap<>();
-        this.currentLocalOffset = 0;
-        this.currentParameterOffset = 4;
+        this(context.getClassSymbol(), methodSymbol);
     }
 
     public CurrentContext(ClassSymbol classSymbol) {
-        this.classSymbol = classSymbol;
-        this.parameters_and_locals = new HashMap<>();
-        this.methodSymbol = null;
-        this.currentLocalOffset = 0;
-        this.currentParameterOffset = 4;
+        this(classSymbol, null);
     }
 
     public CurrentContext(ClassSymbol classSymbol, MethodSymbol methodSymbol) {
         this.classSymbol = classSymbol;
         this.methodSymbol = methodSymbol;
         this.parameters_and_locals = new HashMap<>();
-        this.currentLocalOffset = 0;
-        this.currentParameterOffset = 4;
+        this.currentLocalOffset = -Config.SIZEOF_PTR;
+        // Skip return address and pushed base pointer
+        this.currentParameterOffset = Config.SIZEOF_PTR * 2;
     }
 
     /**
@@ -82,10 +77,9 @@ public final class CurrentContext {
      * @param name of the parameter as string
      * @return
      */
-    public Void addParameter(String name) {
-        this.currentParameterOffset -= 4;
+    public void addParameter(String name) {
         this.parameters_and_locals.put(name, this.currentParameterOffset);
-        return null;
+        this.currentParameterOffset += Config.SIZEOF_PTR;
     }
 
     /**
@@ -96,10 +90,9 @@ public final class CurrentContext {
      * @param name of the local as string
      * @return nothing
      */
-    public Void addLocal(String name) {
-        this.currentLocalOffset += 4;
+    public void addLocal(String name) {
         this.parameters_and_locals.put(name, this.currentLocalOffset);
-        return null;
+        this.currentLocalOffset -= Config.SIZEOF_PTR;
     }
 
     /**

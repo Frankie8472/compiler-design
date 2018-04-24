@@ -61,9 +61,11 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 	@Override
 	public Register methodCall(MethodCall ast, CurrentContext dummy) { // todo
 		// wenn wird das ufgrüäfe? happens in exprgenerator oder?
-		throw new ToDoException();
+        // Wenns nur e method call ohni assignemnt isch. muess eifach de ExprGenerator calle.
+		return cg.eg.visit(ast.getMethodCallExpr(), dummy);
 	}
 
+	// @frankie: Was isch das?
 	public Register methodCall(MethodSymbol sym, List<Expr> allArguments) {
 		throw new RuntimeException("Not required");
 	}
@@ -75,18 +77,6 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 		currentVTableOffset = 4;
 		Map<String, Integer> vtable = new HashMap<>();
 		// Registers are initialized in AstCodeGenerator-constructor with method initMethodData();
-
-		if (first_class) {
-			// Emit some useful string constants:
-			cg.emit.emitRaw(Config.DATA_STR_SECTION);
-			cg.emit.emitLabel("STR_NL");
-			cg.emit.emitRaw(Config.DOT_STRING + " \"\\n\"");
-			cg.emit.emitLabel("STR_D");
-			cg.emit.emitRaw(Config.DOT_STRING + " \"%d\"");
-
-			first_class = false;
-		}
-
 		// Create offset table for vtables
 		for (VarDecl varDecl : ast.fields()){
 			vtable.put(varDecl.name, currentVTableOffset);
@@ -113,14 +103,15 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 		String name = current.getClassSymbol().name + "_" + current.getMethodSymbol().name;
 
 		cg.emit.emitRaw(Config.TEXT_SECTION);
-		cg.emit.emitRaw(".globl " + name);
 		cg.emit.emitLabel(name);
 
-		cg.emit.emit("enter", "$8", "$0");
+        cg.emit.emit("push", Register.EBP);
+        cg.emit.emitMove(Register.ESP, Register.EBP);
+        // Align stack to be on an address dividable by 16. Important for Macs.
 		cg.emit.emit("and", -16, STACK_REG);
 
 		for (String arg_names : ast.argumentNames){
-			arg.addParameter(name + "_" + arg_names);
+			current.addParameter(name + "_" + arg_names);
 		}
 
 		visit(ast.decls(), current);
@@ -178,7 +169,7 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 		Register reg = visit(ast.arg(), arg);
 		cg.emit.emit("sub", constant(16), STACK_REG);
 		cg.emit.emitStore(reg, 4, STACK_REG);
-		cg.emit.emitStore("$STR_D", 0, STACK_REG);
+		cg.emit.emitStore(AssemblyEmitter.labelAddress(AstCodeGenerator.DECIMAL_FORMAT_LABEL), 0, STACK_REG);
 		cg.emit.emit("call", Config.PRINTF);
 		cg.emit.emit("add", constant(16), STACK_REG);
 		cg.rm.releaseRegister(reg);
@@ -188,7 +179,7 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 	@Override
 	public Register builtInWriteln(BuiltInWriteln ast, CurrentContext arg) {
 		cg.emit.emit("sub", constant(16), STACK_REG);
-		cg.emit.emitStore("$STR_NL", 0, STACK_REG);
+		cg.emit.emitStore(AssemblyEmitter.labelAddress(AstCodeGenerator.NEW_LINE_LABEL), 0, STACK_REG);
 		cg.emit.emit("call", Config.PRINTF);
 		cg.emit.emit("add", constant(16), STACK_REG);
 		return null;
