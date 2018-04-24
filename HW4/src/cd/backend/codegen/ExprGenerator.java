@@ -28,13 +28,14 @@ import cd.ir.Ast.ThisRef;
 import cd.ir.Ast.UnaryOp;
 import cd.ir.Ast.Var;
 import cd.ir.ExprVisitor;
+import cd.ir.Symbol;
 import cd.util.debug.AstOneLine;
 
 /**
  * Generates code to evaluate expressions. After emitting the code, returns a
  * String which indicates the register where the result can be found.
  */
-class ExprGenerator extends ExprVisitor<Register,CurrentContext> {
+class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
     protected final AstCodeGenerator cg;
 
     ExprGenerator(AstCodeGenerator astCodeGenerator) {
@@ -49,7 +50,7 @@ class ExprGenerator extends ExprVisitor<Register,CurrentContext> {
     public Register visit(Expr ast, CurrentContext arg) {
         try {
             cg.emit.increaseIndent("Emitting " + AstOneLine.toString(ast));
-            return super.visit(ast, null);
+            return super.visit(ast, arg);
         } finally {
             cg.emit.decreaseIndent();
         }
@@ -67,11 +68,11 @@ class ExprGenerator extends ExprVisitor<Register,CurrentContext> {
 
         Register leftReg, rightReg;
         if (leftRN > rightRN) {
-            leftReg = gen(ast.left());
-            rightReg = gen(ast.right());
+            leftReg = visit(ast.left(), arg);
+            rightReg = visit(ast.right(), arg);
         } else {
-            rightReg = gen(ast.right());
-            leftReg = gen(ast.left());
+            rightReg = visit(ast.right(), arg);
+            leftReg = visit(ast.left(), arg);
         }
 
         cg.debug("Binary Op: %s (%s,%s)", ast, leftReg, rightReg);
@@ -175,8 +176,10 @@ class ExprGenerator extends ExprVisitor<Register,CurrentContext> {
 
     @Override
     public Register field(Field ast, CurrentContext arg) { // todo
-
-        throw new ToDoException();
+        Register reg = visit(ast.arg(), arg);
+        Integer offset = cg.vTables.get(ast.arg().type.name).getFieldOffset(ast.fieldName);
+        cg.emit.emitMove(AssemblyEmitter.registerOffset(offset, reg), reg);
+        return reg;
     }
 
     @Override
@@ -195,16 +198,17 @@ class ExprGenerator extends ExprVisitor<Register,CurrentContext> {
     }
 
     @Override
-    public Register newObject(NewObject ast, CurrentContext arg) { // todo
+    public Register newObject(NewObject ast, CurrentContext arg) {
         // TODO: Allocate Heap in sizeof(ast.type as class), set Pointer to vtable of the corresponding class
         Register objectPointer = cg.rm.getRegister();
         VTable table = cg.vTables.get(ast.typeName);
+        cg.emit.emit("xchg", objectPointer, Register.EAX); // Backup EAX (even if not in use)
         cg.emit.emit("pushl", AssemblyEmitter.constant(Config.SIZEOF_PTR));
         cg.emit.emit("pushl", AssemblyEmitter.constant(table.getFieldCount()));
         cg.emit.emit("call", Config.CALLOC);
-        cg.emit.emit("xchg", Register.EAX, objectPointer);
+        cg.emit.emit("xchg", Register.EAX, objectPointer); // Restore EAX and put pointer in new register
         cg.emit.emit("addl", AssemblyEmitter.constant(8), RegisterManager.STACK_REG);
-        cg.emit.emitMove(AssemblyEmitter.labelAddress(LabelUtil.generateMethodTableLabelName(ast.typeName)), AssemblyEmitter.registerOffset(0,objectPointer));
+        cg.emit.emitMove(AssemblyEmitter.labelAddress(LabelUtil.generateMethodTableLabelName(ast.typeName)), AssemblyEmitter.registerOffset(0, objectPointer));
         return objectPointer;
     }
 
@@ -216,28 +220,42 @@ class ExprGenerator extends ExprVisitor<Register,CurrentContext> {
 
     @Override
     public Register thisRef(ThisRef ast, CurrentContext arg) { // todo
-
-        throw new ToDoException();
+        Register reg = cg.rm.getRegister();
+        cg.emit.emitLoad(arg.getOffset("this"), RegisterManager.BASE_REG, reg);
+        return reg;
     }
 
     @Override
     public Register methodCall(MethodCallExpr ast, CurrentContext arg) { // todo: jcheck
         // put parameter in inverse queue on stack
-        Register reg;
-        for (int i = ast.allArguments().size() - 1; i >= 0; i--) {
+        Register reg = null; //TODO Hack?
+
+        for (int i = ast.allArguments().size() - 1; i > 0; i--) {
             reg = visit(ast.allArguments().get(i), arg);
             cg.emit.emit("pushl", reg);
             cg.rm.releaseRegister(reg);
         }
+        reg = visit(ast.allArguments().get(0), arg);
+        cg.emit.emit("pushl", reg);
+
+//        reg = visit(ast.receiver(), arg); //TODO: Not nice!
+
         // jump to methodlabel, inheritance not checked
-        cg.emit.emit("call", labelAddress(ast.methodName));
+        cg.emit.emitLoad(0, reg, reg);
+        // It needs a '*' because it's an indirect call
+        Integer methodOffset = cg.vTables.get(arg.getClassSymbol().name).getMethodOffset(ast.methodName);
+
+        //TODO if methodOffset == null check super class
+
+        cg.emit.emit("call", "*" + AssemblyEmitter.registerOffset(methodOffset,reg));
+        cg.emit.emit("xchg", Register.EAX, reg);
         // return eax (return register? right)
-        return Register.EAX;
+        return reg;
     }
 
     @Override
     public Register unaryOp(UnaryOp ast, CurrentContext arg) {
-        Register argReg = gen(ast.arg());
+        Register argReg = visit(ast.arg(), arg);
         switch (ast.operator) {
             case U_PLUS:
                 break;
@@ -257,7 +275,16 @@ class ExprGenerator extends ExprVisitor<Register,CurrentContext> {
     @Override
     public Register var(Var ast, CurrentContext arg) {
         Register reg = cg.rm.getRegister();
-        cg.emit.emit("movl", AssemblyEmitter.registerOffset(arg.getOffset(LabelUtil.generateLocalLabelName(ast.name, arg)), Register.EBP), reg);
+        Integer offset;
+        if (ast.sym.kind == Symbol.VariableSymbol.Kind.FIELD) {
+            offset = cg.vTables.get(arg.getClassSymbol().name).getFieldOffset(ast.name);
+            cg.emit.emitLoad(arg.getOffset("this"), Register.EBP, reg);
+
+            cg.emit.emitLoad(offset, reg, reg);
+        } else {
+            offset = arg.getOffset(LabelUtil.generateLocalLabelName(ast.name, arg));
+            cg.emit.emitLoad(offset, Register.EBP, reg);
+        }
         return reg;
     }
 

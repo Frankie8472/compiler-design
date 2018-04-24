@@ -88,7 +88,23 @@ public class AstCodeGenerator {
 
         // Call Main function
         emit.emitLabel(Config.MAIN);
-        emit.emit("call", LabelUtil.generateMethodLabelName("Main", "main"));
+
+        // Allocate Memory on Heap
+        emit.emit("pushl", AssemblyEmitter.constant(Config.SIZEOF_PTR));
+        emit.emit("pushl", AssemblyEmitter.constant(vTables.get("Main").getFieldCount()));
+        emit.emit("call", Config.CALLOC);
+        emit.emit("addl", AssemblyEmitter.constant(Config.SIZEOF_PTR*2), Register.ESP);
+
+        emit.emitStore(AssemblyEmitter.labelAddress(LabelUtil.generateMethodTableLabelName("Main")), 0, Register.EAX);
+
+        emit.emit("pushl", Register.EAX);
+        emit.emitLoad(0, Register.EAX, Register.EAX);
+
+        emit.emit("call", "*" + AssemblyEmitter.registerOffset(vTables.get("Main").getMethodOffset("main"), Register.EAX));
+        emit.emit("addl", AssemblyEmitter.constant(Config.SIZEOF_PTR), Register.ESP);
+//        emit.emit("xorl", Register.EAX, Register.EAX);
+        emit.emitRaw("ret");
+
 
     }
 

@@ -88,19 +88,22 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
         cg.emit.emit("push", Register.EBP);
         cg.emit.emitMove(Register.ESP, Register.EBP);
         // Align stack to be on an address dividable by 16. Important for Macs.
-		cg.emit.emit("and", -16, STACK_REG);
+//		cg.emit.emit("and", -16, STACK_REG);
+
+
+		current.addParameter("this");
 
 		for (String arg_names : ast.argumentNames){
-			current.addParameter(name + "_" + arg_names);
+			current.addParameter(LabelUtil.generateLocalLabelName(arg_names, current));
 		}
 
 		visit(ast.decls(), current);
 		visit(ast.body(), current);
 
 		if(ast.sym.returnType != Symbol.PrimitiveTypeSymbol.voidType)
-		    cg.emitMethodSuffix(true); // leave expression
+		    cg.emitMethodSuffix(false); // leave expression
         else
-            cg.emitMethodSuffix(false); // leave expression
+            cg.emitMethodSuffix(true); // leave expression
 		return null;
 
 	}
@@ -123,26 +126,45 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 			if (!(ast.left() instanceof Var))
 				throw new RuntimeException("LHS must be var in HW1");
 			*/
-		Register lhsReg = cg.eg.visit(ast.left(), arg);
+//		Register lhsReg = cg.eg.visit(ast.left(), arg);
+
 		Register rhsReg = cg.eg.visit(ast.right(), arg);
+
 		if (ast.left() instanceof Ast.Index){
+		    Register lhsReg = cg.eg.visit(ast.left(), arg);
 			cg.emit.emitStore(rhsReg, 0, lhsReg);
+            cg.rm.releaseRegister(lhsReg);
+
 		} else if (ast.left() instanceof Ast.Var) {
 			Var var = (Var) ast.left();
-			cg.emit.emit("movl", rhsReg, AstCodeGenerator.VAR_PREFIX + var.name);
+			Integer offset;
+			if(var.sym.kind == Symbol.VariableSymbol.Kind.FIELD){
+                offset = cg.vTables.get(arg.getClassSymbol().name).getFieldOffset(var.name);
+                Register temp = cg.rm.getRegister();
+                cg.emit.emitLoad(arg.getOffset("this"), Register.EBP, temp);
+
+                cg.emit.emitStore(rhsReg, offset, temp);
+                cg.rm.releaseRegister(temp);
+            } else {
+                offset = arg.getOffset(LabelUtil.generateLocalLabelName(var.name, arg));
+                cg.emit.emitStore(rhsReg, offset, Register.EBP);
+            }
+//			cg.emit.emit("movl", rhsReg, AstCodeGenerator.VAR_PREFIX + var.name);
 //			cg.rm.releaseRegister(rhsReg);
+
 		} else if (ast.left() instanceof Ast.Field) {
-			// thinking of giving fields, methods, arguments special labels:
-			// "classlabel" + "_" + "method/field"
-			// "classlabel" + "_" + "method/field" + "_" + "var_" + "varname"
-			// but then I must remember in which class/ method I am and inheritance
-			// todo: thoughts on that, j?
+			Ast.Field field = (Ast.Field) ast.left();
+			Register classAddr = cg.eg.visit(field.arg(), arg);
+			Integer fieldOffset = cg.vTables.get(field.arg().type.name).getFieldOffset(field.fieldName);
+            cg.emit.emitMove(rhsReg, AssemblyEmitter.registerOffset(fieldOffset, classAddr));
+			cg.rm.releaseRegister(classAddr);
+
 		} else {
 			throw new ToDoException(); // Todo: choose right errocode
 		}
 
 		cg.rm.releaseRegister(rhsReg);
-		cg.rm.releaseRegister(lhsReg);
+
 		return null;
 
 	}
@@ -189,33 +211,32 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 
 		switch(ast.sym.kind){
 			case FIELD:
-				Register temp = null;
-				name = arg.getClassSymbol().name + "_" + ast.name;
-				cg.emit.emitRaw(Config.DATA_INT_SECTION);
-				cg.emit.emitRaw(".globl " + name);
-				cg.emit.emitLabel(name);
-				//should instead of 0, a ptr to the heap location of the data be saved?
-				// do I need this, if I move int here after?
-				cg.emit.emitConstantData("0");
-
-				//try for heap allocation todo: jcheck
-				if (cg.rm.isInUse(Register.EAX)){
-					temp = cg.rm.getRegister();
-					cg.emit.emitMove(Register.EAX, temp);
-				}
-
-				cg.emit.emit("pushl", constant(1));
-				cg.emit.emit("pushl", Config.SIZEOF_PTR);
-				cg.emit.emit("call", Config.CALLOC);
-				cg.emit.emit("addl", constant(2*Config.SIZEOF_PTR), Register.ESP);
-				cg.emit.emitMove(Register.EAX, labelAddress(name));
-
-				if (temp != null){
-					cg.emit.emitMove(temp, Register.EAX);
-					cg.rm.releaseRegister(temp);
-				}
-
-				// todo: add to vtable
+//				Register temp = null;
+//				name = arg.getClassSymbol().name + "_" + ast.name;
+//				cg.emit.emitRaw(Config.DATA_INT_SECTION);
+//				cg.emit.emitLabel(name);
+//				//should instead of 0, a ptr to the heap location of the data be saved?
+//				// do I need this, if I move int here after?
+//				cg.emit.emitConstantData("0");
+//
+//				//try for heap allocation todo: jcheck
+//				if (cg.rm.isInUse(Register.EAX)){
+//					temp = cg.rm.getRegister();
+//					cg.emit.emitMove(Register.EAX, temp);
+//				}
+//
+//				cg.emit.emit("pushl", constant(1));
+//				cg.emit.emit("pushl", Config.SIZEOF_PTR);
+//				cg.emit.emit("call", Config.CALLOC);
+//				cg.emit.emit("addl", constant(2*Config.SIZEOF_PTR), Register.ESP);
+//				cg.emit.emitMove(Register.EAX, labelAddress(name));
+//
+//				if (temp != null){
+//					cg.emit.emitMove(temp, Register.EAX);
+//					cg.rm.releaseRegister(temp);
+//				}
+//
+//				// todo: add to vtable
 				break;
 			case LOCAL:
 				name = LabelUtil.generateLocalLabelName(ast.name, arg);
