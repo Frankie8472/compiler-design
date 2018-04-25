@@ -104,34 +104,32 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 		String end_label = cg.emit.uniqueLabel();
 
 		Register condition = cg.eg.visit(ast.condition(), arg); // will contain boolean 1 or 0
-		cg.emit.emit("pushl", condition);
-		cg.rm.releaseRegister(condition);
 
 		//test
 		cg.emit.emit("testl", condition, condition);
 		cg.emit.emit("je", else_label);
 
 		//true
-		visit(ast.then(), arg);
-
-		condition = cg.rm.getRegister();
-		cg.emit.emit("popl", condition);
-
+        cg.emit.emit("pushl", condition);
+        cg.rm.releaseRegister(condition);
+        visit(ast.then(), arg);
+        condition = cg.rm.getRegister();
+        cg.emit.emit("popl", condition);
 		cg.emit.emit("jmp", end_label);
 
 		//else
-		cg.emit.emitLabel(else_label);
-		visit(ast.otherwise(), arg);
-
-		condition = cg.rm.getRegister();
-		cg.emit.emit("popl", condition);
+        cg.emit.emitLabel(else_label);
+        cg.emit.emit("pushl", condition);
+        cg.rm.releaseRegister(condition);
+        visit(ast.otherwise(), arg);
+        condition = cg.rm.getRegister();
+        cg.emit.emit("popl", condition);
 
 		//end
 		cg.emit.emitLabel(end_label);
 
 		cg.rm.releaseRegister(condition);
 		return null;
-
 	}
 
 	@Override
@@ -148,8 +146,12 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 		cg.emit.emit("je", end_label);
 
 		//loop body
+        cg.emit.emit("pushl", condition);
+        cg.rm.releaseRegister(condition);
 		visit(ast.body(), arg);
-		cg.emit.emit("jmp", loop_label);
+        condition = cg.rm.getRegister();
+        cg.emit.emit("popl", condition);
+        cg.emit.emit("jmp", loop_label);
 
 		//exit loop
 		cg.emit.emitLabel(end_label);

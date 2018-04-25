@@ -315,7 +315,7 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
     }
 
     @Override
-    public Register field(Field ast, CurrentContext arg) { // todo
+    public Register field(Field ast, CurrentContext arg) {
         Register reg = visit(ast.arg(), arg);
         Integer offset = cg.vTables.get(ast.arg().type.name).getFieldOffset(ast.fieldName);
         cg.emit.emitMove(AssemblyEmitter.registerOffset(offset, reg), reg);
@@ -374,7 +374,6 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
         System.out.println(addressOrType);
         cg.emit.emit("movl", addressOrType, AssemblyEmitter.registerOffset(0, array));
 
-
         return array;
     }
 
@@ -402,38 +401,36 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
     }
 
     @Override
-
-    public Register nullConst(NullConst ast, CurrentContext arg) { // todo: jcheck
+    public Register nullConst(NullConst ast, CurrentContext arg) {
         Register ret = cg.rm.getRegister();
         cg.emit.emitMove(AssemblyEmitter.constant(0), ret);
         return ret;
     }
 
     @Override
-    public Register thisRef(ThisRef ast, CurrentContext arg) { // todo
+    public Register thisRef(ThisRef ast, CurrentContext arg) {
         Register reg = cg.rm.getRegister();
         cg.emit.emitLoad(arg.getOffset("this"), RegisterManager.BASE_REG, reg);
         return reg;
     }
 
     @Override
-    public Register methodCall(MethodCallExpr ast, CurrentContext arg) { // todo: jcheck
+    public Register methodCall(MethodCallExpr ast, CurrentContext arg) {
         // put parameter in inverse queue on stack
-        Register reg;
+        Register reg = null;
 
-        for (int i = ast.allArguments().size() - 1; i > 0; i--) {
+        for (int i = ast.allArguments().size() - 1; i >= 0; i--) {
             reg = visit(ast.allArguments().get(i), arg);
             cg.emit.emit("pushl", reg);
             cg.rm.releaseRegister(reg);
         }
-        reg = visit(ast.allArguments().get(0), arg);
-        cg.emit.emit("pushl", reg);
-
-//        reg = visit(ast.receiver(), arg); //TODO: Not nice!
 
         // jump to methodlabel, inheritance not checked
 //        cg.emit.emitLoad(0, reg, reg);
         // It needs a '*' because it's an indirect call
+
+        reg = cg.rm.getRegister();
+
         Symbol.ClassSymbol currentClass = (Symbol.ClassSymbol) ast.receiver().type; //TODO unsafe Cast
         Integer methodOffset = null;
 
@@ -443,8 +440,7 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
             methodOffset = table.getMethodOffset(ast.methodName);
             currentClass = currentClass.superClass;
         }
-
-        //TODO if methodOffset == null check super class
+//        cg.emit.emitLoad(0, reg, reg);
 
         cg.emit.emit("call", "*" + AssemblyEmitter.registerOffset(methodOffset, reg));
         cg.emit.emit("xchg", Register.EAX, reg);
