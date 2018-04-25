@@ -1,9 +1,6 @@
 package cd.backend.codegen;
 
 import static cd.Config.SCANF;
-import static cd.backend.codegen.AssemblyEmitter.constant;
-import static cd.backend.codegen.AssemblyEmitter.arrayAddress;
-import static cd.backend.codegen.AssemblyEmitter.labelAddress;
 import static cd.backend.codegen.RegisterManager.STACK_REG;
 
 import java.util.Arrays;
@@ -65,6 +62,10 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
 
         int leftRN = cg.rnv.calc(ast.left());
         int rightRN = cg.rnv.calc(ast.right());
+        String if_label = cg.emit.uniqueLabel();
+        String end_label = cg.emit.uniqueLabel();
+        List<Register> dontBother;
+        Register[] affected = {Register.EAX, Register.EBX, Register.EDX};
 
         Register leftReg, rightReg;
         if (leftRN > rightRN) {
@@ -81,18 +82,20 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
             case B_TIMES:
                 cg.emit.emit("imul", rightReg, leftReg);
                 break;
+
             case B_PLUS:
                 cg.emit.emit("add", rightReg, leftReg);
                 break;
+
             case B_MINUS:
                 cg.emit.emit("sub", rightReg, leftReg);
                 break;
+
             case B_DIV:
                 // Save EAX, EBX, and EDX to the stack if they are not used
                 // in this subtree (but are used elsewhere). We will be
                 // changing them.
-                List<Register> dontBother = Arrays.asList(rightReg, leftReg);
-                Register[] affected = {Register.EAX, Register.EBX, Register.EDX};
+                dontBother = Arrays.asList(rightReg, leftReg);
 
                 for (Register s : affected)
                     if (!dontBother.contains(s) && cg.rm.isInUse(s))
@@ -115,6 +118,103 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
                         cg.emit.emit("popl", s);
                 }
                 break;
+
+            case B_MOD:
+                // Save EAX, EBX, and EDX to the stack if they are not used
+                // in this subtree (but are used elsewhere). We will be
+                // changing them.
+                dontBother = Arrays.asList(rightReg, leftReg);
+
+                for (Register s : affected)
+                    if (!dontBother.contains(s) && cg.rm.isInUse(s))
+                        cg.emit.emit("pushl", s);
+
+                // Move the LHS (numerator) into eax
+                // Move the RHS (denominator) into ebx
+                cg.emit.emit("pushl", rightReg);
+                cg.emit.emit("pushl", leftReg);
+                cg.emit.emit("popl", Register.EAX);
+                cg.emit.emit("popl", Register.EBX);
+                cg.emit.emitRaw("cltd"); // sign-extend %eax into %edx
+                cg.emit.emit("idivl", Register.EBX); // division, result into edx:eax
+
+                // Move the result into the LHS, and pop off anything we saved
+                cg.emit.emit("movl", Register.EDX, leftReg);
+                for (int i = affected.length - 1; i >= 0; i--) {
+                    Register s = affected[i];
+                    if (!dontBother.contains(s) && cg.rm.isInUse(s))
+                        cg.emit.emit("popl", s);
+                }
+                break;
+
+            case B_OR:
+                cg.emit.emit("andl", rightReg, leftReg);
+                break;
+
+            case B_AND:
+                cg.emit.emit("orl", rightReg, leftReg);
+                break;
+
+            case B_EQUAL:
+                cg.emit.emit("cmpl", rightReg, leftReg);
+                cg.emit.emit("je", if_label);
+                cg.emit.emitMove(AssemblyEmitter.constant(0), leftReg);
+                cg.emit.emit("jmp", end_label);
+                cg.emit.emitLabel(if_label);
+                cg.emit.emitMove(AssemblyEmitter.constant(1), leftReg);
+                cg.emit.emitLabel(end_label);
+                break;
+
+            case B_NOT_EQUAL:
+                cg.emit.emit("cmpl", rightReg, leftReg);
+                cg.emit.emit("jne", if_label);
+                cg.emit.emitMove(AssemblyEmitter.constant(0), leftReg);
+                cg.emit.emit("jmp", end_label);
+                cg.emit.emitLabel(if_label);
+                cg.emit.emitMove(AssemblyEmitter.constant(1), leftReg);
+                cg.emit.emitLabel(end_label);
+                break;
+
+            case B_LESS_THAN:
+                cg.emit.emit("cmpl", rightReg, leftReg);
+                cg.emit.emit("jl", if_label);
+                cg.emit.emitMove(AssemblyEmitter.constant(0), leftReg);
+                cg.emit.emit("jmp", end_label);
+                cg.emit.emitLabel(if_label);
+                cg.emit.emitMove(AssemblyEmitter.constant(1), leftReg);
+                cg.emit.emitLabel(end_label);
+                break;
+
+            case B_GREATER_THAN:
+                cg.emit.emit("cmpl", rightReg, leftReg);
+                cg.emit.emit("jg", if_label);
+                cg.emit.emitMove(AssemblyEmitter.constant(0), leftReg);
+                cg.emit.emit("jmp", end_label);
+                cg.emit.emitLabel(if_label);
+                cg.emit.emitMove(AssemblyEmitter.constant(1), leftReg);
+                cg.emit.emitLabel(end_label);
+                break;
+
+            case B_LESS_OR_EQUAL:
+                cg.emit.emit("cmpl", rightReg, leftReg);
+                cg.emit.emit("jle", if_label);
+                cg.emit.emitMove(AssemblyEmitter.constant(0), leftReg);
+                cg.emit.emit("jmp", end_label);
+                cg.emit.emitLabel(if_label);
+                cg.emit.emitMove(AssemblyEmitter.constant(1), leftReg);
+                cg.emit.emitLabel(end_label);
+                break;
+
+            case B_GREATER_OR_EQUAL:
+                cg.emit.emit("cmpl", rightReg, leftReg);
+                cg.emit.emit("jge", if_label);
+                cg.emit.emitMove(AssemblyEmitter.constant(0), leftReg);
+                cg.emit.emit("jmp", end_label);
+                cg.emit.emitLabel(if_label);
+                cg.emit.emitMove(AssemblyEmitter.constant(1), leftReg);
+                cg.emit.emitLabel(end_label);
+                break;
+
             default: {
                 throw new ToDoException(); // todo: throw correct error code
             }
@@ -129,9 +229,9 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
     public Register booleanConst(BooleanConst ast, CurrentContext arg) { //todo: jcheck
         Register reg = cg.rm.getRegister();
         if (ast.value) {
-            cg.emit.emitMove(constant(1), reg);
+            cg.emit.emitMove(AssemblyEmitter.constant(1), reg);
         } else {
-            cg.emit.emitMove(constant(0), reg);
+            cg.emit.emitMove(AssemblyEmitter.constant(0), reg);
         }
         return reg;
     }
@@ -140,29 +240,48 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
     @Override
     public Register builtInRead(BuiltInRead ast, CurrentContext arg) {
         Register reg = cg.rm.getRegister();
-        cg.emit.emit("sub", constant(16), STACK_REG);
+        cg.emit.emit("sub", AssemblyEmitter.constant(16), STACK_REG);
         cg.emit.emit("leal", AssemblyEmitter.registerOffset(8, STACK_REG), reg);
         cg.emit.emitStore(reg, 4, STACK_REG);
         cg.emit.emitStore(AssemblyEmitter.labelAddress(AstCodeGenerator.DECIMAL_FORMAT_LABEL), 0, STACK_REG);
         cg.emit.emit("call", SCANF);
         cg.emit.emitLoad(8, STACK_REG, reg);
-        cg.emit.emit("add", constant(16), STACK_REG);
+        cg.emit.emit("add", AssemblyEmitter.constant(16), STACK_REG);
         return reg;
     }
 
     @Override
     public Register cast(Cast ast, CurrentContext arg) { // todo
+        Register reg = visit(ast.arg(), arg);
 
-        throw new ToDoException();
+        cg.emit.emit("pushl", AssemblyEmitter.registerOffset(0, reg));
+
+        if (ast.type instanceof Symbol.ArrayTypeSymbol) {
+            Symbol.ArrayTypeSymbol typeToCast = (Symbol.ArrayTypeSymbol) ast.type;
+            cg.emit.emit("pushl",LabelUtil.generateMethodTableLabelName(typeToCast.elementType.name) + "+1");
+        } else {
+            System.out.println(ast.typeName);
+            System.out.println(LabelUtil.generateMethodTableLabelName(ast.typeName));
+            cg.emit.emit("pushl", AssemblyEmitter.labelAddress(LabelUtil.generateMethodTableLabelName(ast.typeName)));
+        }
+//        cg.emit.emit("pushl", reg);
+
+        cg.emit.emit("call", "cast");
+        cg.emit.emit("addl", AssemblyEmitter.constant(Config.SIZEOF_PTR * 2), RegisterManager.STACK_REG);
+        cg.emit.emit("popl", reg);
+
+        return reg;
     }
 
     @Override
-    // Giving value back, not address of value, remember to transform for assignments!
     public Register index(Index ast, CurrentContext arg) { // todo: jcheck
+
+        //TODO: Do inbound check!
         Register array = visit(ast.left(), arg);
         Register index = visit(ast.right(), arg);
 
-        cg.emit.emitMove(arrayAddress(array, index), array);
+//        cg.emit.emit("addl", Config.SIZEOF_PTR * 2, index);
+        cg.emit.emitMove(AssemblyEmitter.arrayAddress(array, index), array);
         cg.rm.releaseRegister(index);
         return array;
     }
@@ -170,7 +289,7 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
     @Override
     public Register intConst(IntConst ast, CurrentContext arg) {
         Register reg = cg.rm.getRegister();
-        cg.emit.emitMove(constant(ast.value), reg);
+        cg.emit.emitMove(AssemblyEmitter.constant(ast.value), reg);
         return reg;
     }
 
@@ -183,23 +302,74 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
     }
 
     @Override
-    public Register newArray(NewArray ast, CurrentContext arg) { // todo
-        // is the array size a given?
+    public Register newArray(NewArray ast, CurrentContext arg) {
+        /*
+            Array Layout
+                -------@ Memory 0xYYYYYYYY ------
+                | METHOD_VTABLE_PTR + 1         |
+                | lenght                        |
+                | Array contents                |
+                ---------------------------------
+
+            If the LSB of the METHOD_VTABLE_PTR is one we know it is an array. We align the METHOD_VTABLE to be on an
+            address dividable by four so the LSB should always be 0 for a normal address.
+
+            If it is an int array METHOD_VTABLE_PTR is 3 (... 0011)
+            if it is a boolean array METHOD_VTABLE_PTR is 1 ( ... 0001)
+         */
         Register array_size = visit(ast.arg(), arg);
         Register array = cg.rm.getRegister();
-        cg.emit.emit("imull", Config.SIZEOF_PTR, array_size);
-        cg.emit.emit("subl", array_size, Register.ESP); // does this work? sceptic!
-        cg.emit.emitMove(Register.ESP, array);
 
+        cg.emit.emit("xchg", array, Register.EAX);
+
+        cg.emit.emit("pushl", AssemblyEmitter.constant(Config.SIZEOF_PTR));
+        cg.emit.emit("addl", 2, array_size);
+        cg.emit.emit("pushl", array_size);
         cg.rm.releaseRegister(array_size);
-        return array;
 
-        // can stack release be neglected?
+        cg.emit.emit("call", Config.CALLOC);
+
+        cg.emit.emit("addl", AssemblyEmitter.constant(Config.SIZEOF_PTR), RegisterManager.STACK_REG);
+        cg.emit.emit("xchg", Register.EAX, array);
+
+        //TODO store method pointer let it be 0 for now
+
+        //TODO Identify type of stored entries
+
+
+        Symbol.TypeSymbol arrayType = ((Symbol.ArrayTypeSymbol) ast.type).elementType;
+        String addressOrType;
+
+        if (arrayType.isReferenceType()) {
+            addressOrType = AssemblyEmitter.labelAddress(LabelUtil.generateMethodTableLabelName(arrayType.name)) + "+1";
+
+        } else {
+            Symbol.PrimitiveTypeSymbol primitive = (Symbol.PrimitiveTypeSymbol) arrayType;
+
+            if (primitive == Symbol.PrimitiveTypeSymbol.intType) {
+                addressOrType = AssemblyEmitter.constant(3); //TODO Put these constants somewhere better
+            } else {
+                addressOrType = AssemblyEmitter.constant(1);
+            }
+
+        }
+        cg.emit.emit("movl", addressOrType, AssemblyEmitter.registerOffset(Config.SIZEOF_PTR, array));
+
+
+        return array;
     }
 
     @Override
     public Register newObject(NewObject ast, CurrentContext arg) {
         // TODO: Allocate Heap in sizeof(ast.type as class), set Pointer to vtable of the corresponding class
+        /*
+            Object Layout
+                -------@ Memory 0xYYYYYYYY ------
+                | METHOD_VTABLE_PTR             |
+                | [Fields from Superclass(es)]  |
+                | [Fields from this]            |
+                ---------------------------------
+         */
         Register objectPointer = cg.rm.getRegister();
         VTable table = cg.vTables.get(ast.typeName);
         cg.emit.emit("xchg", objectPointer, Register.EAX); // Backup EAX (even if not in use)
@@ -213,10 +383,11 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
     }
 
     @Override
-    public Register nullConst(NullConst ast, CurrentContext arg) { // todo
-        Register reg = cg.rm.getRegister();
-        cg.emit.emitMove("0", reg);
-        return reg;
+
+    public Register nullConst(NullConst ast, CurrentContext arg) { // todo: jcheck
+        Register ret = cg.rm.getRegister();
+        cg.emit.emitMove(AssemblyEmitter.constant(0), ret);
+        return ret;
     }
 
     @Override
@@ -247,16 +418,16 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
         Symbol.ClassSymbol currentClass = (Symbol.ClassSymbol) ast.receiver().type; //TODO unsafe Cast
         Integer methodOffset = null;
 
-        while(methodOffset == null){
+        while (methodOffset == null) {
             cg.emit.emitLoad(0, reg, reg);
-            VTable table =  cg.vTables.get(currentClass.name);
+            VTable table = cg.vTables.get(currentClass.name);
             methodOffset = table.getMethodOffset(ast.methodName);
             currentClass = currentClass.superClass;
         }
 
         //TODO if methodOffset == null check super class
 
-        cg.emit.emit("call", "*" + AssemblyEmitter.registerOffset(methodOffset,reg));
+        cg.emit.emit("call", "*" + AssemblyEmitter.registerOffset(methodOffset, reg));
         cg.emit.emit("xchg", Register.EAX, reg);
         // return eax (return register? right)
         return reg;

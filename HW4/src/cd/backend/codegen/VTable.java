@@ -17,16 +17,19 @@ public class VTable {
 
     public VTable(Symbol.ClassSymbol classSymbol){
         className = classSymbol.name;
-        superClassName = classSymbol.superClass.name;
-        Symbol.ClassSymbol currentSymbol = classSymbol;
+        if(classSymbol.superClass != null) {
+            superClassName = classSymbol.superClass.name;
 
-        while (currentSymbol.superClass != null) {
-            for (Symbol.VariableSymbol field : currentSymbol.fields.values()) {
-                fields.add(field.name);
+            Symbol.ClassSymbol currentSymbol = classSymbol;
+
+            while (currentSymbol.superClass != null) {
+                for (Symbol.VariableSymbol field : currentSymbol.fields.values()) {
+                    fields.add(field.name);
+                }
+                currentSymbol = currentSymbol.superClass;
             }
-            currentSymbol = currentSymbol.superClass;
+            Collections.reverse(fields);
         }
-        Collections.reverse(fields);
 
         for (Symbol.MethodSymbol method : classSymbol.methods.values()) {
             methods.add(method.name);
@@ -45,6 +48,14 @@ public class VTable {
         return (fields.lastIndexOf(fieldName) + 1) * Config.SIZEOF_PTR;
     }
 
+    public Integer getOffset(String varName) {
+
+        if (getMethodOffset(varName) != null){
+            return getMethodOffset(varName);
+        }
+
+        return getFieldOffset(varName);
+    }
 
     public Integer getFullSize(){
         return (fields.size() + 1) * Config.SIZEOF_PTR;
@@ -65,10 +76,11 @@ public class VTable {
             .int $A_my_Method3
             .int $A_my_Method4
          */
-        emitter.emitRaw(Config.TEXT_SECTION);
+        emitter.emitRaw(Config.DATA_INT_SECTION);
+        emitter.emitRaw(".align 4");
         emitter.emitLabel(LabelUtil.generateMethodTableLabelName(this.className));
 
-        if(!superClassName.equals("Object"))
+        if(superClassName != null)
             emitter.emitConstantData(LabelUtil.generateMethodTableLabelName(superClassName));
         else
             emitter.emitConstantData("0");

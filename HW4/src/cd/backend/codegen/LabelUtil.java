@@ -1,6 +1,6 @@
 package cd.backend.codegen;
 
-public class LabelUtil { // TODO: Rename!!
+public class LabelUtil {
 
     public static String generateMethodTableLabelName(String className){
         return className + "_method_table";

@@ -1,6 +1,7 @@
 package cd.backend.codegen;
 
-import java.io.Writer;
+import java.io.*;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,7 @@ import cd.Config;
 import cd.Main;
 import cd.backend.codegen.RegisterManager.Register;
 import cd.ir.Ast.ClassDecl;
+import cd.ir.Symbol;
 
 public class AstCodeGenerator {
 
@@ -49,6 +51,8 @@ public class AstCodeGenerator {
     protected static final String NEW_LINE_LABEL = "STR_NL";
     protected static final String DECIMAL_FORMAT_LABEL = "STR_D";
 
+    private static final String CASTING_ASSEMBLY_PATH = "src/cd/backend/codegen/check_casts.s";
+
     /**
      * Main method. Causes us to emit x86 assembly corresponding to {@code ast}
      * into {@code file}. Throws a {@link RuntimeException} should any I/O error
@@ -72,9 +76,9 @@ public class AstCodeGenerator {
         emit.emitLabel(DECIMAL_FORMAT_LABEL);
         emit.emitRaw(Config.DOT_STRING + " \"%d\"");
 
-        //DEBUG
-        emit.emitLabel("var_test");
-        emit.emitConstantData("0");
+        VTable objectTable = new VTable(Symbol.ClassSymbol.objectType);
+        vTables.put(Symbol.ClassSymbol.objectType.name, objectTable);
+        objectTable.emitStaticMethodVTable(emit);
 
         for (ClassDecl ast : astRoots) {
             VTable table = new VTable(ast.sym);
@@ -87,6 +91,7 @@ public class AstCodeGenerator {
         }
 
         // Call Main function
+        emit.emitRaw(Config.TEXT_SECTION);
         emit.emitLabel(Config.MAIN);
         emit.increaseIndent("Call startpoint");
         // Allocate Memory on Heap
@@ -100,13 +105,34 @@ public class AstCodeGenerator {
         emit.emit("pushl", Register.EAX);
         emit.emitLoad(0, Register.EAX, Register.EAX);
 
-        emit.emit("call", "*" + AssemblyEmitter.registerOffset(vTables.get("Main").getMethodOffset("main"), Register.EAX));
+        emit.emit("call", "*" + AssemblyEmitter.registerOffset(vTables.get("Main").getOffset("main"), Register.EAX));
         emit.emit("addl", AssemblyEmitter.constant(Config.SIZEOF_PTR), Register.ESP);
 //        emit.emit("xorl", Register.EAX, Register.EAX);
         emit.emitRaw("ret");
 
         emit.decreaseIndent();
 
+        emit.emitRaw(loadCastingAssembly(CASTING_ASSEMBLY_PATH));
+
+    }
+
+    protected String loadCastingAssembly(String filename){
+        String assembly;
+        try(BufferedReader br = new BufferedReader(new FileReader(filename))){
+            StringBuilder sb = new StringBuilder();
+            String line = br.readLine();
+
+            while(line != null){
+                sb.append(line);
+                sb.append(System.lineSeparator());
+                line = br.readLine();
+            }
+            assembly = sb.toString();
+            return MessageFormat.format(assembly, LabelUtil.generateMethodTableLabelName(Symbol.ClassSymbol.objectType.name), Config.EXIT);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 

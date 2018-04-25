@@ -56,12 +56,10 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 	public Register methodCall(MethodCall ast, CurrentContext dummy) { // todo
 		// wenn wird das ufgrüäfe? happens in exprgenerator oder?
         // Wenns nur e method call ohni assignemnt isch. muess eifach de ExprGenerator calle.
-		return cg.eg.visit(ast.getMethodCallExpr(), dummy);
-	}
+		Register reg =  cg.eg.visit(ast.getMethodCallExpr(), dummy);
+		cg.rm.releaseRegister(reg);
+		return null;
 
-	// @frankie: Was isch das?
-	public Register methodCall(MethodSymbol sym, List<Expr> allArguments) {
-		throw new RuntimeException("Not required");
 	}
 
 	// Emit vtable for arrays of this class:
@@ -110,14 +108,49 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 
 	@Override
 	public Register ifElse(IfElse ast, CurrentContext arg) { // todo
+		String else_label = cg.emit.uniqueLabel();
+		String end_label = cg.emit.uniqueLabel();
 
-		throw new ToDoException();
+		Register condition = cg.eg.visit(ast.condition(), arg);
+
+		//test
+		cg.emit.emit("testl", condition, condition);
+		cg.emit.emit("je", else_label);
+
+		//true
+		visit(ast.then(), arg);
+		cg.emit.emit("jmp", end_label);
+
+		//else
+		cg.emit.emitLabel(else_label);
+		visit(ast.otherwise(), arg);
+
+		//end
+		cg.emit.emitLabel(end_label);
+		return null;
+
 	}
 
 	@Override
 	public Register whileLoop(WhileLoop ast, CurrentContext arg) { // todo
+		String loop_label = cg.emit.uniqueLabel();
+		String end_label = cg.emit.uniqueLabel();
 
-		throw new ToDoException();
+		//loop beginning
+		cg.emit.emitLabel(loop_label);
+		Register condition = visit(ast.condition(), arg); // will contain boolean 1 or 0
+
+		//test
+		cg.emit.emit("testl", condition, condition);
+		cg.emit.emit("je", end_label);
+
+		//loop body
+		visit(ast.body(), arg);
+		cg.emit.emit("jmp", loop_label);
+
+		//exit loop
+		cg.emit.emitLabel(end_label);
+		return null;
 	}
 
 	@Override
