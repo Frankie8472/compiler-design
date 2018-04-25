@@ -156,14 +156,13 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
 
             case B_AND:
                 cg.emit.emit("orl", rightReg, leftReg);
-
                 break;
 
             case B_EQUAL:
                 cg.emit.emit("cmpl", rightReg, leftReg);
-                cg.emit.emit("jmp", labelAddress(if_label));
-                cg.emit.emit(constant(0), leftReg);
-                cg.emit.emit("jmp", labelAddress(end_label));
+                cg.emit.emit("je", if_label);
+                cg.emit.emitMove(constant(0), leftReg);
+                cg.emit.emit("jmp", end_label);
                 cg.emit.emitLabel(if_label);
                 cg.emit.emitMove(constant(1), leftReg);
                 cg.emit.emitLabel(end_label);
@@ -171,9 +170,9 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
 
             case B_NOT_EQUAL:
                 cg.emit.emit("cmpl", rightReg, leftReg);
-                cg.emit.emit("jne", labelAddress(if_label));
-                cg.emit.emit(constant(0), leftReg);
-                cg.emit.emit("jmp", labelAddress(end_label));
+                cg.emit.emit("jne", if_label);
+                cg.emit.emitMove(constant(0), leftReg);
+                cg.emit.emit("jmp", end_label);
                 cg.emit.emitLabel(if_label);
                 cg.emit.emitMove(constant(1), leftReg);
                 cg.emit.emitLabel(end_label);
@@ -181,9 +180,9 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
 
             case B_LESS_THAN:
                 cg.emit.emit("cmpl", rightReg, leftReg);
-                cg.emit.emit("jl", labelAddress(if_label));
-                cg.emit.emit(constant(0), leftReg);
-                cg.emit.emit("jmp", labelAddress(end_label));
+                cg.emit.emit("jl", if_label);
+                cg.emit.emitMove(constant(0), leftReg);
+                cg.emit.emit("jmp", end_label);
                 cg.emit.emitLabel(if_label);
                 cg.emit.emitMove(constant(1), leftReg);
                 cg.emit.emitLabel(end_label);
@@ -191,9 +190,9 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
 
             case B_GREATER_THAN:
                 cg.emit.emit("cmpl", rightReg, leftReg);
-                cg.emit.emit("jg", labelAddress(if_label));
-                cg.emit.emit(constant(0), leftReg);
-                cg.emit.emit("jmp", labelAddress(end_label));
+                cg.emit.emit("jg", if_label);
+                cg.emit.emitMove(constant(0), leftReg);
+                cg.emit.emit("jmp", end_label);
                 cg.emit.emitLabel(if_label);
                 cg.emit.emitMove(constant(1), leftReg);
                 cg.emit.emitLabel(end_label);
@@ -201,9 +200,9 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
 
             case B_LESS_OR_EQUAL:
                 cg.emit.emit("cmpl", rightReg, leftReg);
-                cg.emit.emit("jle", labelAddress(if_label));
-                cg.emit.emit(constant(0), leftReg);
-                cg.emit.emit("jmp", labelAddress(end_label));
+                cg.emit.emit("jle", if_label);
+                cg.emit.emitMove(constant(0), leftReg);
+                cg.emit.emit("jmp", end_label);
                 cg.emit.emitLabel(if_label);
                 cg.emit.emitMove(constant(1), leftReg);
                 cg.emit.emitLabel(end_label);
@@ -211,9 +210,9 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
 
             case B_GREATER_OR_EQUAL:
                 cg.emit.emit("cmpl", rightReg, leftReg);
-                cg.emit.emit("jge", labelAddress(if_label));
-                cg.emit.emit(constant(0), leftReg);
-                cg.emit.emit("jmp", labelAddress(end_label));
+                cg.emit.emit("jge", if_label);
+                cg.emit.emitMove(constant(0), leftReg);
+                cg.emit.emit("jmp", end_label);
                 cg.emit.emitLabel(if_label);
                 cg.emit.emitMove(constant(1), leftReg);
                 cg.emit.emitLabel(end_label);

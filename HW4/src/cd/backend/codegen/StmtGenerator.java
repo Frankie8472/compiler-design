@@ -116,12 +116,12 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 		Register condition = cg.eg.visit(ast.condition(), arg);
 
 		//test
-		cg.emit.emit("jmp", condition, condition);
-		cg.emit.emit("je", labelAddress(else_label));
+		cg.emit.emit("testl", condition, condition);
+		cg.emit.emit("je", else_label);
 
 		//true
 		visit(ast.then(), arg);
-		cg.emit.emit("jmp", labelAddress(end_label));
+		cg.emit.emit("jmp", end_label);
 
 		//else
 		cg.emit.emitLabel(else_label);
@@ -144,11 +144,11 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 
 		//test
 		cg.emit.emit("testl", condition, condition);
-		cg.emit.emit("je", labelAddress(end_label));
+		cg.emit.emit("je", end_label);
 
 		//loop body
 		visit(ast.body(), arg);
-		cg.emit.emit("jmp", labelAddress(loop_label));
+		cg.emit.emit("jmp", loop_label);
 
 		//exit loop
 		cg.emit.emitLabel(end_label);
