@@ -20,6 +20,7 @@ extern void *Object_method_table;
 void cast(void *typeToCast, void **currentType){
     //printf("As_table: 0x%x, BsTable 0x%x, ObjectsTable 0x%x, , MainsTable 0x%x\n",&A_method_table, &B_method_table, &Object_method_table, &Main_method_table);
     // If current Object is an array
+//    printf("TypeToCast: 0x%x currentType 0x%x\n",typeToCast, currentType);
     if(((int)currentType) & 1){
         if(currentType == typeToCast){
             // Must be the array of same type
@@ -33,7 +34,6 @@ void cast(void *typeToCast, void **currentType){
     }
     // Current Object is not an array. Test if it's runtime type is a subtype of the cast;
     while(currentType != 0){
-//        printf("TypeToCast: 0x%x currentType 0x%x\n",typeToCast, currentType);
         if(typeToCast == currentType){
             return;
         }

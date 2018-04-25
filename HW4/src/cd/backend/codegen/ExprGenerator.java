@@ -1,6 +1,5 @@
 package cd.backend.codegen;
 
-import static cd.Config.SCANF;
 import static cd.backend.codegen.RegisterManager.STACK_REG;
 
 import java.util.Arrays;
@@ -244,7 +243,7 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
         cg.emit.emit("leal", AssemblyEmitter.registerOffset(8, STACK_REG), reg);
         cg.emit.emitStore(reg, 4, STACK_REG);
         cg.emit.emitStore(AssemblyEmitter.labelAddress(AstCodeGenerator.DECIMAL_FORMAT_LABEL), 0, STACK_REG);
-        cg.emit.emit("call", SCANF);
+        cg.emit.emit("call", Config.SCANF);
         cg.emit.emitLoad(8, STACK_REG, reg);
         cg.emit.emit("add", AssemblyEmitter.constant(16), STACK_REG);
         return reg;
@@ -258,17 +257,24 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
 
         if (ast.type instanceof Symbol.ArrayTypeSymbol) {
             Symbol.ArrayTypeSymbol typeToCast = (Symbol.ArrayTypeSymbol) ast.type;
-            cg.emit.emit("pushl",LabelUtil.generateMethodTableLabelName(typeToCast.elementType.name) + "+1");
+            String arrayIdentifier;
+            if(typeToCast.elementType.isReferenceType()) {
+                arrayIdentifier = LabelUtil.generateMethodTableLabelName(typeToCast.elementType.name) + "+1";
+            } else {
+                if(typeToCast.elementType == Symbol.PrimitiveTypeSymbol.intType){
+                    arrayIdentifier = AssemblyEmitter.constant(AstCodeGenerator.INT_ARRAY_IDENTIFIER);
+                } else {
+                    arrayIdentifier = AssemblyEmitter.constant(AstCodeGenerator.BOOLEAN_ARRAY_IDENTIFIER);
+                }
+            }
+            cg.emit.emit("pushl", arrayIdentifier);
         } else {
-            System.out.println(ast.typeName);
-            System.out.println(LabelUtil.generateMethodTableLabelName(ast.typeName));
             cg.emit.emit("pushl", AssemblyEmitter.labelAddress(LabelUtil.generateMethodTableLabelName(ast.typeName)));
         }
 //        cg.emit.emit("pushl", reg);
 
         cg.emit.emit("call", "cast");
         cg.emit.emit("addl", AssemblyEmitter.constant(Config.SIZEOF_PTR * 2), RegisterManager.STACK_REG);
-        cg.emit.emit("popl", reg);
 
         return reg;
     }
@@ -342,18 +348,16 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
 
         if (arrayType.isReferenceType()) {
             addressOrType = AssemblyEmitter.labelAddress(LabelUtil.generateMethodTableLabelName(arrayType.name)) + "+1";
-
         } else {
             Symbol.PrimitiveTypeSymbol primitive = (Symbol.PrimitiveTypeSymbol) arrayType;
-
             if (primitive == Symbol.PrimitiveTypeSymbol.intType) {
-                addressOrType = AssemblyEmitter.constant(3); //TODO Put these constants somewhere better
+                addressOrType = AssemblyEmitter.constant(AstCodeGenerator.INT_ARRAY_IDENTIFIER);
             } else {
-                addressOrType = AssemblyEmitter.constant(1);
+                addressOrType = AssemblyEmitter.constant(AstCodeGenerator.BOOLEAN_ARRAY_IDENTIFIER);
             }
-
         }
-        cg.emit.emit("movl", addressOrType, AssemblyEmitter.registerOffset(Config.SIZEOF_PTR, array));
+        System.out.println(addressOrType);
+        cg.emit.emit("movl", addressOrType, AssemblyEmitter.registerOffset(0, array));
 
 
         return array;

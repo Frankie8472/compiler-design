@@ -53,6 +53,9 @@ public class AstCodeGenerator {
 
     private static final String CASTING_ASSEMBLY_PATH = "src/cd/backend/codegen/check_casts.s";
 
+    public static final Integer INT_ARRAY_IDENTIFIER = 0b11;
+    public static final Integer BOOLEAN_ARRAY_IDENTIFIER = 0b01;
+
     /**
      * Main method. Causes us to emit x86 assembly corresponding to {@code ast}
      * into {@code file}. Throws a {@link RuntimeException} should any I/O error

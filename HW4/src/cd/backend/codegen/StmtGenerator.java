@@ -1,7 +1,5 @@
 package cd.backend.codegen;
 
-import static cd.backend.codegen.AssemblyEmitter.constant;
-import static cd.backend.codegen.AssemblyEmitter.labelAddress;
 import static cd.backend.codegen.RegisterManager.STACK_REG;
 
 import java.util.List;
@@ -209,21 +207,21 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 	@Override
 	public Register builtInWrite(BuiltInWrite ast, CurrentContext arg) {
 		Register reg = cg.eg.visit(ast.arg(), arg);
-		cg.emit.emit("sub", constant(16), STACK_REG);
+		cg.emit.emit("sub", AssemblyEmitter.constant(16), STACK_REG);
 		cg.emit.emitStore(reg, 4, STACK_REG);
 		cg.emit.emitStore(AssemblyEmitter.labelAddress(AstCodeGenerator.DECIMAL_FORMAT_LABEL), 0, STACK_REG);
 		cg.emit.emit("call", Config.PRINTF);
-		cg.emit.emit("add", constant(16), STACK_REG);
+		cg.emit.emit("add", AssemblyEmitter.constant(16), STACK_REG);
 		cg.rm.releaseRegister(reg);
 		return null;
 	}
 
 	@Override
 	public Register builtInWriteln(BuiltInWriteln ast, CurrentContext arg) {
-		cg.emit.emit("sub", constant(16), STACK_REG);
+		cg.emit.emit("sub", AssemblyEmitter.constant(16), STACK_REG);
 		cg.emit.emitStore(AssemblyEmitter.labelAddress(AstCodeGenerator.NEW_LINE_LABEL), 0, STACK_REG);
 		cg.emit.emit("call", Config.PRINTF);
-		cg.emit.emit("add", constant(16), STACK_REG);
+		cg.emit.emit("add", AssemblyEmitter.constant(16), STACK_REG);
 		return null;
 	}
 
@@ -232,7 +230,7 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 		Register ret;
 
 		if (ast.arg() == null){
-			cg.emit.emitMove(constant(0), Register.EAX);
+			cg.emit.emitMove(AssemblyEmitter.constant(0), Register.EAX);
 		} else {
 			ret = cg.eg.visit(ast.arg(), arg);
 			cg.emit.emitMove(ret, Register.EAX);
@@ -278,7 +276,7 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 			case LOCAL:
 				name = LabelUtil.generateLocalLabelName(ast.name, arg);
 				arg.addLocal(name);
-				cg.emit.emit("subl", constant(4), Register.ESP);
+				cg.emit.emit("subl", AssemblyEmitter.constant(4), Register.ESP);
 				break;
 			default:
 				//todo: giz de error überhaupt?
