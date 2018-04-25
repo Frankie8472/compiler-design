@@ -51,23 +51,17 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 	}
 
 	@Override
-	public Register methodCall(MethodCall ast, CurrentContext dummy) { // todo
-		// wenn wird das ufgrüäfe? happens in exprgenerator oder?
-        // Wenns nur e method call ohni assignemnt isch. muess eifach de ExprGenerator calle.
-		Register reg =  cg.eg.visit(ast.getMethodCallExpr(), dummy);
-		cg.rm.releaseRegister(reg);
-		return null;
 
+	public Register methodCall(MethodCall ast, CurrentContext dummy) {
+		return cg.eg.visit(ast.getMethodCallExpr(), dummy);
 	}
 
-	// Emit vtable for arrays of this class:
 	@Override
 	public Register classDecl(ClassDecl ast, CurrentContext arg) {
 		CurrentContext current = new CurrentContext(ast.sym);
 
 		cg.vTables.get(ast.name).emitStaticMethodVTable(cg.emit);
 
-		// add vptr here but only for baseclass, yet confused...
 		visitChildren(ast, current);
 
 		return null;
@@ -109,7 +103,7 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 		String else_label = cg.emit.uniqueLabel();
 		String end_label = cg.emit.uniqueLabel();
 
-		Register condition = cg.eg.visit(ast.condition(), arg);
+		Register condition = cg.eg.visit(ast.condition(), arg); // will contain boolean 1 or 0
 
 		//test
 		cg.emit.emit("testl", condition, condition);
@@ -125,6 +119,8 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 
 		//end
 		cg.emit.emitLabel(end_label);
+
+		cg.rm.releaseRegister(condition);
 		return null;
 
 	}
@@ -136,7 +132,7 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 
 		//loop beginning
 		cg.emit.emitLabel(loop_label);
-		Register condition = visit(ast.condition(), arg); // will contain boolean 1 or 0
+		Register condition = cg.eg.visit(ast.condition(), arg); // will contain boolean 1 or 0
 
 		//test
 		cg.emit.emit("testl", condition, condition);
@@ -148,6 +144,8 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 
 		//exit loop
 		cg.emit.emitLabel(end_label);
+
+		cg.rm.releaseRegister(condition);
 		return null;
 	}
 
@@ -195,7 +193,7 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 			cg.rm.releaseRegister(classAddr);
 
 		} else {
-			throw new ToDoException(); // Todo: choose right errocode
+			throw new ToDoException(); // Todo: choose right errorcode
 		}
 
 		cg.rm.releaseRegister(rhsReg);
@@ -237,7 +235,7 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 			cg.rm.releaseRegister(ret);
 		}
 
-		return Register.EAX;
+		return null;
 	}
 
 	@Override
