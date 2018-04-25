@@ -111,6 +111,8 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 		String end_label = cg.emit.uniqueLabel();
 
 		Register condition = cg.eg.visit(ast.condition(), arg); // will contain boolean 1 or 0
+		cg.emit.emit("pushl", condition);
+		cg.rm.releaseRegister(condition);
 
 		//test
 		cg.emit.emit("testl", condition, condition);
@@ -118,11 +120,18 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 
 		//true
 		visit(ast.then(), arg);
+
+		condition = cg.rm.getRegister();
+		cg.emit.emit("popl", condition);
+
 		cg.emit.emit("jmp", end_label);
 
 		//else
 		cg.emit.emitLabel(else_label);
 		visit(ast.otherwise(), arg);
+
+		condition = cg.rm.getRegister();
+		cg.emit.emit("popl", condition);
 
 		//end
 		cg.emit.emitLabel(end_label);
@@ -133,7 +142,7 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 	}
 
 	@Override
-	public Register whileLoop(WhileLoop ast, CurrentContext arg) { // todo
+	public Register whileLoop(WhileLoop ast, CurrentContext arg) {
 		String loop_label = cg.emit.uniqueLabel();
 		String end_label = cg.emit.uniqueLabel();
 
@@ -165,13 +174,23 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 //		Register lhsReg = cg.eg.visit(ast.left(), arg);
 
 		Register rhsReg = cg.eg.visit(ast.right(), arg);
+		cg.emit.emit("pushl", rhsReg);
+		cg.rm.releaseRegister(rhsReg);
 
 		if (ast.left() instanceof Ast.Index){
 		    Register lhsReg = cg.eg.visit(ast.left(), arg);
+
+			rhsReg = cg.rm.getRegister();
+			cg.emit.emit("popl", rhsReg);
+
 			cg.emit.emitStore(rhsReg, 0, lhsReg);
             cg.rm.releaseRegister(lhsReg);
 
 		} else if (ast.left() instanceof Ast.Var) {
+
+			rhsReg = cg.rm.getRegister();
+			cg.emit.emit("popl", rhsReg);
+
 			Var var = (Var) ast.left();
 			Integer offset;
 			if(var.sym.kind == Symbol.VariableSymbol.Kind.FIELD){
@@ -191,6 +210,10 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 		} else if (ast.left() instanceof Ast.Field) {
 			Ast.Field field = (Ast.Field) ast.left();
 			Register classAddr = cg.eg.visit(field.arg(), arg);
+
+			rhsReg = cg.rm.getRegister();
+			cg.emit.emit("popl", rhsReg);
+
 			Integer fieldOffset = cg.vTables.get(field.arg().type.name).getFieldOffset(field.fieldName);
             cg.emit.emitMove(rhsReg, AssemblyEmitter.registerOffset(fieldOffset, classAddr));
 			cg.rm.releaseRegister(classAddr);
@@ -227,7 +250,7 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 	}
 
 	@Override
-	public Register returnStmt(ReturnStmt ast, CurrentContext arg) { // todo
+	public Register returnStmt(ReturnStmt ast, CurrentContext arg) {
 		Register ret;
 
 		if (ast.arg() == null){

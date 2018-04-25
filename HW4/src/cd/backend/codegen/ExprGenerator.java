@@ -73,10 +73,18 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
         Register leftReg, rightReg;
         if (leftRN > rightRN) {
             leftReg = visit(ast.left(), arg);
+            cg.emit.emit("pushl", leftReg);
+            cg.rm.releaseRegister(leftReg);
             rightReg = visit(ast.right(), arg);
+            leftReg = cg.rm.getRegister();
+            cg.emit.emit("popl", leftReg);
         } else {
             rightReg = visit(ast.right(), arg);
+            cg.emit.emit("pushl", rightReg);
+            cg.rm.releaseRegister(rightReg);
             leftReg = visit(ast.left(), arg);
+            rightReg = cg.rm.getRegister();
+            cg.emit.emit("popl", rightReg);
         }
 
         cg.debug("Binary Op: %s (%s,%s)", ast, leftReg, rightReg);
@@ -151,11 +159,11 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
                 break;
 
             case B_OR:
-                cg.emit.emit("andl", rightReg, leftReg);
+                cg.emit.emit("orl", rightReg, leftReg);
                 break;
 
             case B_AND:
-                cg.emit.emit("orl", rightReg, leftReg);
+                cg.emit.emit("andl", rightReg, leftReg);
                 break;
 
             case B_EQUAL:
@@ -264,7 +272,11 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
     // Giving value back, not address of value, remember to transform for assignments!
     public Register index(Index ast, CurrentContext arg) { // todo: jcheck
         Register index = visit(ast.left(), arg);
+        cg.emit.emit("pushl", index);
+        cg.rm.releaseRegister(index);
         Register array = visit(ast.right(), arg);
+        index = cg.rm.getRegister();
+        cg.emit.emit("popl", index);
 
         cg.emit.emitMove(arrayAddress(array, index), array);
         cg.rm.releaseRegister(index);
