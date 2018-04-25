@@ -289,17 +289,17 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
 
     @Override
     public Register index(Index ast, CurrentContext arg) { // todo: jcheck
-//        Register index = visit(ast.left(), arg);
-//        cg.emit.emit("pushl", index);
-//        cg.rm.releaseRegister(index);
-//
-//        Register array = visit(ast.right(), arg);
-//        index = cg.rm.getRegister();
-//        cg.emit.emit("popl", index);
+        Register index = visit(ast.right(), arg);
+        cg.emit.emit("pushl", index);
+        cg.rm.releaseRegister(index);
+
+        Register array = visit(ast.left(), arg);
+        index = cg.rm.getRegister();
+        cg.emit.emit("popl", index);
 
         //TODO: Do inbound check!
-        Register array = visit(ast.left(), arg);
-        Register index = visit(ast.right(), arg);
+//        Register array = visit(ast.left(), arg);
+//        Register index = visit(ast.right(), arg);
 
 //        cg.emit.emit("addl", Config.SIZEOF_PTR * 2, index);
         cg.emit.emitMove(AssemblyEmitter.arrayAddress(array, index), array);

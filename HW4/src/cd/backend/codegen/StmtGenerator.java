@@ -169,24 +169,20 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 //		Register lhsReg = cg.eg.visit(ast.left(), arg);
 
 		Register rhsReg = cg.eg.visit(ast.right(), arg);
-		cg.emit.emit("pushl", rhsReg);
-		cg.rm.releaseRegister(rhsReg);
+
 
 		if (ast.left() instanceof Ast.Index){
-            rhsReg = cg.rm.getRegister();
-            cg.emit.emit("popl", rhsReg);
             Ast.Index index = (Ast.Index) ast.left();
 		    Register arrayAddr = cg.eg.visit(index.left(), arg);
 		    Register arrayIndex = cg.eg.visit(index.right(), arg);
 
             cg.emit.emitMove(rhsReg, AssemblyEmitter.arrayAddress(arrayAddr, arrayIndex));
+            cg.rm.releaseRegister(arrayAddr);
+            cg.rm.releaseRegister(arrayIndex);
 //			cg.emit.emitStore(rhsReg, 0, lhsReg);
 //            cg.rm.releaseRegister(lhsReg);
 
 		} else if (ast.left() instanceof Ast.Var) {
-
-			rhsReg = cg.rm.getRegister();
-			cg.emit.emit("popl", rhsReg);
 
 			Var var = (Var) ast.left();
 			Integer offset;
@@ -205,6 +201,9 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 //			cg.rm.releaseRegister(rhsReg);
 
 		} else if (ast.left() instanceof Ast.Field) {
+            cg.emit.emit("pushl", rhsReg);
+            cg.rm.releaseRegister(rhsReg);
+
 			Ast.Field field = (Ast.Field) ast.left();
 			Register classAddr = cg.eg.visit(field.arg(), arg);
 
