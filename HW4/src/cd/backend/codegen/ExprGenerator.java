@@ -269,8 +269,7 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
     }
 
     @Override
-    // Giving value back, not address of value, remember to transform for assignments!
-    public Register index(Index ast, CurrentContext arg) { // todo: jcheck
+    public Register index(Index ast, CurrentContext arg) {
         Register index = visit(ast.left(), arg);
         cg.emit.emit("pushl", index);
         cg.rm.releaseRegister(index);
@@ -291,7 +290,7 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
     }
 
     @Override
-    public Register field(Field ast, CurrentContext arg) { // todo
+    public Register field(Field ast, CurrentContext arg) {
         Register reg = visit(ast.arg(), arg);
         Integer offset = cg.vTables.get(ast.arg().type.name).getFieldOffset(ast.fieldName);
         cg.emit.emitMove(AssemblyEmitter.registerOffset(offset, reg), reg);
@@ -299,7 +298,7 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
     }
 
     @Override
-    public Register newArray(NewArray ast, CurrentContext arg) { // todo
+    public Register newArray(NewArray ast, CurrentContext arg) {
         // is the array size a given?
         Register array_size = visit(ast.arg(), arg);
         Register array = cg.rm.getRegister();
@@ -309,8 +308,6 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
 
         cg.rm.releaseRegister(array_size);
         return array;
-
-        // can stack release be neglected?
     }
 
     @Override
@@ -329,40 +326,40 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
     }
 
     @Override
-    public Register nullConst(NullConst ast, CurrentContext arg) { // todo: jcheck
+    public Register nullConst(NullConst ast, CurrentContext arg) {
         Register ret = cg.rm.getRegister();
         cg.emit.emitMove(constant(0), ret);
         return ret;
     }
 
     @Override
-    public Register thisRef(ThisRef ast, CurrentContext arg) { // todo
+    public Register thisRef(ThisRef ast, CurrentContext arg) {
         Register reg = cg.rm.getRegister();
         cg.emit.emitLoad(arg.getOffset("this"), RegisterManager.BASE_REG, reg);
         return reg;
     }
 
     @Override
-    public Register methodCall(MethodCallExpr ast, CurrentContext arg) { // todo: jcheck
+    public Register methodCall(MethodCallExpr ast, CurrentContext arg) {
         // put parameter in inverse queue on stack
-        Register reg = null; //TODO Hack?
+        Register reg = null;
 
-        for (int i = ast.allArguments().size() - 1; i > 0; i--) {
+        for (int i = ast.allArguments().size() - 1; i >= 0; i--) {
             reg = visit(ast.allArguments().get(i), arg);
             cg.emit.emit("pushl", reg);
             cg.rm.releaseRegister(reg);
         }
-        reg = visit(ast.allArguments().get(0), arg);
-        cg.emit.emit("pushl", reg);
-
-//        reg = visit(ast.receiver(), arg); //TODO: Not nice!
 
         // jump to methodlabel, inheritance not checked
         cg.emit.emitLoad(0, reg, reg);
-        // It needs a '*' because it's an indirect call
-        Integer methodOffset = cg.vTables.get(arg.getClassSymbol().name).getMethodOffset(ast.methodName);
 
-        //TODO if methodOffset == null check super class
+        // It needs a '*' because it's an indirect call
+        Symbol.ClassSymbol current = arg.getClassSymbol();
+        Integer methodOffset = cg.vTables.get(current.name).getMethodOffset(ast.methodName);
+        while (!current.name.equals("Object") && methodOffset == null){
+            current = current.superClass;
+            methodOffset = cg.vTables.get(current.name).getMethodOffset(ast.methodName);
+        }
 
         cg.emit.emit("call", "*" + AssemblyEmitter.registerOffset(methodOffset,reg));
         cg.emit.emit("xchg", Register.EAX, reg);

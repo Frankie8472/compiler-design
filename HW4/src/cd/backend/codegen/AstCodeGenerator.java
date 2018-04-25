@@ -100,7 +100,7 @@ public class AstCodeGenerator {
         emit.emit("pushl", Register.EAX);
         emit.emitLoad(0, Register.EAX, Register.EAX);
 
-        emit.emit("call", "*" + AssemblyEmitter.registerOffset(vTables.get("Main").getOffset("main"), Register.EAX));
+        emit.emit("call", "*" + AssemblyEmitter.registerOffset(vTables.get("Main").getMethodOffset("main"), Register.EAX));
         emit.emit("addl", AssemblyEmitter.constant(Config.SIZEOF_PTR), Register.ESP);
 //        emit.emit("xorl", Register.EAX, Register.EAX);
         emit.emitRaw("ret");
