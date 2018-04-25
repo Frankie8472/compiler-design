@@ -33,11 +33,11 @@ public class VTable {
         }
     }
 
-    private Integer getMethodOffset(String methodName){
+    public Integer getMethodOffset(String methodName){
         return (methods.indexOf(methodName) + 1) * Config.SIZEOF_PTR;
     }
 
-    private Integer getFieldOffset(String fieldName){
+    public Integer getFieldOffset(String fieldName){
         return (fields.lastIndexOf(fieldName) + 1) * Config.SIZEOF_PTR;
     }
 

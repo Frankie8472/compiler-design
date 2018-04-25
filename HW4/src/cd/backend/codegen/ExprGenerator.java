@@ -65,6 +65,10 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
 
         int leftRN = cg.rnv.calc(ast.left());
         int rightRN = cg.rnv.calc(ast.right());
+        String if_label = cg.emit.uniqueLabel();
+        String end_label = cg.emit.uniqueLabel();
+        List<Register> dontBother;
+        Register[] affected = {Register.EAX, Register.EBX, Register.EDX};
 
         Register leftReg, rightReg;
         if (leftRN > rightRN) {
@@ -81,18 +85,20 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
             case B_TIMES:
                 cg.emit.emit("imul", rightReg, leftReg);
                 break;
+
             case B_PLUS:
                 cg.emit.emit("add", rightReg, leftReg);
                 break;
+
             case B_MINUS:
                 cg.emit.emit("sub", rightReg, leftReg);
                 break;
+
             case B_DIV:
                 // Save EAX, EBX, and EDX to the stack if they are not used
                 // in this subtree (but are used elsewhere). We will be
                 // changing them.
-                List<Register> dontBother = Arrays.asList(rightReg, leftReg);
-                Register[] affected = {Register.EAX, Register.EBX, Register.EDX};
+                dontBother = Arrays.asList(rightReg, leftReg);
 
                 for (Register s : affected)
                     if (!dontBother.contains(s) && cg.rm.isInUse(s))
@@ -115,6 +121,104 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
                         cg.emit.emit("popl", s);
                 }
                 break;
+
+            case B_MOD:
+                // Save EAX, EBX, and EDX to the stack if they are not used
+                // in this subtree (but are used elsewhere). We will be
+                // changing them.
+                dontBother = Arrays.asList(rightReg, leftReg);
+
+                for (Register s : affected)
+                    if (!dontBother.contains(s) && cg.rm.isInUse(s))
+                        cg.emit.emit("pushl", s);
+
+                // Move the LHS (numerator) into eax
+                // Move the RHS (denominator) into ebx
+                cg.emit.emit("pushl", rightReg);
+                cg.emit.emit("pushl", leftReg);
+                cg.emit.emit("popl", Register.EAX);
+                cg.emit.emit("popl", Register.EBX);
+                cg.emit.emitRaw("cltd"); // sign-extend %eax into %edx
+                cg.emit.emit("idivl", Register.EBX); // division, result into edx:eax
+
+                // Move the result into the LHS, and pop off anything we saved
+                cg.emit.emit("movl", Register.EDX, leftReg);
+                for (int i = affected.length - 1; i >= 0; i--) {
+                    Register s = affected[i];
+                    if (!dontBother.contains(s) && cg.rm.isInUse(s))
+                        cg.emit.emit("popl", s);
+                }
+                break;
+
+            case B_OR:
+                cg.emit.emit("andl", rightReg, leftReg);
+                break;
+
+            case B_AND:
+                cg.emit.emit("orl", rightReg, leftReg);
+
+                break;
+
+            case B_EQUAL:
+                cg.emit.emit("cmpl", rightReg, leftReg);
+                cg.emit.emit("jmp", labelAddress(if_label));
+                cg.emit.emit(constant(0), leftReg);
+                cg.emit.emit("jmp", labelAddress(end_label));
+                cg.emit.emitLabel(if_label);
+                cg.emit.emitMove(constant(1), leftReg);
+                cg.emit.emitLabel(end_label);
+                break;
+
+            case B_NOT_EQUAL:
+                cg.emit.emit("cmpl", rightReg, leftReg);
+                cg.emit.emit("jne", labelAddress(if_label));
+                cg.emit.emit(constant(0), leftReg);
+                cg.emit.emit("jmp", labelAddress(end_label));
+                cg.emit.emitLabel(if_label);
+                cg.emit.emitMove(constant(1), leftReg);
+                cg.emit.emitLabel(end_label);
+                break;
+
+            case B_LESS_THAN:
+                cg.emit.emit("cmpl", rightReg, leftReg);
+                cg.emit.emit("jl", labelAddress(if_label));
+                cg.emit.emit(constant(0), leftReg);
+                cg.emit.emit("jmp", labelAddress(end_label));
+                cg.emit.emitLabel(if_label);
+                cg.emit.emitMove(constant(1), leftReg);
+                cg.emit.emitLabel(end_label);
+                break;
+
+            case B_GREATER_THAN:
+                cg.emit.emit("cmpl", rightReg, leftReg);
+                cg.emit.emit("jg", labelAddress(if_label));
+                cg.emit.emit(constant(0), leftReg);
+                cg.emit.emit("jmp", labelAddress(end_label));
+                cg.emit.emitLabel(if_label);
+                cg.emit.emitMove(constant(1), leftReg);
+                cg.emit.emitLabel(end_label);
+                break;
+
+            case B_LESS_OR_EQUAL:
+                cg.emit.emit("cmpl", rightReg, leftReg);
+                cg.emit.emit("jle", labelAddress(if_label));
+                cg.emit.emit(constant(0), leftReg);
+                cg.emit.emit("jmp", labelAddress(end_label));
+                cg.emit.emitLabel(if_label);
+                cg.emit.emitMove(constant(1), leftReg);
+                cg.emit.emitLabel(end_label);
+                break;
+
+            case B_GREATER_OR_EQUAL:
+                cg.emit.emit("cmpl", rightReg, leftReg);
+                cg.emit.emit("jge", labelAddress(if_label));
+                cg.emit.emit(constant(0), leftReg);
+                cg.emit.emit("jmp", labelAddress(end_label));
+                cg.emit.emitLabel(if_label);
+                cg.emit.emitMove(constant(1), leftReg);
+                cg.emit.emitLabel(end_label);
+                break;
+
             default: {
                 throw new ToDoException(); // todo: throw correct error code
             }
@@ -152,8 +256,9 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
 
     @Override
     public Register cast(Cast ast, CurrentContext arg) { // todo
+        Register reg = visit(ast.arg(), arg);
+        return reg;
 
-        throw new ToDoException();
     }
 
     @Override
@@ -177,7 +282,7 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
     @Override
     public Register field(Field ast, CurrentContext arg) { // todo
         Register reg = visit(ast.arg(), arg);
-        Integer offset = cg.vTables.get(ast.arg().type.name).getOffset(ast.fieldName);
+        Integer offset = cg.vTables.get(ast.arg().type.name).getFieldOffset(ast.fieldName);
         cg.emit.emitMove(AssemblyEmitter.registerOffset(offset, reg), reg);
         return reg;
     }
@@ -213,9 +318,10 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
     }
 
     @Override
-    public Register nullConst(NullConst ast, CurrentContext arg) { // todo
-
-        throw new ToDoException();
+    public Register nullConst(NullConst ast, CurrentContext arg) { // todo: jcheck
+        Register ret = cg.rm.getRegister();
+        cg.emit.emitMove(constant(0), ret);
+        return ret;
     }
 
     @Override
@@ -243,7 +349,7 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
         // jump to methodlabel, inheritance not checked
         cg.emit.emitLoad(0, reg, reg);
         // It needs a '*' because it's an indirect call
-        Integer methodOffset = cg.vTables.get(arg.getClassSymbol().name).getOffset(ast.methodName);
+        Integer methodOffset = cg.vTables.get(arg.getClassSymbol().name).getMethodOffset(ast.methodName);
 
         //TODO if methodOffset == null check super class
 
@@ -277,7 +383,7 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
         Register reg = cg.rm.getRegister();
         Integer offset;
         if (ast.sym.kind == Symbol.VariableSymbol.Kind.FIELD) {
-            offset = cg.vTables.get(arg.getClassSymbol().name).getOffset(ast.name);
+            offset = cg.vTables.get(arg.getClassSymbol().name).getFieldOffset(ast.name);
             cg.emit.emitLoad(arg.getOffset("this"), Register.EBP, reg);
 
             cg.emit.emitLoad(offset, reg, reg);

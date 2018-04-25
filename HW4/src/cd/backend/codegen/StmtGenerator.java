@@ -110,14 +110,49 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 
 	@Override
 	public Register ifElse(IfElse ast, CurrentContext arg) { // todo
+		String else_label = cg.emit.uniqueLabel();
+		String end_label = cg.emit.uniqueLabel();
 
-		throw new ToDoException();
+		Register condition = cg.eg.visit(ast.condition(), arg);
+
+		//test
+		cg.emit.emit("jmp", condition, condition);
+		cg.emit.emit("je", labelAddress(else_label));
+
+		//true
+		visit(ast.then(), arg);
+		cg.emit.emit("jmp", labelAddress(end_label));
+
+		//else
+		cg.emit.emitLabel(else_label);
+		visit(ast.otherwise(), arg);
+
+		//end
+		cg.emit.emitLabel(end_label);
+		return null;
+
 	}
 
 	@Override
 	public Register whileLoop(WhileLoop ast, CurrentContext arg) { // todo
+		String loop_label = cg.emit.uniqueLabel();
+		String end_label = cg.emit.uniqueLabel();
 
-		throw new ToDoException();
+		//loop beginning
+		cg.emit.emitLabel(loop_label);
+		Register condition = visit(ast.condition(), arg); // will contain boolean 1 or 0
+
+		//test
+		cg.emit.emit("testl", condition, condition);
+		cg.emit.emit("je", labelAddress(end_label));
+
+		//loop body
+		visit(ast.body(), arg);
+		cg.emit.emit("jmp", labelAddress(loop_label));
+
+		//exit loop
+		cg.emit.emitLabel(end_label);
+		return null;
 	}
 
 	@Override
@@ -139,7 +174,7 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 			Var var = (Var) ast.left();
 			Integer offset;
 			if(var.sym.kind == Symbol.VariableSymbol.Kind.FIELD){
-                offset = cg.vTables.get(arg.getClassSymbol().name).getOffset(var.name);
+                offset = cg.vTables.get(arg.getClassSymbol().name).getFieldOffset(var.name);
                 Register temp = cg.rm.getRegister();
                 cg.emit.emitLoad(arg.getOffset("this"), Register.EBP, temp);
 
@@ -155,7 +190,7 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 		} else if (ast.left() instanceof Ast.Field) {
 			Ast.Field field = (Ast.Field) ast.left();
 			Register classAddr = cg.eg.visit(field.arg(), arg);
-			Integer fieldOffset = cg.vTables.get(field.arg().type.name).getOffset(field.fieldName);
+			Integer fieldOffset = cg.vTables.get(field.arg().type.name).getFieldOffset(field.fieldName);
             cg.emit.emitMove(rhsReg, AssemblyEmitter.registerOffset(fieldOffset, classAddr));
 			cg.rm.releaseRegister(classAddr);
 
