@@ -2,12 +2,13 @@ package cd.backend.codegen;
 
 import cd.Config;
 import cd.ir.Symbol;
+import org.antlr.v4.misc.OrderedHashMap;
 
 import java.util.*;
 
 public class VTable {
 
-    private List<String> methods = new ArrayList<>();
+    private Map<String, String> methods = new LinkedHashMap<>();
 
     private List<String> fields = new ArrayList<>();
     private int fieldOffset = Config.SIZEOF_PTR;
@@ -18,28 +19,37 @@ public class VTable {
     public VTable(Symbol.ClassSymbol classSymbol){
         className = classSymbol.name;
         if(classSymbol.superClass != null) {
+
+            List<Symbol.ClassSymbol> classList = new ArrayList<>();
+
             superClassName = classSymbol.superClass.name;
 
             Symbol.ClassSymbol currentSymbol = classSymbol;
 
             while (currentSymbol.superClass != null) {
-                for (Symbol.VariableSymbol field : currentSymbol.fields.values()) {
-                    fields.add(field.name);
-                }
+                classList.add(currentSymbol);
                 currentSymbol = currentSymbol.superClass;
             }
-            Collections.reverse(fields);
-        }
 
-        for (Symbol.MethodSymbol method : classSymbol.methods.values()) {
-            methods.add(method.name);
+            Collections.reverse(classList);
+
+            for (Symbol.ClassSymbol currentClass : classList) {
+
+                for (Symbol.VariableSymbol field : currentClass.fields.values()) {
+                    fields.add(field.name);
+                }
+
+                for (Symbol.MethodSymbol method : currentClass.methods.values()) {
+                    methods.put(method.name, currentClass.name);
+                }
+            }
         }
     }
 
     public Integer getMethodOffset(String methodName){
-        if(!methods.contains(methodName))
+        if(!methods.containsKey(methodName))
             return null;
-        return (methods.indexOf(methodName) + 1) * Config.SIZEOF_PTR;
+        return ((new ArrayList<>(methods.keySet())).indexOf(methodName) + 1) * Config.SIZEOF_PTR;
     }
 
     public Integer getFieldOffset(String fieldName){
@@ -86,8 +96,8 @@ public class VTable {
             emitter.emitConstantData("0");
 
 
-        for(String methodName : methods){
-            emitter.emitConstantData(LabelUtil.generateMethodLabelName(this.className, methodName));
+        for(String methodName : methods.keySet()){
+            emitter.emitConstantData(LabelUtil.generateMethodLabelName(methods.get(methodName), methodName));
         }
     }
 

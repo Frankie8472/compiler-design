@@ -67,7 +67,7 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
         Register[] affected = {Register.EAX, Register.EBX, Register.EDX};
 
         Register leftReg, rightReg;
-        if (leftRN > rightRN) {
+        if (false){//leftRN > rightRN) {
             leftReg = visit(ast.left(), arg);
             cg.emit.emit("pushl", leftReg);
             cg.rm.releaseRegister(leftReg);

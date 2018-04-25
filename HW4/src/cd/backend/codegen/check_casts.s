@@ -26,7 +26,7 @@ cast:
 	jmp	.L1
 .L5:
 	movl	$1, (%esp)
-	call	exit
+	call	{1}
 .L2:
 	jmp	.L6
 .L8:
@@ -42,7 +42,7 @@ cast:
 	cmpl	$0, 12(%ebp)
 	jne	.L8
 	movl	$1, (%esp)
-	call	exit
+	call	{1}
 .L1:
 	leave
 	.cfi_restore 5

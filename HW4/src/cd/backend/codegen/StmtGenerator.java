@@ -79,7 +79,7 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
         cg.emit.emit("push", Register.EBP);
         cg.emit.emitMove(Register.ESP, Register.EBP);
         // Align stack to be on an address dividable by 16. Important for Macs.
-//		cg.emit.emit("and", -16, STACK_REG);
+		// cg.emit.emit("and", -16, STACK_REG);
 
 
 		current.addParameter("this");

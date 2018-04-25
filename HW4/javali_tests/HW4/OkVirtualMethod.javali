@@ -41,10 +41,10 @@ class Main {
 		a = b;
 		a.base();
 		a.override();
-		
-      b.base();
-      b.override();
-      b.sub();
-      
+
+        b.base();
+        b.override();
+        b.sub();
+
 	}
 }
