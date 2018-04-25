@@ -436,6 +436,8 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
         Symbol.ClassSymbol currentClass = (Symbol.ClassSymbol) ast.receiver().type; //TODO unsafe Cast
         Integer methodOffset = null;
 
+        cg.emit.emitMove(AssemblyEmitter.registerOffset(0, RegisterManager.STACK_REG), reg);
+
         while (methodOffset == null) {
             cg.emit.emitLoad(0, reg, reg);
             VTable table = cg.vTables.get(currentClass.name);
