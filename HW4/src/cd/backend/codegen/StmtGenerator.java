@@ -139,7 +139,7 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 			Var var = (Var) ast.left();
 			Integer offset;
 			if(var.sym.kind == Symbol.VariableSymbol.Kind.FIELD){
-                offset = cg.vTables.get(arg.getClassSymbol().name).getFieldOffset(var.name);
+                offset = cg.vTables.get(arg.getClassSymbol().name).getOffset(var.name);
                 Register temp = cg.rm.getRegister();
                 cg.emit.emitLoad(arg.getOffset("this"), Register.EBP, temp);
 
@@ -155,7 +155,7 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 		} else if (ast.left() instanceof Ast.Field) {
 			Ast.Field field = (Ast.Field) ast.left();
 			Register classAddr = cg.eg.visit(field.arg(), arg);
-			Integer fieldOffset = cg.vTables.get(field.arg().type.name).getFieldOffset(field.fieldName);
+			Integer fieldOffset = cg.vTables.get(field.arg().type.name).getOffset(field.fieldName);
             cg.emit.emitMove(rhsReg, AssemblyEmitter.registerOffset(fieldOffset, classAddr));
 			cg.rm.releaseRegister(classAddr);
 

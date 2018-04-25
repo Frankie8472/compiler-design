@@ -177,7 +177,7 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
     @Override
     public Register field(Field ast, CurrentContext arg) { // todo
         Register reg = visit(ast.arg(), arg);
-        Integer offset = cg.vTables.get(ast.arg().type.name).getFieldOffset(ast.fieldName);
+        Integer offset = cg.vTables.get(ast.arg().type.name).getOffset(ast.fieldName);
         cg.emit.emitMove(AssemblyEmitter.registerOffset(offset, reg), reg);
         return reg;
     }
@@ -243,7 +243,7 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
         // jump to methodlabel, inheritance not checked
         cg.emit.emitLoad(0, reg, reg);
         // It needs a '*' because it's an indirect call
-        Integer methodOffset = cg.vTables.get(arg.getClassSymbol().name).getMethodOffset(ast.methodName);
+        Integer methodOffset = cg.vTables.get(arg.getClassSymbol().name).getOffset(ast.methodName);
 
         //TODO if methodOffset == null check super class
 
@@ -277,7 +277,7 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
         Register reg = cg.rm.getRegister();
         Integer offset;
         if (ast.sym.kind == Symbol.VariableSymbol.Kind.FIELD) {
-            offset = cg.vTables.get(arg.getClassSymbol().name).getFieldOffset(ast.name);
+            offset = cg.vTables.get(arg.getClassSymbol().name).getOffset(ast.name);
             cg.emit.emitLoad(arg.getOffset("this"), Register.EBP, reg);
 
             cg.emit.emitLoad(offset, reg, reg);

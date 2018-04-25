@@ -1,7 +1,6 @@
 package cd.backend.codegen;
 
 import cd.Config;
-import cd.ToDoException;
 import cd.ir.Symbol.MethodSymbol;
 import cd.ir.Symbol.ClassSymbol;
 
