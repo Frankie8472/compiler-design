@@ -195,7 +195,10 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 			Ast.Field field = (Ast.Field) ast.left();
 			Register classAddr = cg.eg.visit(field.arg(), arg);
 
-			rhsReg = cg.rm.getRegister();
+            cg.emit.emit("null_ptr_check", classAddr);
+
+
+            rhsReg = cg.rm.getRegister();
 			cg.emit.emit("popl", rhsReg);
 
 			Integer fieldOffset = cg.vTables.get(field.arg().type.name).getFieldOffset(field.fieldName);

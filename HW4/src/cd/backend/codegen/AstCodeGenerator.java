@@ -8,6 +8,7 @@ import java.util.Map;
 
 import cd.Config;
 import cd.Main;
+import cd.backend.ExitCode;
 import cd.backend.codegen.RegisterManager.Register;
 import cd.ir.Ast.ClassDecl;
 import cd.ir.Symbol;
@@ -79,6 +80,12 @@ public class AstCodeGenerator {
         emit.emitLabel(DECIMAL_FORMAT_LABEL);
         emit.emitRaw(Config.DOT_STRING + " \"%d\"");
 
+        emit.emitRaw(".macro null_ptr_check ptr");
+        emit.emit("test", "\\ptr", "\\ptr");
+        emit.emit("je", "NULL_POINTER");
+        emit.emitRaw(".endm");
+
+
         VTable objectTable = new VTable(Symbol.ClassSymbol.objectType);
         vTables.put(Symbol.ClassSymbol.objectType.name, objectTable);
         objectTable.emitStaticMethodVTable(emit);
@@ -113,6 +120,46 @@ public class AstCodeGenerator {
 //        emit.emit("xorl", Register.EAX, Register.EAX);
         emit.emitRaw("ret");
 
+        // error code label
+        emit.emitLabel("INVALID_DOWNCAST");
+        emit.emitMove(AssemblyEmitter.constant(ExitCode.INVALID_DOWNCAST.value), Register.EAX);
+        emit.emit("call", "exit");
+
+        emit.emitLabel("INVALID_ARRAY_STORE");
+        emit.emitMove(AssemblyEmitter.constant(ExitCode.INVALID_ARRAY_STORE.value), Register.EAX);
+        emit.emit("call", "exit");
+
+
+        emit.emitLabel("INVALID_ARRAY_BOUNDS");
+        emit.emitMove(AssemblyEmitter.constant(ExitCode.INVALID_ARRAY_BOUNDS.value), Register.EAX);
+        emit.emit("call", "exit");
+
+
+        emit.emitLabel("INVALID_ARRAY_SIZE");
+        emit.emitMove(AssemblyEmitter.constant(ExitCode.INVALID_ARRAY_SIZE.value), Register.EAX);
+        emit.emit("call", "exit");
+
+
+        emit.emitLabel("NULL_POINTER");
+        emit.emitMove(AssemblyEmitter.constant(ExitCode.NULL_POINTER.value), Register.EAX);
+        emit.emit("call", "exit");
+
+
+        emit.emitLabel("INFINITE_LOOP");
+        emit.emitMove(AssemblyEmitter.constant(ExitCode.INFINITE_LOOP.value), Register.EAX);
+        emit.emit("call", "exit");
+
+
+        emit.emitLabel("DIVISION_BY_ZERO");
+        emit.emitMove(AssemblyEmitter.constant(ExitCode.DIVISION_BY_ZERO.value), Register.EAX);
+        emit.emit("call", "exit");
+
+
+        emit.emitLabel("INTERNAL_ERROR");
+        emit.emitMove(AssemblyEmitter.constant(ExitCode.INTERNAL_ERROR.value), Register.EAX);
+        emit.emit("call", "exit");
+
+
         emit.decreaseIndent();
 
         emit.emitRaw(loadCastingAssembly(CASTING_ASSEMBLY_PATH));
@@ -131,7 +178,7 @@ public class AstCodeGenerator {
                 line = br.readLine();
             }
             assembly = sb.toString();
-            return MessageFormat.format(assembly, LabelUtil.generateMethodTableLabelName(Symbol.ClassSymbol.objectType.name), Config.EXIT);
+            return MessageFormat.format(assembly, LabelUtil.generateMethodTableLabelName(Symbol.ClassSymbol.objectType.name), Config.EXIT, AssemblyEmitter.constant(ExitCode.INVALID_DOWNCAST.value));
         } catch (IOException e) {
             e.printStackTrace();
         }

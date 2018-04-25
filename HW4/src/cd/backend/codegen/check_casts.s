@@ -20,12 +20,13 @@ cast:
 	jne	.L3
 	jmp	.L1
 .L3:
-	movl	Object_method_table, %eax
+	movl	{0}, %eax
 	cmpl	%eax, 8(%ebp)
 	jne	.L5
 	jmp	.L1
 .L5:
-	movl	$1, (%esp)
+	movl	{2}, %eax
+	movl	%eax, (%esp)
 	call	{1}
 .L2:
 	jmp	.L6
@@ -41,7 +42,8 @@ cast:
 .L6:
 	cmpl	$0, 12(%ebp)
 	jne	.L8
-	movl	$1, (%esp)
+	movl	{2}, %eax
+	movl	%eax, (%esp)
 	call	{1}
 .L1:
 	leave

@@ -2,6 +2,8 @@
 
 // The Method_VTable of Object.
 extern void *Object_method_table;
+extern int CAST_ERROR_CODE;
+//#define CAST_ERROR_CODE 0
 //extern void *A_method_table;
 //extern void *B_method_table;
 //extern void *Main_method_table;
@@ -18,9 +20,8 @@ extern void *Object_method_table;
 *   currentType: The Current Type of the object
 */
 void cast(void *typeToCast, void **currentType){
-    //printf("As_table: 0x%x, BsTable 0x%x, ObjectsTable 0x%x, , MainsTable 0x%x\n",&A_method_table, &B_method_table, &Object_method_table, &Main_method_table);
+    //printf("As_tab§le: 0x%x, BsTable 0x%x, ObjectsTable 0x%x, , MainsTable 0x%x\n",&A_method_table, &B_method_table, &Object_method_table, &Main_method_table);
     // If current Object is an array
-//    printf("TypeToCast: 0x%x currentType 0x%x\n",typeToCast, currentType);
     if(((int)currentType) & 1){
         if(currentType == typeToCast){
             // Must be the array of same type
@@ -29,7 +30,7 @@ void cast(void *typeToCast, void **currentType){
             // Cast to Object OK
             return;
         } else {
-            exit(1);
+            exit(CAST_ERROR_CODE);
         }
     }
     // Current Object is not an array. Test if it's runtime type is a subtype of the cast;
@@ -40,7 +41,7 @@ void cast(void *typeToCast, void **currentType){
 
         currentType = *currentType;
     }
-    
+
     // Was not a subtype throw error
-    exit(1);
+    exit(CAST_ERROR_CODE);
 }

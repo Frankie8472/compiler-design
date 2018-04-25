@@ -296,14 +296,14 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
         cg.rm.releaseRegister(index);
 
         Register array = visit(ast.left(), arg);
+        cg.emit.emit("null_ptr_check", array);
         index = cg.rm.getRegister();
         cg.emit.emit("popl", index);
 
-        //TODO: Do inbound check!
-//        Register array = visit(ast.left(), arg);
-//        Register index = visit(ast.right(), arg);
-
-//        cg.emit.emit("addl", Config.SIZEOF_PTR * 2, index);
+        cg.emit.emit("cmpl", AssemblyEmitter.constant(0), index);
+        cg.emit.emit("jl", "INVALID_ARRAY_BOUNDS");
+        cg.emit.emit("cmpl", AssemblyEmitter.registerOffset(Config.SIZEOF_PTR, array), index);
+        cg.emit.emit("jge", "INVALID_ARRAY_BOUNDS");
         cg.emit.emitMove(AssemblyEmitter.arrayAddress(array, index), array);
         cg.rm.releaseRegister(index);
         return array;
@@ -319,6 +319,8 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
     @Override
     public Register field(Field ast, CurrentContext arg) {
         Register reg = visit(ast.arg(), arg);
+        cg.emit.emit("null_ptr_check", reg);
+
         Integer offset = cg.vTables.get(ast.arg().type.name).getFieldOffset(ast.fieldName);
         cg.emit.emitMove(AssemblyEmitter.registerOffset(offset, reg), reg);
         return reg;
@@ -341,6 +343,11 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
             if it is a boolean array METHOD_VTABLE_PTR is 1 ( ... 0001)
          */
         Register array_size = visit(ast.arg(), arg);
+
+        cg.emit.emit("cmpl", AssemblyEmitter.constant(0), array_size);
+        cg.emit.emit("jl", "INVALID_ARRAY_SIZE");
+
+
         Register array = cg.rm.getRegister();
 
         cg.emit.emit("xchg", array, Register.EAX);
@@ -348,17 +355,12 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
         cg.emit.emit("pushl", AssemblyEmitter.constant(Config.SIZEOF_PTR));
         cg.emit.emit("addl", 2, array_size);
         cg.emit.emit("pushl", array_size);
-        cg.rm.releaseRegister(array_size);
+
 
         cg.emit.emit("call", Config.CALLOC);
 
         cg.emit.emit("addl", AssemblyEmitter.constant(Config.SIZEOF_PTR), RegisterManager.STACK_REG);
         cg.emit.emit("xchg", Register.EAX, array);
-
-        //TODO store method pointer let it be 0 for now
-
-        //TODO Identify type of stored entries
-
 
         Symbol.TypeSymbol arrayType = ((Symbol.ArrayTypeSymbol) ast.type).elementType;
         String addressOrType;
@@ -373,15 +375,15 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
                 addressOrType = AssemblyEmitter.constant(AstCodeGenerator.BOOLEAN_ARRAY_IDENTIFIER);
             }
         }
-        System.out.println(addressOrType);
         cg.emit.emit("movl", addressOrType, AssemblyEmitter.registerOffset(0, array));
+        cg.emit.emit("movl", array_size, AssemblyEmitter.registerOffset(4, array));
+        cg.rm.releaseRegister(array_size);
 
         return array;
     }
 
     @Override
     public Register newObject(NewObject ast, CurrentContext arg) {
-        // TODO: Allocate Heap in sizeof(ast.type as class), set Pointer to vtable of the corresponding class
         /*
             Object Layout
                 -------@ Memory 0xYYYYYYYY ------
@@ -437,6 +439,8 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
         Integer methodOffset = null;
 
         cg.emit.emitMove(AssemblyEmitter.registerOffset(0, RegisterManager.STACK_REG), reg);
+
+        cg.emit.emit("null_ptr_check", reg);
 
         while (methodOffset == null) {
             cg.emit.emitLoad(0, reg, reg);
