@@ -71,6 +71,7 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
             leftReg = visit(ast.left(), arg);
             cg.emit.emit("pushl", leftReg);
             cg.rm.releaseRegister(leftReg);
+
             rightReg = visit(ast.right(), arg);
             leftReg = cg.rm.getRegister();
             cg.emit.emit("popl", leftReg);
@@ -78,6 +79,7 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
             rightReg = visit(ast.right(), arg);
             cg.emit.emit("pushl", rightReg);
             cg.rm.releaseRegister(rightReg);
+
             leftReg = visit(ast.left(), arg);
             rightReg = cg.rm.getRegister();
             cg.emit.emit("popl", rightReg);
@@ -417,7 +419,7 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
     @Override
     public Register methodCall(MethodCallExpr ast, CurrentContext arg) {
         // put parameter in inverse queue on stack
-        Register reg = null;
+        Register reg;
 
         for (int i = ast.allArguments().size() - 1; i >= 0; i--) {
             reg = visit(ast.allArguments().get(i), arg);

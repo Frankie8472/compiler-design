@@ -51,9 +51,10 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 	}
 
 	@Override
-
 	public Register methodCall(MethodCall ast, CurrentContext dummy) {
-		return cg.eg.visit(ast.getMethodCallExpr(), dummy);
+		Register reg =  cg.eg.visit(ast.getMethodCallExpr(), dummy);
+		cg.rm.releaseRegister(reg);
+		return null;
 	}
 
 	@Override
@@ -109,26 +110,18 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 		cg.emit.emit("testl", condition, condition);
 		cg.emit.emit("je", else_label);
 
+		cg.rm.releaseRegister(condition);
+
 		//true
-        cg.emit.emit("pushl", condition);
-        cg.rm.releaseRegister(condition);
         visit(ast.then(), arg);
-        condition = cg.rm.getRegister();
-        cg.emit.emit("popl", condition);
 		cg.emit.emit("jmp", end_label);
 
 		//else
         cg.emit.emitLabel(else_label);
-        cg.emit.emit("pushl", condition);
-        cg.rm.releaseRegister(condition);
         visit(ast.otherwise(), arg);
-        condition = cg.rm.getRegister();
-        cg.emit.emit("popl", condition);
 
 		//end
 		cg.emit.emitLabel(end_label);
-
-		cg.rm.releaseRegister(condition);
 		return null;
 	}
 
@@ -146,17 +139,12 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 		cg.emit.emit("je", end_label);
 
 		//loop body
-        cg.emit.emit("pushl", condition);
         cg.rm.releaseRegister(condition);
 		visit(ast.body(), arg);
-        condition = cg.rm.getRegister();
-        cg.emit.emit("popl", condition);
         cg.emit.emit("jmp", loop_label);
 
 		//exit loop
 		cg.emit.emitLabel(end_label);
-
-		cg.rm.releaseRegister(condition);
 		return null;
 	}
 
