@@ -1,0 +1,45 @@
+class A{
+    int foo(){
+        return 1;
+    }
+
+    int bar(){
+        return 5;
+    }
+}
+
+class B inherits A{
+    int foo(){
+        return 0;
+    }
+
+    int foobar(){
+        return 3;
+    }
+}
+
+class Main{
+    void main(){
+        A a;
+        B b;
+        a = new A();
+        b = new B();
+
+        write(a.foo());
+        write(a.bar());
+        write(b.foo());
+        write(b.bar());
+        write(b.foobar());
+
+        a = b;
+
+        write(a.foo());     // must write 0, not 1
+        write(a.bar());
+        write(a.foobar());
+
+        a = new A();
+
+        write (a.foobar()); // wrong
+
+    }
+}

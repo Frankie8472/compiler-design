@@ -3,7 +3,7 @@ package cd.backend.codegen;
 public class LabelUtil {
 
     public static String generateMethodTableLabelName(String className){
-        return className + "_method_table";
+        return className + "_method_table_m";
     }
 
     public static String generateMethodLabelName(String className, String methodName){

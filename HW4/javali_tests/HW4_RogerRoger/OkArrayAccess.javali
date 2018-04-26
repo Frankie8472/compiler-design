@@ -1,0 +1,48 @@
+class A{
+    int[] i1;
+    boolean[] b1;
+
+    A foo(int[] i2, boolean[] b2, A[] a1){
+        if(b2[0] && b1[0]){
+            write(i2[0] + i2[1]);
+            write(i1[0] + i1[1]);
+        }
+
+        return a1[0];
+    }
+}
+
+class Main{
+    void main(){
+        int[] iarr;
+        boolean[] barr;
+        C[] carr;
+        A[] aarr;
+        aarr = new A[5];
+        carr = new C[4];
+        iarr = new int[6];
+        barr = new boolean[3];
+        aarr[0] = new A();
+        aarr[1] = new A();
+        aarr[2] = new A();
+        aarr[3] = new A();
+        aarr[4] = new A();
+        iarr[0] = 1;
+        iarr[1] = 2;
+        iarr[2] = 3;
+        iarr[3] = 4;
+        iarr[4] = 5;
+        iarr[5] = 6;
+        barr[0] = True;
+        barr[1] = False;
+        barr[2] = True;
+
+        aarr[0].i1 = iarr;
+        aarr[0].b1 = barr;
+
+        aarr[1] = [aarr[0].foo(iarr, barr, aarr);
+
+        return null;
+
+    }
+}
