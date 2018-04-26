@@ -8,7 +8,7 @@ class A{
     }
 }
 
-class B inherits A{
+class B extends A{
     int foo(){
         return 0;
     }
@@ -35,11 +35,8 @@ class Main{
 
         write(a.foo());     // must write 0, not 1
         write(a.bar());
-        write(a.foobar());
 
         a = new A();
-
-        write (a.foobar()); // wrong
 
     }
 }

@@ -110,6 +110,9 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
                     if (!dontBother.contains(s) && cg.rm.isInUse(s))
                         cg.emit.emit("pushl", s);
 
+                cg.emit.emit("cmpl", AssemblyEmitter.constant(0), rightReg);
+                cg.emit.emit("je", "DIVISION_BY_ZERO");
+
                 // Move the LHS (numerator) into eax
                 // Move the RHS (denominator) into ebx
                 cg.emit.emit("pushl", rightReg);
@@ -137,6 +140,9 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
                 for (Register s : affected)
                     if (!dontBother.contains(s) && cg.rm.isInUse(s))
                         cg.emit.emit("pushl", s);
+
+                cg.emit.emit("cmpl", AssemblyEmitter.constant(0), rightReg);
+                cg.emit.emit("je", "DIVISION_BY_ZERO");
 
                 // Move the LHS (numerator) into eax
                 // Move the RHS (denominator) into ebx
@@ -244,7 +250,6 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
         }
         return reg;
     }
-
 
     @Override
     public Register builtInRead(BuiltInRead ast, CurrentContext arg) {
@@ -359,7 +364,7 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
 
         cg.emit.emit("call", Config.CALLOC);
 
-        cg.emit.emit("addl", AssemblyEmitter.constant(Config.SIZEOF_PTR), RegisterManager.STACK_REG);
+        cg.emit.emit("addl", AssemblyEmitter.constant(Config.SIZEOF_PTR*2), RegisterManager.STACK_REG);
         cg.emit.emit("xchg", Register.EAX, array);
 
         Symbol.TypeSymbol arrayType = ((Symbol.ArrayTypeSymbol) ast.type).elementType;
@@ -376,6 +381,7 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
             }
         }
         cg.emit.emit("movl", addressOrType, AssemblyEmitter.registerOffset(0, array));
+        cg.emit.emit("subl", AssemblyEmitter.constant(2), array_size);
         cg.emit.emit("movl", array_size, AssemblyEmitter.registerOffset(4, array));
         cg.rm.releaseRegister(array_size);
 
@@ -399,7 +405,7 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
         cg.emit.emit("pushl", AssemblyEmitter.constant(table.getFieldCount()));
         cg.emit.emit("call", Config.CALLOC);
         cg.emit.emit("xchg", Register.EAX, objectPointer); // Restore EAX and put pointer in new register
-        cg.emit.emit("addl", AssemblyEmitter.constant(8), RegisterManager.STACK_REG);
+        cg.emit.emit("addl", AssemblyEmitter.constant(Config.SIZEOF_PTR*2), RegisterManager.STACK_REG);
         cg.emit.emitMove(AssemblyEmitter.labelAddress(LabelUtil.generateMethodTableLabelName(ast.typeName)), AssemblyEmitter.registerOffset(0, objectPointer));
         return objectPointer;
     }
@@ -451,6 +457,7 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
 //        cg.emit.emitLoad(0, reg, reg);
 
         cg.emit.emit("call", "*" + AssemblyEmitter.registerOffset(methodOffset, reg));
+        cg.emit.emit("addl", AssemblyEmitter.constant(ast.allArguments().size()*Config.SIZEOF_PTR), Register.ESP);
         cg.emit.emit("xchg", Register.EAX, reg);
         // return eax (return register? right)
         return reg;

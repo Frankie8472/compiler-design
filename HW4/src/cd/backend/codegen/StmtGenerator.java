@@ -164,6 +164,8 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 		    Register arrayAddr = cg.eg.visit(index.left(), arg);
 		    Register arrayIndex = cg.eg.visit(index.right(), arg);
 
+		    cg.emit.emit("null_ptr_check", arrayAddr);
+
             cg.emit.emit("cmpl", AssemblyEmitter.constant(0), arrayIndex);
             cg.emit.emit("jl", "INVALID_ARRAY_BOUNDS");
             cg.emit.emit("cmpl", AssemblyEmitter.registerOffset(Config.SIZEOF_PTR, arrayAddr), arrayIndex);
@@ -252,7 +254,8 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 			cg.emit.emitMove(ret, Register.EAX);
 			cg.rm.releaseRegister(ret);
 		}
-
+		cg.emit.emitRaw("leave");
+		cg.emit.emitRaw("ret");
 		return null;
 	}
 
@@ -270,7 +273,6 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 //				// do I need this, if I move int here after?
 //				cg.emit.emitConstantData("0");
 //
-//				//try for heap allocation todo: jcheck
 //				if (cg.rm.isInUse(Register.EAX)){
 //					temp = cg.rm.getRegister();
 //					cg.emit.emitMove(Register.EAX, temp);
@@ -287,7 +289,6 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 //					cg.rm.releaseRegister(temp);
 //				}
 //
-//				// todo: add to vtable
 				break;
 			case LOCAL:
 				name = LabelUtil.generateLocalLabelName(ast.name, arg);
@@ -295,7 +296,6 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 				cg.emit.emit("subl", AssemblyEmitter.constant(4), Register.ESP);
 				break;
 			default:
-				//todo: giz de error überhaupt?
 				break;
 		}
 

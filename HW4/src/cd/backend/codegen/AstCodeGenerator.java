@@ -122,41 +122,40 @@ public class AstCodeGenerator {
 
         // error code label
         emit.emitLabel("INVALID_DOWNCAST");
-        emit.emitMove(AssemblyEmitter.constant(ExitCode.INVALID_DOWNCAST.value), Register.EAX);
+        emit.emit("pushl", AssemblyEmitter.constant(ExitCode.INVALID_DOWNCAST.value));
         emit.emit("call", "exit");
 
         emit.emitLabel("INVALID_ARRAY_STORE");
-        emit.emitMove(AssemblyEmitter.constant(ExitCode.INVALID_ARRAY_STORE.value), Register.EAX);
+        emit.emit("pushl", AssemblyEmitter.constant(ExitCode.INVALID_ARRAY_STORE.value));
         emit.emit("call", "exit");
 
 
         emit.emitLabel("INVALID_ARRAY_BOUNDS");
-        emit.emitMove(AssemblyEmitter.constant(ExitCode.INVALID_ARRAY_BOUNDS.value), Register.EAX);
+        emit.emit("pushl", AssemblyEmitter.constant(ExitCode.INVALID_ARRAY_BOUNDS.value));
         emit.emit("call", "exit");
 
 
         emit.emitLabel("INVALID_ARRAY_SIZE");
-        emit.emitMove(AssemblyEmitter.constant(ExitCode.INVALID_ARRAY_SIZE.value), Register.EAX);
-        emit.emit("call", "exit");
-
-
-        emit.emitLabel("NULL_POINTER");
-        emit.emitMove(AssemblyEmitter.constant(ExitCode.NULL_POINTER.value), Register.EAX);
+        emit.emit("pushl", AssemblyEmitter.constant(ExitCode.INVALID_ARRAY_SIZE.value));
         emit.emit("call", "exit");
 
 
         emit.emitLabel("INFINITE_LOOP");
-        emit.emitMove(AssemblyEmitter.constant(ExitCode.INFINITE_LOOP.value), Register.EAX);
+        emit.emit("pushl", AssemblyEmitter.constant(ExitCode.INFINITE_LOOP.value));
         emit.emit("call", "exit");
 
 
         emit.emitLabel("DIVISION_BY_ZERO");
-        emit.emitMove(AssemblyEmitter.constant(ExitCode.DIVISION_BY_ZERO.value), Register.EAX);
+        emit.emit("pushl", AssemblyEmitter.constant(ExitCode.DIVISION_BY_ZERO.value));
+        emit.emit("call", "exit");
+
+        emit.emitLabel("NULL_POINTER");
+        emit.emit("pushl", AssemblyEmitter.constant(ExitCode.NULL_POINTER.value));
         emit.emit("call", "exit");
 
 
         emit.emitLabel("INTERNAL_ERROR");
-        emit.emitMove(AssemblyEmitter.constant(ExitCode.INTERNAL_ERROR.value), Register.EAX);
+        emit.emit("pushl", AssemblyEmitter.constant(ExitCode.INTERNAL_ERROR.value));
         emit.emit("call", "exit");
 
 

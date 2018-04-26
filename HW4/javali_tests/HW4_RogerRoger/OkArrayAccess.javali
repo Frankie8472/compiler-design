@@ -16,10 +16,8 @@ class Main{
     void main(){
         int[] iarr;
         boolean[] barr;
-        C[] carr;
         A[] aarr;
         aarr = new A[5];
-        carr = new C[4];
         iarr = new int[6];
         barr = new boolean[3];
         aarr[0] = new A();
@@ -33,16 +31,16 @@ class Main{
         iarr[3] = 4;
         iarr[4] = 5;
         iarr[5] = 6;
-        barr[0] = True;
-        barr[1] = False;
-        barr[2] = True;
+        barr[0] = true;
+        barr[1] = false;
+        barr[2] = true;
 
         aarr[0].i1 = iarr;
         aarr[0].b1 = barr;
 
-        aarr[1] = [aarr[0].foo(iarr, barr, aarr);
+        aarr[1] = aarr[0].foo(iarr, barr, aarr);
 
-        return null;
+        return;
 
     }
 }
