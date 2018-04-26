@@ -1,0 +1,38 @@
+# Report code review HW1 (Team wisely)
+## Participant roles
+Team RogerRoger
+- Josua Cantieni (Scribe)
+- Franz Knobel (Moderator)
+
+Team wisely
+- Anna Laura John
+- Xenia Hofmeier
+
+Other Teams (Reviewers)
+
+## Presentation
+Team wisely introduces themselves and presents their code. 
+
+First they present the "Predict Visitor". This visitor visits all nodes and returns the number of registers the expression uses. The returned value is used in the method binaryOp in the ExprVisitor.
+
+It was the first code they wrote after some time.
+
+## Discussion
+The moderator takes over, thanks the team for their presentation and opens the discussion. 
+
+### First the StmtGenerator is discussed.
+It was mentioned that two seperate labels that label have the same content are emited in methoddecl. "labelScanf" and "labelPrintf" both label "%d" so one could optimize this.
+Someone mentioned that they could have called visit directly on the body in method decl insead of creating a for loop, as they wrote in the comment above the for loop.
+Someone liked the way they implemented their declaraion of the variables.
+
+### Second the ExprGenerator is discussed.
+Someone had a comment on their implementation of the division. To backup EAX and EDX team wisely used extra registers which is considered as a waste of registers. As a solution the use of the stack was proposed.
+When handling the unary operations the team compares the string of the given operation which is an enum. Instead they could have compared the enums directly.
+    
+### Last but not least, general thoughts on their code/-structure are discussed.
+It was mentioned that the team does not call static methods of a class in a static way. E.g instead of calling AssemblyEmiter.labelAddress("labelScanf") they call cg.emit.labelAddress("labelScanf").
+The predict visitor is in the ir package. This was critizied, but the team justified that all other visitors reside in this package. 
+Someone mentioned that they have tests that produce semantic errors. For example in one test the main class was written small.
+
+## Finish
+The moderator thanks all participants and closes the discussion. 
