@@ -293,7 +293,8 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 			case LOCAL:
 				name = LabelUtil.generateLocalLabelName(ast.name, arg);
 				arg.addLocal(name);
-				cg.emit.emit("subl", AssemblyEmitter.constant(4), Register.ESP);
+				cg.emit.emit("pushl", AssemblyEmitter.constant(0));
+				//cg.emit.emit("subl", AssemblyEmitter.constant(4), Register.ESP);
 				break;
 			default:
 				break;
