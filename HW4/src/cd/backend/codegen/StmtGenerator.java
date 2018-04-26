@@ -164,6 +164,11 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 		    Register arrayAddr = cg.eg.visit(index.left(), arg);
 		    Register arrayIndex = cg.eg.visit(index.right(), arg);
 
+            cg.emit.emit("cmpl", AssemblyEmitter.constant(0), arrayIndex);
+            cg.emit.emit("jl", "INVALID_ARRAY_BOUNDS");
+            cg.emit.emit("cmpl", AssemblyEmitter.registerOffset(Config.SIZEOF_PTR, arrayAddr), arrayIndex);
+            cg.emit.emit("jge", "INVALID_ARRAY_BOUNDS");
+
             cg.emit.emitMove(rhsReg, AssemblyEmitter.arrayAddress(arrayAddr, arrayIndex));
             cg.rm.releaseRegister(arrayAddr);
             cg.rm.releaseRegister(arrayIndex);
