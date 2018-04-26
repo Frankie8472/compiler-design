@@ -271,18 +271,8 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
         cg.emit.emit("pushl", AssemblyEmitter.registerOffset(0, reg));
 
         if (ast.type instanceof Symbol.ArrayTypeSymbol) {
-            Symbol.ArrayTypeSymbol typeToCast = (Symbol.ArrayTypeSymbol) ast.type;
-            String arrayIdentifier;
-            if(typeToCast.elementType.isReferenceType()) {
-                arrayIdentifier = LabelUtil.generateMethodTableLabelName(typeToCast.elementType.name) + "+1";
-            } else {
-                if(typeToCast.elementType == Symbol.PrimitiveTypeSymbol.intType){
-                    arrayIdentifier = AssemblyEmitter.constant(AstCodeGenerator.INT_ARRAY_IDENTIFIER);
-                } else {
-                    arrayIdentifier = AssemblyEmitter.constant(AstCodeGenerator.BOOLEAN_ARRAY_IDENTIFIER);
-                }
-            }
-            cg.emit.emit("pushl", arrayIdentifier);
+            Symbol.ArrayTypeSymbol arrayTypeSymbol = (Symbol.ArrayTypeSymbol) ast.type;
+            cg.emit.emit("pushl", AssemblyEmitter.labelAddress(LabelUtil.generateArrayLabelName(arrayTypeSymbol.elementType.name)));
         } else {
             cg.emit.emit("pushl", AssemblyEmitter.labelAddress(LabelUtil.generateMethodTableLabelName(ast.typeName)));
         }
@@ -336,7 +326,7 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
         /*
             Array Layout
                 -------@ Memory 0xYYYYYYYY ------
-                | METHOD_VTABLE_PTR + 1         |
+                | METHOD_VTABLE_PTR             |
                 | lenght                        |
                 | Array contents                |
                 ---------------------------------
@@ -356,30 +346,19 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
         Register array = cg.rm.getRegister();
 
         cg.emit.emit("xchg", array, Register.EAX);
-
         cg.emit.emit("pushl", AssemblyEmitter.constant(Config.SIZEOF_PTR));
+
         cg.emit.emit("addl", 2, array_size);
         cg.emit.emit("pushl", array_size);
 
-
         cg.emit.emit("call", Config.CALLOC);
-
         cg.emit.emit("addl", AssemblyEmitter.constant(Config.SIZEOF_PTR*2), RegisterManager.STACK_REG);
         cg.emit.emit("xchg", Register.EAX, array);
 
         Symbol.TypeSymbol arrayType = ((Symbol.ArrayTypeSymbol) ast.type).elementType;
-        String addressOrType;
 
-        if (arrayType.isReferenceType()) {
-            addressOrType = AssemblyEmitter.labelAddress(LabelUtil.generateMethodTableLabelName(arrayType.name)) + "+1";
-        } else {
-            Symbol.PrimitiveTypeSymbol primitive = (Symbol.PrimitiveTypeSymbol) arrayType;
-            if (primitive == Symbol.PrimitiveTypeSymbol.intType) {
-                addressOrType = AssemblyEmitter.constant(AstCodeGenerator.INT_ARRAY_IDENTIFIER);
-            } else {
-                addressOrType = AssemblyEmitter.constant(AstCodeGenerator.BOOLEAN_ARRAY_IDENTIFIER);
-            }
-        }
+        String addressOrType = AssemblyEmitter.labelAddress(LabelUtil.generateArrayLabelName(arrayType.name));
+
         cg.emit.emit("movl", addressOrType, AssemblyEmitter.registerOffset(0, array));
         cg.emit.emit("subl", AssemblyEmitter.constant(2), array_size);
         cg.emit.emit("movl", array_size, AssemblyEmitter.registerOffset(4, array));

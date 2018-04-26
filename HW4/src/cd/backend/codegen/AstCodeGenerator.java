@@ -86,6 +86,17 @@ public class AstCodeGenerator {
         emit.emitRaw(".endm");
 
 
+        emit.emitRaw(Config.DATA_INT_SECTION);
+        emit.emitRaw(".align 4");
+        emit.emitLabel(LabelUtil.generateArrayLabelName("int"));
+        emit.emitConstantData(LabelUtil.generateMethodTableLabelName(Symbol.ClassSymbol.objectType.name));
+
+        emit.emitRaw(Config.DATA_INT_SECTION);
+        emit.emitRaw(".align 4");
+        emit.emitLabel(LabelUtil.generateArrayLabelName("boolean"));
+        emit.emitConstantData(LabelUtil.generateMethodTableLabelName(Symbol.ClassSymbol.objectType.name));
+
+
         VTable objectTable = new VTable(Symbol.ClassSymbol.objectType);
         vTables.put(Symbol.ClassSymbol.objectType.name, objectTable);
         objectTable.emitStaticMethodVTable(emit);

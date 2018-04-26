@@ -22,17 +22,17 @@ extern int CAST_ERROR_CODE;
 void cast(void *typeToCast, void **currentType){
     //printf("As_tab§le: 0x%x, BsTable 0x%x, ObjectsTable 0x%x, , MainsTable 0x%x\n",&A_method_table, &B_method_table, &Object_method_table, &Main_method_table);
     // If current Object is an array
-    if(((int)currentType) & 1){
-        if(currentType == typeToCast){
-            // Must be the array of same type
-            return;
-        } else if (typeToCast == Object_method_table){
-            // Cast to Object OK
-            return;
-        } else {
-            exit(CAST_ERROR_CODE);
-        }
-    }
+//    if(((int)currentType) & 1){
+//        if(currentType == typeToCast){
+//            // Must be the array of same type
+//            return;
+//        } else if (typeToCast == Object_method_table){
+//            // Cast to Object OK
+//            return;
+//        } else {
+//            exit(CAST_ERROR_CODE);
+//        }
+//    }
     // Current Object is not an array. Test if it's runtime type is a subtype of the cast;
     while(currentType != 0){
         if(typeToCast == currentType){

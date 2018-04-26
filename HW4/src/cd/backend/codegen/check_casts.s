@@ -11,41 +11,23 @@ cast:
 	movl	%esp, %ebp
 	.cfi_def_cfa_register 5
 	subl	$24, %esp
-	movl	12(%ebp), %eax
-	andl	$1, %eax
-	testl	%eax, %eax
-	je	.L2
-	movl	12(%ebp), %eax
-	cmpl	8(%ebp), %eax
-	jne	.L3
-	jmp	.L1
-.L3:
-	movl	{0}, %eax
-	cmpl	%eax, 8(%ebp)
-	jne	.L5
-	jmp	.L1
+	jmp	.L2
 .L5:
-	movl	{2}, %eax
-	movl	%eax, (%esp)
-	call	{1}
-.L2:
-	jmp	.L6
-.L8:
 	movl	8(%ebp), %eax
 	cmpl	12(%ebp), %eax
-	jne	.L7
-	jmp	.L1
-.L7:
+	jne	.L3
+	jmp	.L6
+.L3:
 	movl	12(%ebp), %eax
 	movl	(%eax), %eax
 	movl	%eax, 12(%ebp)
-.L6:
+.L2:
 	cmpl	$0, 12(%ebp)
-	jne	.L8
+	jne	.L5
 	movl	{2}, %eax
 	movl	%eax, (%esp)
 	call	{1}
-.L1:
+.L6:
 	leave
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4

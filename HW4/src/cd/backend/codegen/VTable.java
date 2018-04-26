@@ -99,6 +99,12 @@ public class VTable {
         for(String methodName : methods.keySet()){
             emitter.emitConstantData(LabelUtil.generateMethodLabelName(methods.get(methodName), methodName));
         }
+
+        emitter.emitRaw(Config.DATA_INT_SECTION);
+        emitter.emitRaw(".align 4");
+        emitter.emitLabel(LabelUtil.generateArrayLabelName(this.className));
+        emitter.emitConstantData(LabelUtil.generateMethodTableLabelName(Symbol.ClassSymbol.objectType.name));
+
     }
 
 
