@@ -61,8 +61,8 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
 
         int leftRN = cg.rnv.calc(ast.left());
         int rightRN = cg.rnv.calc(ast.right());
-        String if_label = cg.emit.uniqueLabel();
-        String end_label = cg.emit.uniqueLabel();
+        String if_label = ".L" + cg.emit.uniqueLabel();
+        String end_label = ".L" + cg.emit.uniqueLabel();
         List<Register> dontBother;
         Register[] affected = {Register.EAX, Register.EBX, Register.EDX};
 
@@ -268,7 +268,7 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
     public Register cast(Cast ast, CurrentContext arg) { // todo
         Register reg = visit(ast.arg(), arg);
 
-        cg.emit.emit("pushl", AssemblyEmitter.registerOffset(0, reg));
+        cg.emit.emit("pushl", reg);
 
         if (ast.type instanceof Symbol.ArrayTypeSymbol) {
             Symbol.ArrayTypeSymbol arrayTypeSymbol = (Symbol.ArrayTypeSymbol) ast.type;

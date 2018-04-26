@@ -101,8 +101,8 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 
 	@Override
 	public Register ifElse(IfElse ast, CurrentContext arg) { // todo
-		String else_label = cg.emit.uniqueLabel();
-		String end_label = cg.emit.uniqueLabel();
+		String else_label = ".L" + cg.emit.uniqueLabel();
+		String end_label = ".L" + cg.emit.uniqueLabel();
 
 		Register condition = cg.eg.visit(ast.condition(), arg); // will contain boolean 1 or 0
 
@@ -114,21 +114,26 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 
 		//true
         visit(ast.then(), arg);
-		cg.emit.emit("jmp", end_label);
+
+        if(!(ast.otherwise() instanceof Ast.Nop)) {
+			cg.emit.emit("jmp", end_label);
+		}
 
 		//else
         cg.emit.emitLabel(else_label);
         visit(ast.otherwise(), arg);
 
 		//end
-		cg.emit.emitLabel(end_label);
+        if(!(ast.otherwise() instanceof Ast.Nop)) {
+            cg.emit.emitLabel(end_label);
+        }
 		return null;
 	}
 
 	@Override
 	public Register whileLoop(WhileLoop ast, CurrentContext arg) {
-		String loop_label = cg.emit.uniqueLabel();
-		String end_label = cg.emit.uniqueLabel();
+		String loop_label = ".L" + cg.emit.uniqueLabel();
+		String end_label = ".L" + cg.emit.uniqueLabel();
 
 		//loop beginning
 		cg.emit.emitLabel(loop_label);

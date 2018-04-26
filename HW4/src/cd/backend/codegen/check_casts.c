@@ -17,31 +17,27 @@ extern int CAST_ERROR_CODE;
 *
 * Params:
 *   typeToCast: Type the object should be casted to
-*   currentType: The Current Type of the object
+*   currentObject: The pointer to the object to cast.
 */
-void cast(void *typeToCast, void **currentType){
-    //printf("As_tab§le: 0x%x, BsTable 0x%x, ObjectsTable 0x%x, , MainsTable 0x%x\n",&A_method_table, &B_method_table, &Object_method_table, &Main_method_table);
-    // If current Object is an array
-//    if(((int)currentType) & 1){
-//        if(currentType == typeToCast){
-//            // Must be the array of same type
-//            return;
-//        } else if (typeToCast == Object_method_table){
-//            // Cast to Object OK
-//            return;
-//        } else {
-//            exit(CAST_ERROR_CODE);
-//        }
-//    }
-    // Current Object is not an array. Test if it's runtime type is a subtype of the cast;
-    while(currentType != 0){
-        if(typeToCast == currentType){
+void cast(void *typeToCast, void **currentObject){
+//    printf("TypeToCast§le: 0x%x, currentType: 0x%x", typeToCast, currentType);
+
+    // If current object is a null pointer (e.g. 0) don't try to estimate the type. Would cause a segfault.
+    if(!currentObject){
+        return;
+    }
+
+    // check if super type is same as type to cast.
+    while(currentObject != 0){
+        if(typeToCast == currentObject){
+            // If currentObject is a subtype of typeToCast everything is ok and return.
             return;
         }
 
-        currentType = *currentType;
+        // Get supertype
+        currentObject = *currentObject;
     }
 
     // Was not a subtype throw error
-    exit(CAST_ERROR_CODE);
+    __asm__("jmp INVALID_DOWNCAST");
 }

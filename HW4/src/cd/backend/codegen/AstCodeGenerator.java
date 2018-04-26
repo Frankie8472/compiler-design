@@ -177,7 +177,7 @@ public class AstCodeGenerator {
     }
 
     protected String loadCastingAssembly(String filename){
-        String assembly;
+//        String assembly;
         try(BufferedReader br = new BufferedReader(new FileReader(filename))){
             StringBuilder sb = new StringBuilder();
             String line = br.readLine();
@@ -187,8 +187,8 @@ public class AstCodeGenerator {
                 sb.append(System.lineSeparator());
                 line = br.readLine();
             }
-            assembly = sb.toString();
-            return MessageFormat.format(assembly, LabelUtil.generateMethodTableLabelName(Symbol.ClassSymbol.objectType.name), Config.EXIT, AssemblyEmitter.constant(ExitCode.INVALID_DOWNCAST.value));
+            return sb.toString();
+//            return MessageFormat.format(assembly, Config.EXIT, AssemblyEmitter.constant(ExitCode.INVALID_DOWNCAST.value));
         } catch (IOException e) {
             e.printStackTrace();
         }

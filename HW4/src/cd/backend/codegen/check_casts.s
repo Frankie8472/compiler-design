@@ -10,25 +10,30 @@ cast:
 	.cfi_offset 5, -8
 	movl	%esp, %ebp
 	.cfi_def_cfa_register 5
-	subl	$24, %esp
-	jmp	.L2
-.L5:
+	cmpl	$0, 12(%ebp)
+	jne	.L2
+	jmp	.L1
+.L2:
+	jmp	.L4
+.L6:
 	movl	8(%ebp), %eax
 	cmpl	12(%ebp), %eax
-	jne	.L3
-	jmp	.L6
-.L3:
+	jne	.L5
+	jmp	.L1
+.L5:
 	movl	12(%ebp), %eax
 	movl	(%eax), %eax
 	movl	%eax, 12(%ebp)
-.L2:
+.L4:
 	cmpl	$0, 12(%ebp)
-	jne	.L5
-	movl	{2}, %eax
-	movl	%eax, (%esp)
-	call	{1}
-.L6:
-	leave
+	jne	.L6
+#APP
+# 42 "check_casts.c" 1
+	jmp INVALID_DOWNCAST
+# 0 "" 2
+#NO_APP
+.L1:
+	popl	%ebp
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
 	ret
