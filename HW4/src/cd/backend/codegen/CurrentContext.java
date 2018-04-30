@@ -30,7 +30,7 @@ public final class CurrentContext {
      * Meaning after pushing ebp and mov esp ebp.
      * Negative number is for locals and positive for
      */
-    public Map<String, Integer> parameters_and_locals;
+    private Map<String, Integer> parameters_and_locals;
 
 
     public CurrentContext(CurrentContext context, MethodSymbol methodSymbol) {

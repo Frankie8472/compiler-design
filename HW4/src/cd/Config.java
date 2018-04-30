@@ -9,7 +9,12 @@ public class Config {
         WINDOWS,
         MACOSX
     }
-    
+
+    /**
+     * Marks the label as local, so it will not be stored in the symboltable of the executable.
+     */
+    public static final String LOCALLABEL = ".L";
+
     /**
      * Defines the extension used for assembler files on this platform.
      * Currently always {@code .s}.

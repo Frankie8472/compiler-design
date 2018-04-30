@@ -82,7 +82,7 @@ public class AstCodeGenerator {
 
         emit.emitRaw(".macro null_ptr_check ptr");
         emit.emit("test", "\\ptr", "\\ptr");
-        emit.emit("je", "NULL_POINTER");
+        emit.emit("je", ExitCode.NULL_POINTER.name());
         emit.emitRaw(".endm");
 
 
@@ -115,6 +115,7 @@ public class AstCodeGenerator {
         emit.emitRaw(Config.TEXT_SECTION);
         emit.emitLabel(Config.MAIN);
         emit.increaseIndent("Call startpoint");
+
         // Allocate Memory on Heap
         emit.emit("pushl", AssemblyEmitter.constant(Config.SIZEOF_PTR));
         emit.emit("pushl", AssemblyEmitter.constant(vTables.get("Main").getFieldCount()));
@@ -128,44 +129,43 @@ public class AstCodeGenerator {
 
         emit.emit("call", "*" + AssemblyEmitter.registerOffset(vTables.get("Main").getMethodOffset("main"), Register.EAX));
         emit.emit("addl", AssemblyEmitter.constant(Config.SIZEOF_PTR), Register.ESP);
-//        emit.emit("xorl", Register.EAX, Register.EAX);
         emit.emitRaw("ret");
 
         // error code label
-        emit.emitLabel("INVALID_DOWNCAST");
+        emit.emitLabel(ExitCode.INVALID_DOWNCAST.name());
         emit.emit("pushl", AssemblyEmitter.constant(ExitCode.INVALID_DOWNCAST.value));
         emit.emit("call", "exit");
 
-        emit.emitLabel("INVALID_ARRAY_STORE");
+        emit.emitLabel(ExitCode.INVALID_ARRAY_STORE.name());
         emit.emit("pushl", AssemblyEmitter.constant(ExitCode.INVALID_ARRAY_STORE.value));
         emit.emit("call", "exit");
 
 
-        emit.emitLabel("INVALID_ARRAY_BOUNDS");
+        emit.emitLabel(ExitCode.INVALID_ARRAY_BOUNDS.name());
         emit.emit("pushl", AssemblyEmitter.constant(ExitCode.INVALID_ARRAY_BOUNDS.value));
         emit.emit("call", "exit");
 
 
-        emit.emitLabel("INVALID_ARRAY_SIZE");
+        emit.emitLabel(ExitCode.INVALID_ARRAY_SIZE.name());
         emit.emit("pushl", AssemblyEmitter.constant(ExitCode.INVALID_ARRAY_SIZE.value));
         emit.emit("call", "exit");
 
 
-        emit.emitLabel("INFINITE_LOOP");
+        emit.emitLabel(ExitCode.INFINITE_LOOP.name());
         emit.emit("pushl", AssemblyEmitter.constant(ExitCode.INFINITE_LOOP.value));
         emit.emit("call", "exit");
 
 
-        emit.emitLabel("DIVISION_BY_ZERO");
+        emit.emitLabel(ExitCode.DIVISION_BY_ZERO.name());
         emit.emit("pushl", AssemblyEmitter.constant(ExitCode.DIVISION_BY_ZERO.value));
         emit.emit("call", "exit");
 
-        emit.emitLabel("NULL_POINTER");
+        emit.emitLabel(ExitCode.NULL_POINTER.name());
         emit.emit("pushl", AssemblyEmitter.constant(ExitCode.NULL_POINTER.value));
         emit.emit("call", "exit");
 
 
-        emit.emitLabel("INTERNAL_ERROR");
+        emit.emitLabel(ExitCode.INTERNAL_ERROR.name());
         emit.emit("pushl", AssemblyEmitter.constant(ExitCode.INTERNAL_ERROR.value));
         emit.emit("call", "exit");
 

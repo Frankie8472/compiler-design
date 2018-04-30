@@ -11,7 +11,6 @@ public class VTable {
     private Map<String, String> methods = new LinkedHashMap<>();
 
     private List<String> fields = new ArrayList<>();
-    private int fieldOffset = Config.SIZEOF_PTR;
 
     private String className;
     private String superClassName;
@@ -56,19 +55,6 @@ public class VTable {
         if(!fields.contains(fieldName))
             return null;
         return (fields.lastIndexOf(fieldName) + 1) * Config.SIZEOF_PTR;
-    }
-
-    public Integer getOffset(String varName) {
-
-        if (getMethodOffset(varName) != null){
-            return getMethodOffset(varName);
-        }
-
-        return getFieldOffset(varName);
-    }
-
-    public Integer getFullSize(){
-        return (fields.size() + 1) * Config.SIZEOF_PTR;
     }
 
     public Integer getFieldCount(){

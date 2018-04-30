@@ -7,6 +7,7 @@ import java.util.List;
 
 import cd.Config;
 import cd.ToDoException;
+import cd.backend.ExitCode;
 import cd.backend.codegen.RegisterManager.Register;
 import cd.ir.Ast.BinaryOp;
 import cd.ir.Ast.BooleanConst;
@@ -38,7 +39,7 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
         cg = astCodeGenerator;
     }
 
-    public Register gen(Expr ast) { //todo: what for?
+    public Register gen(Expr ast) {
         return visit(ast, null);
     }
 
@@ -50,7 +51,6 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
         } finally {
             cg.emit.decreaseIndent();
         }
-
     }
 
     @Override
@@ -61,13 +61,13 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
 
         int leftRN = cg.rnv.calc(ast.left());
         int rightRN = cg.rnv.calc(ast.right());
-        String if_label = ".L" + cg.emit.uniqueLabel();
-        String end_label = ".L" + cg.emit.uniqueLabel();
+        String if_label = Config.LOCALLABEL + cg.emit.uniqueLabel();
+        String end_label = Config.LOCALLABEL + cg.emit.uniqueLabel();
         List<Register> dontBother;
         Register[] affected = {Register.EAX, Register.EBX, Register.EDX};
 
         Register leftReg, rightReg;
-        if (false){//leftRN > rightRN) {
+        if (leftRN > rightRN) {
             leftReg = visit(ast.left(), arg);
             cg.emit.emit("pushl", leftReg);
             cg.rm.releaseRegister(leftReg);
@@ -111,7 +111,7 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
                         cg.emit.emit("pushl", s);
 
                 cg.emit.emit("cmpl", AssemblyEmitter.constant(0), rightReg);
-                cg.emit.emit("je", "DIVISION_BY_ZERO");
+                cg.emit.emit("je", ExitCode.DIVISION_BY_ZERO.name());
 
                 // Move the LHS (numerator) into eax
                 // Move the RHS (denominator) into ebx
@@ -142,7 +142,7 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
                         cg.emit.emit("pushl", s);
 
                 cg.emit.emit("cmpl", AssemblyEmitter.constant(0), rightReg);
-                cg.emit.emit("je", "DIVISION_BY_ZERO");
+                cg.emit.emit("je", ExitCode.DIVISION_BY_ZERO.name());
 
                 // Move the LHS (numerator) into eax
                 // Move the RHS (denominator) into ebx
@@ -231,7 +231,7 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
                 break;
 
             default: {
-                throw new ToDoException(); // todo: throw correct error code
+                throw new RuntimeException("BinaryOperator does not exist. This should never happen!");
             }
         }
 
@@ -241,7 +241,7 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
     }
 
     @Override
-    public Register booleanConst(BooleanConst ast, CurrentContext arg) { //todo: jcheck
+    public Register booleanConst(BooleanConst ast, CurrentContext arg) {
         Register reg = cg.rm.getRegister();
         if (ast.value) {
             cg.emit.emitMove(AssemblyEmitter.constant(1), reg);
@@ -276,7 +276,6 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
         } else {
             cg.emit.emit("pushl", AssemblyEmitter.labelAddress(LabelUtil.generateMethodTableLabelName(ast.typeName)));
         }
-//        cg.emit.emit("pushl", reg);
 
         cg.emit.emit("call", "cast");
         cg.emit.emit("addl", AssemblyEmitter.constant(Config.SIZEOF_PTR * 2), RegisterManager.STACK_REG);
@@ -296,9 +295,9 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
         cg.emit.emit("popl", index);
 
         cg.emit.emit("cmpl", AssemblyEmitter.constant(0), index);
-        cg.emit.emit("jl", "INVALID_ARRAY_BOUNDS");
+        cg.emit.emit("jl", ExitCode.INVALID_ARRAY_BOUNDS.name());
         cg.emit.emit("cmpl", AssemblyEmitter.registerOffset(Config.SIZEOF_PTR, array), index);
-        cg.emit.emit("jge", "INVALID_ARRAY_BOUNDS");
+        cg.emit.emit("jge", ExitCode.INVALID_ARRAY_BOUNDS.name());
         cg.emit.emitMove(AssemblyEmitter.arrayAddress(array, index), array);
         cg.rm.releaseRegister(index);
         return array;
@@ -405,7 +404,6 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
 
     @Override
     public Register methodCall(MethodCallExpr ast, CurrentContext arg) {
-        // put parameter in inverse queue on stack
         Register reg;
 
         for (int i = ast.allArguments().size() - 1; i >= 0; i--) {
@@ -414,13 +412,9 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
             cg.rm.releaseRegister(reg);
         }
 
-        // jump to methodlabel, inheritance not checked
-//        cg.emit.emitLoad(0, reg, reg);
-        // It needs a '*' because it's an indirect call
-
         reg = cg.rm.getRegister();
 
-        Symbol.ClassSymbol currentClass = (Symbol.ClassSymbol) ast.receiver().type; //TODO unsafe Cast
+        Symbol.ClassSymbol currentClass = (Symbol.ClassSymbol) ast.receiver().type;
         Integer methodOffset = null;
 
         cg.emit.emitMove(AssemblyEmitter.registerOffset(0, RegisterManager.STACK_REG), reg);
@@ -433,12 +427,10 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
             methodOffset = table.getMethodOffset(ast.methodName);
             currentClass = currentClass.superClass;
         }
-//        cg.emit.emitLoad(0, reg, reg);
 
         cg.emit.emit("call", "*" + AssemblyEmitter.registerOffset(methodOffset, reg));
         cg.emit.emit("addl", AssemblyEmitter.constant(ast.allArguments().size()*Config.SIZEOF_PTR), Register.ESP);
         cg.emit.emit("xchg", Register.EAX, reg);
-        // return eax (return register? right)
         return reg;
     }
 
