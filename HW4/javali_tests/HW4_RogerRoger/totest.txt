@@ -1,6 +1,8 @@
+//todo, look through tests of tim and complete your list
+
 writeln
 write
-read
+read (dont forget input file)
 test each ( int, boolean, obejct, array int, array boolean, array object)
 test vtable with combination of function and fields
 use value in var which has not been set yet
