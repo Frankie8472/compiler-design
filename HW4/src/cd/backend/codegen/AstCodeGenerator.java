@@ -177,7 +177,6 @@ public class AstCodeGenerator {
     }
 
     protected String loadCastingAssembly(String filename){
-//        String assembly;
         try(BufferedReader br = new BufferedReader(new FileReader(filename))){
             StringBuilder sb = new StringBuilder();
             String line = br.readLine();
@@ -188,7 +187,6 @@ public class AstCodeGenerator {
                 line = br.readLine();
             }
             return sb.toString();
-//            return MessageFormat.format(assembly, Config.EXIT, AssemblyEmitter.constant(ExitCode.INVALID_DOWNCAST.value));
         } catch (IOException e) {
             e.printStackTrace();
         }

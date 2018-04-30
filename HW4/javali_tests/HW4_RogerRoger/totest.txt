@@ -1,0 +1,22 @@
+newline
+write
+test each object( int, boolean, obejct, array int, array boolean, array object)
+test vtable with combination of function and fields
+
+indirect down cast
+down cast
+up cast
+cast of
+cast of primitive types already checked im the semanticanalyzer?
+
+
+
+ERRORS:
+Invalid downcast
+invalid array store
+invalid array bounds
+invalid array size
+infinite loop
+division by zero
+null pointer check
+internal error
