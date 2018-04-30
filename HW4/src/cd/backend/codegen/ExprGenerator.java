@@ -265,7 +265,7 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
     }
 
     @Override
-    public Register cast(Cast ast, CurrentContext arg) { // todo
+    public Register cast(Cast ast, CurrentContext arg) {
         Register reg = visit(ast.arg(), arg);
 
         cg.emit.emit("pushl", reg);
@@ -284,7 +284,7 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
     }
 
     @Override
-    public Register index(Index ast, CurrentContext arg) { // todo: jcheck
+    public Register index(Index ast, CurrentContext arg) {
         Register index = visit(ast.right(), arg);
         cg.emit.emit("pushl", index);
         cg.rm.releaseRegister(index);
