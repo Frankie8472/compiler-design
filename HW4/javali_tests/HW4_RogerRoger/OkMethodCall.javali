@@ -1,0 +1,28 @@
+class A{
+    int foo(){
+        return 1;
+    }
+
+    boolean bar(){
+        return true;
+    }
+
+    A foobar(){
+        return new A();
+    }
+
+
+}
+
+class Main{
+    void main(){
+        A a1, a2;
+        int i;
+        boolean b;
+        a1 = new A();
+        i = a1.foo();
+        b = a1.bar();
+        a1 = a1.foobar();
+        return;
+    }
+}

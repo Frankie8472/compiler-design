@@ -3,6 +3,17 @@ class A{
     boolean[] b1;
 
     A foo(int[] i2, boolean[] b2, A[] a1){
+        int i3;
+        boolean b3;
+        A a3;
+        i3 = 6;
+        b3 = false;
+        a3 = new A();
+
+        i3 = i3 + 2;
+        b3 = true;
+        a3 = new A();
+
         if(b2[0] && b1[0]){
             write(i2[0] + i2[1]);
             write(i1[0] + i1[1]);
@@ -23,17 +34,17 @@ class Main{
         aarr[0] = new A();
         aarr[1] = new A();
         aarr[2] = new A();
-        aarr[3] = new A();
+        aarr[3] = aarr[2];
         aarr[4] = new A();
         iarr[0] = 1;
         iarr[1] = 2;
         iarr[2] = 3;
-        iarr[3] = 4;
+        iarr[3] = iarr[3];
         iarr[4] = 5;
         iarr[5] = 6;
         barr[0] = true;
         barr[1] = false;
-        barr[2] = true;
+        barr[2] = barr[1];
 
         aarr[0].i1 = iarr;
         aarr[0].b1 = barr;

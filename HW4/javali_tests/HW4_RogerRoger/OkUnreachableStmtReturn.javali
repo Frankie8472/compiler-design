@@ -1,7 +1,9 @@
 class Main{
     void main(){
-        write(666);
+        int i;
+        i = 0;
+        write(i);
         return;
-        write(69);  // Unreachable
+        write(i);  // Unreachable
     }
 }

@@ -11,7 +11,7 @@ class Main{
         a = b;
         write(a.foo);
         write(a.foobar);
-        //write(a.bar); // this should not be possible
+        write(a.bar); // this should not be possible
 
     }
 }

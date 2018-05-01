@@ -72,6 +72,7 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 
 		cg.emit.emitRaw(Config.TEXT_SECTION);
 		cg.emit.emitLabel(name);
+		cg.emit.emitLabel(name);
 
         cg.emit.emit("push", Register.EBP);
         cg.emit.emitMove(Register.ESP, Register.EBP);

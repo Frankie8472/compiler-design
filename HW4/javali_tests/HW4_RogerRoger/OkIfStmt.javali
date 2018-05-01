@@ -1,0 +1,19 @@
+class A{
+    int foo(boolean b){
+        if(b){
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+}
+
+class Main{
+    void main(){
+        A a;
+        a = new A();
+        write(a.foo(true));
+        write(a.foo(false));
+        return;
+    }
+}
