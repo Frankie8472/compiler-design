@@ -1,11 +1,11 @@
 //todo, look through tests of tim and complete your list
 
-writeln
-write
-read (dont forget input file)
+//writeln
+//write
+//read (dont forget input file)
 //test each ( int, boolean, obejct, array int, array boolean, array object)
-test vtable with combination of function and fields
-use value in var which has not been set yet
+//test vtable with combination of function and fields
+//use value in var which has not been set yet
 
 //binaryop (plus, minus, mult, div, mod)
 //binaryop (==, !=)
@@ -13,11 +13,11 @@ use value in var which has not been set yet
 //unaryop (!)
 //unaryop (+, -)
 
-indirect down cast
-down cast
-up cast
-cast of
-cast of primitive types (only to each other possible)
+//indirect down cast
+//down cast
+//up cast
+//cast of
+//cast of primitive types (only to each other possible)
 this test
 null ptr access on (field, methods, array?)
 
@@ -29,13 +29,13 @@ correct return (stack clean)
 //assign field (int, boolean, object)
 //assign method to (int, boolean, object)
 //assign index (int, boolean, object)
-access on a field, var which was not initialized yet
+//access on a field, var which was not initialized yet
 //inheritance
 
 
 ERRORS:
-Invalid downcast
-invalid array store
+//Invalid downcast
+//invalid array store
 //invalid array bounds >arrsize -1
 //invalid array bounds <0
 //invalid array size
