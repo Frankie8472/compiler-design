@@ -1,0 +1,31 @@
+class Main{
+    void main(){
+        A a;
+        a = new A();
+        a.fun = 42;
+        funnyMethod(null);
+        funnyMethod(a);
+    }
+
+    void funnyMethod(A object){
+        if(object == null){
+            object = new A();
+        }
+        object.method();
+    }
+}
+
+class A{
+    int fun;
+    void method(){
+        write(0x48);
+        write(0x61);
+        write(0x6c);
+        write(0x6c);
+        write(0x6f);
+        writeln();
+        write(fun);
+        writeln();
+    }
+}
+

@@ -1,0 +1,19 @@
+class Main{
+    void main(){
+        int i;
+        A a;
+        Object o;
+        A[] b;
+        Object[] objs;
+
+        a = new A();
+        o = new Object();
+        b = new A[2];
+        objs = new Object[4];
+    }
+}
+
+class A{
+    int hui;
+}
+

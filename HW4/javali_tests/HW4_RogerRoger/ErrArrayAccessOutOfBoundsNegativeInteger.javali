@@ -1,7 +1,7 @@
 class Main{
     void main(){
-        boolean[] b1;
+        int[] b1;
         b1 = new int[4];
-        b1[-1] = true;
+        b1[-1] = 3;
     }
 }

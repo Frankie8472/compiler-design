@@ -1,0 +1,43 @@
+class Main{
+    void main(){
+        A a;
+        B x;
+        C y;
+        Object o;
+        A[] b;
+        Object[] objs;
+
+
+        a = new A();
+        x = new B();
+        y = new C();
+        a = x;
+        x = (B) a;
+        o = new Object();
+        b = new A[2];
+        objs = new Object[4];
+
+        o = a;
+        a = (A) o;
+        o = objs;
+        objs = (Object[]) o;
+        objs[0] = o;
+        o = objs;
+        o = ((Object[])o);
+        o = y;
+        a = (A) o;
+        o = b;
+        b = (A[])o;
+    }
+}
+
+class A{
+}
+
+class B extends A{
+
+}
+
+class C extends B{
+
+}

@@ -204,7 +204,7 @@ class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 
 		} else {
 			//Not necessary as it seems
-			throw new ToDoException();
+			throw new RuntimeException("Unknown AST Type. This should never happen!");
 		}
 
 		cg.rm.releaseRegister(rhsReg);

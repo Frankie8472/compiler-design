@@ -4,14 +4,13 @@ class Main{
         A a;
         a = new A();
         b = new B();
-        write(a.foo);
-        write(a.foobar);
-        write(b.foo);
-        write(b.bar);
+        write(a.foo());
+        write(a.foobar());
+        write(b.foo());
+        write(b.bar());
         a = b;
-        write(a.foo);
-        write(a.foobar);
-        //write(a.bar); // this should not be possible
+        write(a.foo());
+        write(a.foobar());
 
     }
 }

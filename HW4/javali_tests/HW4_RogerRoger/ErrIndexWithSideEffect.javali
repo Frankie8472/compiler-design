@@ -1,0 +1,13 @@
+class Main{
+    int[] a;
+
+    void main(){
+       write(a[getIndex()]);
+    }
+
+    int getIndex(){
+        a = new int[1];
+        a[0] = 42;
+        return 0;
+    }
+}

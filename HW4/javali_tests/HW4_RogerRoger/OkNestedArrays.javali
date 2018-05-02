@@ -1,0 +1,16 @@
+class Main{
+    void main(){
+        int[] array1;
+        Object[] nested;
+        int[] array2;
+
+        array1 = new int[1];
+        array1[0] = 42;
+
+        nested = new Object[1];
+        nested[0] = array1;
+
+        array2 = (int[]) nested[0];
+        write(array2[0]);
+    }
+}

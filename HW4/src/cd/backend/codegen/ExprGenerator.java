@@ -39,9 +39,9 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
         cg = astCodeGenerator;
     }
 
-    public Register gen(Expr ast) {
-        return visit(ast, null);
-    }
+//    public Register gen(Expr ast) {
+//        return visit(ast, null);
+//    }
 
     @Override
     public Register visit(Expr ast, CurrentContext arg) {
@@ -59,31 +59,23 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
         // not care if it runs out of registers, and
         // supports only a limited range of operations:
 
-        int leftRN = cg.rnv.calc(ast.left());
-        int rightRN = cg.rnv.calc(ast.right());
+//        int leftRN = cg.rnv.calc(ast.left());
+//        int rightRN = cg.rnv.calc(ast.right());
         String if_label = Config.LOCALLABEL + cg.emit.uniqueLabel();
         String end_label = Config.LOCALLABEL + cg.emit.uniqueLabel();
         List<Register> dontBother;
         Register[] affected = {Register.EAX, Register.EBX, Register.EDX};
 
         Register leftReg, rightReg;
-        if (leftRN > rightRN) {
-            leftReg = visit(ast.left(), arg);
-            cg.emit.emit("pushl", leftReg);
-            cg.rm.releaseRegister(leftReg);
 
-            rightReg = visit(ast.right(), arg);
-            leftReg = cg.rm.getRegister();
-            cg.emit.emit("popl", leftReg);
-        } else {
-            rightReg = visit(ast.right(), arg);
-            cg.emit.emit("pushl", rightReg);
-            cg.rm.releaseRegister(rightReg);
+        leftReg = visit(ast.left(), arg);
+        cg.emit.emit("pushl", leftReg);
+        cg.rm.releaseRegister(leftReg);
 
-            leftReg = visit(ast.left(), arg);
-            rightReg = cg.rm.getRegister();
-            cg.emit.emit("popl", rightReg);
-        }
+        rightReg = visit(ast.right(), arg);
+        leftReg = cg.rm.getRegister();
+        cg.emit.emit("popl", leftReg);
+
 
         cg.debug("Binary Op: %s (%s,%s)", ast, leftReg, rightReg);
 
@@ -285,14 +277,17 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
 
     @Override
     public Register index(Index ast, CurrentContext arg) {
-        Register index = visit(ast.right(), arg);
-        cg.emit.emit("pushl", index);
-        cg.rm.releaseRegister(index);
+
 
         Register array = visit(ast.left(), arg);
         cg.emit.emit("null_ptr_check", array);
-        index = cg.rm.getRegister();
-        cg.emit.emit("popl", index);
+        cg.emit.emit("pushl", array);
+        cg.rm.releaseRegister(array);
+
+        Register index = visit(ast.right(), arg);
+        array = cg.rm.getRegister();
+        cg.emit.emit("popl", array);
+
 
         cg.emit.emit("cmpl", AssemblyEmitter.constant(0), index);
         cg.emit.emit("jl", ExitCode.INVALID_ARRAY_BOUNDS.name());

@@ -1,0 +1,25 @@
+class Main{
+    int a;
+    int[] b;
+
+    Main main;
+
+    Main getThis(){
+        return this;
+    }
+
+    void main(){
+        Main main;
+        main = new Main();
+        main.getThis().main = this;
+        a = 5;
+        this.b = new int[5];
+        this.main = main.getThis();
+        this.main = this;
+        if (this.a == this.main.a){
+            write(a);
+        }
+
+    }
+}
+

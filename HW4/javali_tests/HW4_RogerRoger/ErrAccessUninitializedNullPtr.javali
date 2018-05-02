@@ -23,9 +23,5 @@ class Main{
         }
 
         c.field = 6;        //?
-        write(c.method());  //?
-        a = c;              //?
-
-
     }
 }

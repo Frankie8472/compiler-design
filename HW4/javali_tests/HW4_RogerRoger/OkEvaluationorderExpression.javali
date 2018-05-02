@@ -1,0 +1,24 @@
+class Main{
+    A a;
+    void main(){
+        int b;
+        b = (hihi() + a.fail);
+    }
+
+    int hihi(){
+        a = new A();
+        a.fail = 42;
+        return 5;
+    }
+
+    void call(int a, int hui){
+        write(a);
+        write(hui);
+
+    }
+}
+
+class A{
+    int fail;
+}
+

@@ -8,7 +8,9 @@ class A{
     }
 
     A foobar(){
-        return new A();
+        A a;
+        a = new A();
+        return a;
     }
 
 

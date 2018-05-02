@@ -1,0 +1,11 @@
+class Main{
+    B b;
+    void main(){
+        write(b.a);
+    }
+
+}
+
+class B{
+    int a;
+}

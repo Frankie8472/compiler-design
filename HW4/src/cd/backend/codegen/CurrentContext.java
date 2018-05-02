@@ -74,7 +74,6 @@ public final class CurrentContext {
      * and updates current: current -= 4
      *
      * @param name of the parameter as string
-     * @return Offset of the parameter above the base Pointer
      */
     public void addParameter(String name) {
         this.parameters_and_locals.put(name, this.currentParameterOffset);
@@ -87,7 +86,6 @@ public final class CurrentContext {
      * and updates current: current += 4
      *
      * @param name of the local as string
-     * @return Offset of the local variable below the base pointer
      */
     public void addLocal(String name) {
         this.parameters_and_locals.put(name, this.currentLocalOffset);

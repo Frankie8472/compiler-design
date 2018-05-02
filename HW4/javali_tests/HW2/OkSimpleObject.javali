@@ -7,7 +7,7 @@ class Main {
       writeln();
    }
   
-   void method(int withArg) {
+   void method2(int withArg) {
       write(withArg);
       writeln();
    }

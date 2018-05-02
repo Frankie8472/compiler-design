@@ -28,11 +28,7 @@ class Main{
         b1 = true;
         b2 = false;
 
-        i1 = (int) i2;
-        b1 = (boolean) b2;
-
         a = temp;
-        //b = a;      //should not be possible right?
 
 
     }
