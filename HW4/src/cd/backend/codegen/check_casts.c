@@ -39,5 +39,5 @@ void cast(void *typeToCast, void **currentObject){
     }
 
     // Was not a subtype throw error
-    __asm__("jmp INVALID_DOWNCAST");
+    __asm__("jmp {0}");
 }

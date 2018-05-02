@@ -29,7 +29,7 @@ cast:
 	jne	.L6
 #APP
 # 42 "check_casts.c" 1
-	jmp INVALID_DOWNCAST
+	jmp {0}
 # 0 "" 2
 #NO_APP
 .L1:

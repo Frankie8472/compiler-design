@@ -186,7 +186,8 @@ public class AstCodeGenerator {
                 sb.append(System.lineSeparator());
                 line = br.readLine();
             }
-            return sb.toString();
+            String asmFile =  sb.toString();
+            return MessageFormat.format(asmFile, ExitCode.INVALID_DOWNCAST.name());
         } catch (IOException e) {
             e.printStackTrace();
         }
