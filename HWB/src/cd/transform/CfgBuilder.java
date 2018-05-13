@@ -57,6 +57,10 @@ public class CfgBuilder {
 				} else {
 					// todo: array
 					// problem, getting array index and what if it is an input? runtime???
+                    String varName = ((Ast.Var) ((Ast.Index) ((Ast.Assign) ast).left()).left()).sym.name + "_0";
+                    cfg.definition_set.get(varName).add(definition_name);
+                    arg.definition_set.add(definition_name);
+                    cfg.definition_map.put(definition_name, varName);
 				}
 			}
 			// -----

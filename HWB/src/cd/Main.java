@@ -9,8 +9,11 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import cd.ir.BasicBlock;
+import cd.ir.ControlFlowGraph;
+import cd.transform.analysis.DataFlowAnalysis;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -125,16 +128,16 @@ public class Main {
 		new SemanticAnalyzer(this).check(astRoots);
 
 		// Build control flow graph:
-		for (ClassDecl cd : astRoots)
-			for (MethodDecl md : cd.methods()){
+		for (ClassDecl cd : astRoots) {
+			for (MethodDecl md : cd.methods()) {
 				new CfgBuilder().build(md);
-				for (BasicBlock block : md.cfg.allBlocks)
+				for (BasicBlock block : md.cfg.allBlocks) {
 					for (String def : block.definition_set) {
 						String var = md.cfg.definition_map.get(def);
 						block.gen.add(def);
-						for(String defs : md.cfg.definition_set.get(var)){
-							if(!defs.equals(def)){
-								if (block.gen.contains(defs)){
+						for (String defs : md.cfg.definition_set.get(var)) {
+							if (!defs.equals(def)) {
+								if (block.gen.contains(defs)) {
 									block.gen.remove(defs);
 								}
 								if (!block.kill.contains(defs)) {
@@ -143,10 +146,10 @@ public class Main {
 							}
 						}
 					}
+				}
 			}
-
+		}
 		CfgDump.toString(astRoots, ".cfg", cfgdumpbase, false);
-
 	}
 
 	public void generateCode(List<ClassDecl> astRoots, Writer out) {
