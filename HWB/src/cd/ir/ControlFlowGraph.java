@@ -1,12 +1,16 @@
 package cd.ir;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import cd.ir.Ast.Expr;
 
 /** Represents the control flow graph of a single method. */
 public class ControlFlowGraph {
+	public Map<String, List<String>> definition_set = new HashMap<>(); 	// made by me, var to defs
+	public Map<String, String> definition_map = new HashMap<>(); 		// made by me, def to var
 	public BasicBlock start, end;
 	public final List<BasicBlock> allBlocks = new ArrayList<BasicBlock>();
 	
@@ -25,7 +29,7 @@ public class ControlFlowGraph {
 	 * merges their control flows into a single successor and returns
 	 * the new successor.
 	 */
-	public BasicBlock join(BasicBlock... pred) {
+	public BasicBlock join(BasicBlock... pred) { //... means zero or more BasicBlock objects can be passed
 		BasicBlock result = newBlock();
 		for (BasicBlock p : pred) {
 			assert p.condition == null;

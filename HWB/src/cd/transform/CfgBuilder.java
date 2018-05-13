@@ -1,24 +1,34 @@
 package cd.transform;
 
-import cd.ir.Ast;
+import cd.ir.*;
 import cd.ir.Ast.IfElse;
 import cd.ir.Ast.MethodDecl;
 import cd.ir.Ast.Seq;
 import cd.ir.Ast.Stmt;
 import cd.ir.Ast.WhileLoop;
-import cd.ir.AstVisitor;
-import cd.ir.BasicBlock;
-import cd.ir.ControlFlowGraph;
+
+import java.util.ArrayList;
 
 public class CfgBuilder {
 	
 	ControlFlowGraph cfg;
-	
+	private Integer definition_counter = 0;
+
 	public void build(MethodDecl mdecl) {
 		cfg = mdecl.cfg = new ControlFlowGraph();
 		cfg.start = cfg.newBlock(); // Note: Use newBlock() to create new basic blocks
 		cfg.end = cfg.newBlock(); // unique exit block to which all blocks that end with a return stmt. lead
-		
+
+		// made by me
+		for(Ast decl : mdecl.decls().rwChildren()){
+			Ast.VarDecl varDecl =  (Ast.VarDecl) decl;
+			if (varDecl.sym.type instanceof Symbol.PrimitiveTypeSymbol.ArrayTypeSymbol){
+				cfg.definition_set.put(varDecl.name + "_0", new ArrayList<>());
+			} else {
+				cfg.definition_set.put(varDecl.name, new ArrayList<>());
+			}
+		}
+
 		{
 			BasicBlock lastInBody = new Visitor().visit(mdecl.body(), cfg.start);
 			if (lastInBody != null) cfg.connect(lastInBody, cfg.end);
@@ -29,10 +39,28 @@ public class CfgBuilder {
 	}
 	
 	protected class Visitor extends AstVisitor<BasicBlock, BasicBlock> {
-		
+
 		@Override
 		protected BasicBlock dfltStmt(Stmt ast, BasicBlock arg) {
 			if (arg == null) return null; // dead code, no need to generate anything
+
+			// my doing
+			if (ast instanceof Ast.Assign){
+				String definition_name = "d_" + definition_counter.toString();
+				definition_counter++;
+
+				if (((Ast.Assign) ast).left() instanceof Ast.Var){
+					String varName = ((Ast.Var) ((Ast.Assign) ast).left()).sym.name;
+					cfg.definition_set.get(varName).add(definition_name);
+					arg.definition_set.add(definition_name);
+					cfg.definition_map.put(definition_name, varName);
+				} else {
+					// todo: array
+					// problem, getting array index and what if it is an input? runtime???
+				}
+			}
+			// -----
+
 			arg.stmts.add(ast);
 			return arg;
 		}

@@ -99,4 +99,14 @@ public class BasicBlock {
 	public String toString() {
 		return "BB"+index;
 	}
+
+	// made by me
+	// Kill set
+	public List<String> kill = new ArrayList<>();
+
+	// Gen set
+	public List<String> gen = new ArrayList<>();
+
+	// definition_set
+	public List<String> definition_set = new ArrayList<>();
 }
