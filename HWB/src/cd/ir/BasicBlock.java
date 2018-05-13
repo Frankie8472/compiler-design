@@ -107,6 +107,12 @@ public class BasicBlock {
 	// Gen set
 	public List<String> gen = new ArrayList<>();
 
-	// definition_set
+	// definition_set, all d_X in this block
 	public List<String> definition_set = new ArrayList<>();
+
+	// use set
+    public List<String> use = new ArrayList<>();
+
+    // def set
+    public List<String> def = new ArrayList<>();
 }

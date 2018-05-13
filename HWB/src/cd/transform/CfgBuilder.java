@@ -54,6 +54,9 @@ public class CfgBuilder {
 					cfg.definition_set.get(varName).add(definition_name);
 					arg.definition_set.add(definition_name);
 					cfg.definition_map.put(definition_name, varName);
+					if(!arg.def.contains(varName)){
+					    arg.def.add(varName);
+                    }
 				} else {
 					// todo: array
 					// problem, getting array index and what if it is an input? runtime???
@@ -61,15 +64,28 @@ public class CfgBuilder {
                     cfg.definition_set.get(varName).add(definition_name);
                     arg.definition_set.add(definition_name);
                     cfg.definition_map.put(definition_name, varName);
+                    if(!arg.def.contains(varName)){
+                        arg.def.add(varName);
+                    }
 				}
+				visit(((Ast.Assign) ast).right(), arg);
 			}
 			// -----
 
 			arg.stmts.add(ast);
 			return arg;
 		}
-		
-		@Override
+
+		// by me
+        @Override
+        public BasicBlock var(Ast.Var ast, BasicBlock arg) {
+            if(!arg.use.contains(ast.sym.name)){
+                arg.use.add(ast.sym.name);
+            }
+		    return null;
+        }
+
+        @Override
 		public BasicBlock ifElse(IfElse ast, BasicBlock arg) {
 			if (arg == null) return null; // dead code, no need to generate anything
 			cfg.terminateInCondition(arg, ast.condition());			
