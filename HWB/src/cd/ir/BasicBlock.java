@@ -100,19 +100,33 @@ public class BasicBlock {
 		return "BB"+index;
 	}
 
-	// made by me
-	// Kill set
-	public List<String> kill = new ArrayList<>();
-
-	// Gen set
-	public List<String> gen = new ArrayList<>();
-
-	// definition_set, all d_X in this block
+	/**
+	 * definition_set, all d_X in this block
+	 **/
 	public List<String> definition_set = new ArrayList<>();
 
-	// use set
-    public List<String> use = new ArrayList<>();
+	/**
+	 * kill B = { d | d is killed in B } <br>
+	 * Method-local
+	 */
+	public List<String> kill = new ArrayList<>();
 
-    // def set
-    public List<String> def = new ArrayList<>();
+	/**
+	 * gen B ={ d | d appears in B and no subsequent statement in B kills d } <br>
+	 * Method-local
+	 */
+	public List<String> gen = new ArrayList<>();
+
+	/**
+	 * use B = { var | var is used in B prior to any definition of var in B } <br>
+	 * In use if there is a chance that the value is used
+	 **/
+	public List<String> use = new ArrayList<>();
+
+	/**
+	 * def B = { var | var is defined in B prior to any use of var in B } <br>
+	 * In def only if we are sure the variable is set
+	 */
+	public List<String> def = new ArrayList<>();
+
 }

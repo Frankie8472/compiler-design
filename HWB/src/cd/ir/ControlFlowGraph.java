@@ -9,10 +9,14 @@ import cd.ir.Ast.Expr;
 
 /** Represents the control flow graph of a single method. */
 public class ControlFlowGraph {
-	public Map<String, List<String>> definition_set = new HashMap<>(); 	// made by me, var to defs
-	public Map<String, String> definition_map = new HashMap<>(); 		// made by me, def to var
+	/** Hashmap that maps all local vars in method to definition_label */
+	public Map<String, List<String>> definition_set = new HashMap<>();
+
+	/** Hashmap that maps all definition_labels to the respective variable */
+	public Map<String, String> definition_map = new HashMap<>();
+
 	public BasicBlock start, end;
-	public final List<BasicBlock> allBlocks = new ArrayList<BasicBlock>();
+	public final List<BasicBlock> allBlocks = new ArrayList<>();
 	
 	public int count() {
 		return allBlocks.size();

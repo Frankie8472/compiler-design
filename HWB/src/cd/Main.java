@@ -131,23 +131,80 @@ public class Main {
 		for (ClassDecl cd : astRoots) {
 			for (MethodDecl md : cd.methods()) {
 				new CfgBuilder().build(md);
+
+				// Iterate through all blocks in a method
 				for (BasicBlock block : md.cfg.allBlocks) {
-					for (String def : block.definition_set) {
-						String var = md.cfg.definition_map.get(def);
-						block.gen.add(def);
+
+					// Iterate through all definitions in a block
+					for (String d : block.definition_set) {
+
+						// Get variableName which is defined in d
+						String var = md.cfg.definition_map.get(d);
+
+						// Add d to gen set (as default)
+						block.gen.add(d);
+
+						// Iterate through all definition occurrences of var
 						for (String defs : md.cfg.definition_set.get(var)) {
-							if (!defs.equals(def)) {
+							if (!defs.equals(d)) {
+
+								// Remove from gen set if gen contains defs and is not equals d
 								if (block.gen.contains(defs)) {
 									block.gen.remove(defs);
 								}
+
+								// Add to kill set if not equals d
 								if (!block.kill.contains(defs)) {
 									block.kill.add(defs);
 								}
 							}
 						}
-						//here new dataflow analysis?
 					}
 				}
+
+				/**
+				 * DataFlowAnalysis for the current method. <br>
+				 */
+				new DataFlowAnalysis</*someState*/>(md.cfg) { // todo: decide what the state is
+					/**
+					 *
+					 * @return
+					 */
+					@Override
+					protected Object initialState() {
+						return null;
+					}
+
+					/**
+					 *
+					 * @return
+					 */
+					@Override
+					protected Object startState() {
+						return null;
+					}
+
+					/**
+					 *
+					 * @param block
+					 * @param inState
+					 * @return
+					 */
+					@Override
+					protected Object transferFunction(BasicBlock block, Object inState) {
+						return null;
+					}
+
+					/**
+					 *
+					 * @param set
+					 * @return
+					 */
+					@Override
+					protected Object join(Set set) {
+						return null;
+					}
+				};
 			}
 		}
 		CfgDump.toString(astRoots, ".cfg", cfgdumpbase, false);

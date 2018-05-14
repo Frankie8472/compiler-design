@@ -19,67 +19,79 @@ public class CfgBuilder {
 		cfg.start = cfg.newBlock(); // Note: Use newBlock() to create new basic blocks
 		cfg.end = cfg.newBlock(); // unique exit block to which all blocks that end with a return stmt. lead
 
-		// made by me
+		/* Create the definition set
+		 * i: d_1, d_3
+		 * j: d_2, d_4, ...
+		 */
 		for(Ast decl : mdecl.decls().rwChildren()){
 			Ast.VarDecl varDecl =  (Ast.VarDecl) decl;
-			if (varDecl.sym.type instanceof Symbol.PrimitiveTypeSymbol.ArrayTypeSymbol){
-				cfg.definition_set.put(varDecl.name + "_0", new ArrayList<>());
-			} else {
+			if (varDecl.sym.type instanceof Symbol.PrimitiveTypeSymbol){
 				cfg.definition_set.put(varDecl.name, new ArrayList<>());
 			}
 		}
 
-		{
-			BasicBlock lastInBody = new Visitor().visit(mdecl.body(), cfg.start);
-			if (lastInBody != null) cfg.connect(lastInBody, cfg.end);
-		}
-		
+		// Visit the body of the method for block creation
+		BasicBlock lastInBody = new Visitor().visit(mdecl.body(), cfg.start);
+		if (lastInBody != null) {cfg.connect(lastInBody, cfg.end);}
+
 		// CFG and AST are not synchronized, only use CFG from now on
 		mdecl.setBody(null);
 	}
-	
+
+	// Visitor for block- and set creation (gen, kill, use, def)
 	protected class Visitor extends AstVisitor<BasicBlock, BasicBlock> {
 
+		/**
+		 * dfltStmt is a function, only called if the assign-method is called
+		 * @param ast - The ast with the assign stmt on it
+		 * @param arg - The basic block you are in right now
+		 * @return A basic block or null, not sure what to return right now todo
+		 */
 		@Override
 		protected BasicBlock dfltStmt(Stmt ast, BasicBlock arg) {
 			if (arg == null) return null; // dead code, no need to generate anything
 
-			// my doing
-			if (ast instanceof Ast.Assign){
-				String definition_name = "d_" + definition_counter.toString();
-				definition_counter++;
+			// ast is already proved to be an AssignStmt
+			Ast.Assign assignStmt = (Ast.Assign) ast;
 
-				if (((Ast.Assign) ast).left() instanceof Ast.Var){
-					String varName = ((Ast.Var) ((Ast.Assign) ast).left()).sym.name;
-					cfg.definition_set.get(varName).add(definition_name);
-					arg.definition_set.add(definition_name);
-					cfg.definition_map.put(definition_name, varName);
-					if(!arg.def.contains(varName)){
-					    arg.def.add(varName);
-                    }
-				} else {
-					// todo: array
-					// problem, getting array index and what if it is an input? runtime???
-                    String varName = ((Ast.Var) ((Ast.Index) ((Ast.Assign) ast).left()).left()).sym.name + "_0";
-                    cfg.definition_set.get(varName).add(definition_name);
-                    arg.definition_set.add(definition_name);
-                    cfg.definition_map.put(definition_name, varName);
-                    if(!arg.def.contains(varName)){
-                        arg.def.add(varName);
-                    }
+			// Get the definition label with the correct number
+			String definition_label = "d_" + definition_counter.toString();
+			definition_counter++;
+
+			// If assigned to a local var, no objects and arrays -> only primitive type
+			if (assignStmt.left() instanceof Ast.Var
+					&& ((Ast.Var) assignStmt.left()).sym.kind.equals(Symbol.VariableSymbol.Kind.LOCAL)
+					&& ((Ast.Var) assignStmt.left()).sym.type instanceof Symbol.PrimitiveTypeSymbol){
+
+				// Get variable name
+				String varName = ((Ast.Var) assignStmt.left()).sym.name;
+
+				// Add to block definition set (List<String>)
+				arg.definition_set.add(definition_label);
+
+				// Add to definition_set (hashmap<varName, List<definition_label>>)
+				cfg.definition_set.get(varName).add(definition_label);
+
+				// Add to definition_map (hashmap<definition_label, varName>)
+				cfg.definition_map.put(definition_label, varName);
+
+
+				if(!arg.use.contains(varName) && !arg.def.contains(varName)){
+					arg.def.add(varName);
 				}
-				visit(((Ast.Assign) ast).right(), arg);
 			}
-			// -----
+			visit(((Ast.Assign) ast).right(), arg);
 
 			arg.stmts.add(ast);
 			return arg;
 		}
 
-		// by me
+		// Create the use set (only the right side of an assign statement will reach var)
         @Override
         public BasicBlock var(Ast.Var ast, BasicBlock arg) {
-            if(!arg.use.contains(ast.sym.name)){
+            if(!(ast.sym.type instanceof Symbol.ArrayTypeSymbol)
+					&& !arg.def.contains(ast.sym.name)
+					&& !arg.use.contains(ast.sym.name)){
                 arg.use.add(ast.sym.name);
             }
 		    return null;
