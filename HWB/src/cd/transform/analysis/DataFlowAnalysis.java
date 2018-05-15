@@ -31,14 +31,20 @@ public abstract class DataFlowAnalysis<State> {
 	}
 	
 	/**
-	 * Returns the in-state of basic block <code>block</code>.
+	 * Returns the in-state of basic block <code>block</code>. <br>
+	 * IN(B) = { var | var live at P_before_B } <br>
+	 * IN(B) = use_B ∪ (OUT(B) – def_B)
+	 *
 	 */
 	public State inStateOf(BasicBlock block) {
 		return inStates.get(block);
 	}
 	
 	/**
-	 * Returns the out-state of basic block <code>block</code>.
+	 * Returns the out-state of basic block <code>block</code>. <br>
+	 * OUT(B) = { var | var live at P_after_B } <br>
+	 * OUT(B) = ∪_(Bi, Bi is successor of B in CFG) IN(B_i) <br>
+	 * Vereinigung alles IN's der direkt nachfolgenden Blöcke (0-2 Blöcke möglich)
 	 */
 	public State outStateOf(BasicBlock block) {
 		return outStates.get(block);
@@ -52,6 +58,8 @@ public abstract class DataFlowAnalysis<State> {
 	protected void iterate() {
 		inStates = new HashMap<>();
 		outStates = new HashMap<>();
+
+		// Create initialState for all Blocks
 		for(BasicBlock block : cfg.allBlocks)
 			outStates.put(block, initialState());
 		
@@ -93,7 +101,7 @@ public abstract class DataFlowAnalysis<State> {
 	/**
 	 * Returns the initial state for the {@link ControlFlowGraph#start start} block.
 	 */
-	protected abstract State startState();
+	protected abstract State 	startState();
 	
 	/**
 	 * Calculates the out-state for a basic block <code>block</code> and an in-state

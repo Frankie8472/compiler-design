@@ -8,6 +8,7 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -162,46 +163,29 @@ public class Main {
 					}
 				}
 
-				/**
-				 * DataFlowAnalysis for the current method. <br>
+
+				/* DataFlowAnalysis for the current method
+				 * State = Set<String> new HashSet<>() = {d_1,d_2, ...}
 				 */
-				new DataFlowAnalysis</*someState*/>(md.cfg) { // todo: decide what the state is
-					/**
-					 *
-					 * @return
-					 */
+
+				new DataFlowAnalysis<Set<String>>(md.cfg) {
 					@Override
-					protected Object initialState() {
+					protected Set<String> initialState() {
 						return null;
 					}
 
-					/**
-					 *
-					 * @return
-					 */
 					@Override
-					protected Object startState() {
+					protected Set<String> startState() {
 						return null;
 					}
 
-					/**
-					 *
-					 * @param block
-					 * @param inState
-					 * @return
-					 */
 					@Override
-					protected Object transferFunction(BasicBlock block, Object inState) {
+					protected Set<String> transferFunction(BasicBlock block, Set<String> inState) {
 						return null;
 					}
 
-					/**
-					 *
-					 * @param set
-					 * @return
-					 */
 					@Override
-					protected Object join(Set set) {
+					protected Set<String> join(Set<Set<String>> sets) {
 						return null;
 					}
 				};
