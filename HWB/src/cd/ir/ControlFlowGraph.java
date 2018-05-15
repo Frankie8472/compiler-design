@@ -10,10 +10,37 @@ import cd.ir.Ast.Expr;
 /** Represents the control flow graph of a single method. */
 public class ControlFlowGraph {
 	/** Hashmap that maps all local vars in method to definition_label */
-	public Map<String, List<String>> definition_set = new HashMap<>();
+	public Map<String, List<String>> graphDefinitionVarSet = new HashMap<>();
+
+	/** Hashmap that maps all used local vars in method to definition_label */
+	public Map<String, List<String>> graphUseVarSet = new HashMap<>();
 
 	/** Hashmap that maps all definition_labels to the respective variable */
-	public Map<String, String> definition_map = new HashMap<>();
+	public Map<String, String> definitionVarMap = new HashMap<>();
+
+	/**
+	 * A Use-Definition Chain which consists of
+	 * a use, U, of a variable,
+	 * and all the definitions, D, of that variable that can reach that use without any other intervening definitions.
+	 *
+	 * To find out all def-use-chains for variable d, do the following steps:
+	 * 1.Search for the first time, the variable is defined (write access).
+	 * In this case it is "d=b" (l.3)
+	 * 2.Search for the first time, the variable is read.
+	 * In this case it is "return d"
+	 * 3.Write down this information in the following style:
+	 * [name of the variable you are creating a def-use-chain for, the concrete write access, the concrete read access]
+	 * In this case it is: [d, d=b, return d]
+	 * Repeat this steps in the following style: combine each write access with each read access (but NOT the other way round).
+	 */
+	public Map<String, String> defUseChain = new HashMap<>();
+
+	/**
+	 * Definition-Use Chain which consists
+	 * of a definition, d_8, of a variable
+	 * and all the uses, U (x, y, z), reachable from that definition without any other intervening definitions.
+	 */
+	public Map<String, String> useDefChain = new HashMap<>();
 
 	public BasicBlock start, end;
 	public final List<BasicBlock> allBlocks = new ArrayList<>();

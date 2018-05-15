@@ -101,9 +101,10 @@ public class BasicBlock {
 	}
 
 	/**
-	 * definition_set, all d_X in this block
+	 * graphDefinitionVarSet, all d_X in this block <br>
+	 * Index is equal to <code>stmts</code> index
 	 **/
-	public List<String> definition_set = new ArrayList<>();
+	public List<String> blockDefinitionSet = new ArrayList<>();
 
 	/**
 	 * kill B = { d | d is killed in B } <br>
@@ -129,4 +130,8 @@ public class BasicBlock {
 	 */
 	public List<String> def = new ArrayList<>();
 
+	/* todo: The set of alive definitions at statement i is denoted as A(i) and the number of alive definitions as |A(i)|.
+	 * (A(i) is a simple but powerful concept: theoretical and practical results in space complexity theory,
+	 * access complexity(I/O complexity), register allocation and cache locality exploitation are based on A(i).)
+	 */
 }

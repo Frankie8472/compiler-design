@@ -10,7 +10,6 @@ import java.io.Writer;
 import java.util.*;
 
 import cd.ir.BasicBlock;
-import cd.ir.ControlFlowGraph;
 import cd.transform.analysis.DataFlowAnalysis;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
@@ -134,16 +133,16 @@ public class Main {
 				for (BasicBlock block : md.cfg.allBlocks) {
 
 					// Iterate through all definitions in a block
-					for (String d : block.definition_set) {
+					for (String d : block.blockDefinitionSet) {
 
 						// Get variableName which is defined in d
-						String var = md.cfg.definition_map.get(d);
+						String var = md.cfg.definitionVarMap.get(d);
 
 						// Add d to gen set (as default)
 						block.gen.add(d);
 
 						// Iterate through all definition occurrences of var
-						for (String defs : md.cfg.definition_set.get(var)) {
+						for (String defs : md.cfg.graphDefinitionVarSet.get(var)) {
 							if (!defs.equals(d)) {
 
 								// Remove from gen set if gen contains defs and is not equals d
@@ -173,7 +172,7 @@ public class Main {
 					 */
 					@Override
 					protected Set<String> initialState() {
-						return cfg.definition_map.keySet();
+						return cfg.definitionVarMap.keySet();
 					}
 
 					/**
