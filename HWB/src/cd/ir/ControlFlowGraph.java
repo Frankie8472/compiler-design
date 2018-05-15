@@ -39,6 +39,12 @@ public class ControlFlowGraph {
 	 * Definition-Use Chain which consists
 	 * of a definition, d_8, of a variable
 	 * and all the uses, U (x, y, z), reachable from that definition without any other intervening definitions.
+	 *
+	 * 1. Set definitions in statement s(0)
+	 * 2. For each i in [1,n], find live definitions that have use in statement s(i)
+	 * 3. Make a link among definitions and uses
+	 * 4. Set the statement s(i), as definition statement
+	 * 5. Kill previous definitions
 	 */
 	public Map<String, String> useDefChain = new HashMap<>();
 
