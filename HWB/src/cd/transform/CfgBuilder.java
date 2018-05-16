@@ -6,6 +6,7 @@ import cd.ir.Ast.MethodDecl;
 import cd.ir.Ast.Seq;
 import cd.ir.Ast.Stmt;
 import cd.ir.Ast.WhileLoop;
+import org.antlr.v4.runtime.misc.Triple;
 
 import java.util.ArrayList;
 
@@ -29,8 +30,8 @@ public class CfgBuilder {
 		for(Ast decl : mdecl.decls().rwChildren()){
 			Ast.VarDecl varDecl =  (Ast.VarDecl) decl;
 			if (varDecl.sym.type instanceof Symbol.PrimitiveTypeSymbol){
-				cfg.graphDefinitionVarSet.put(varDecl.name, new ArrayList<>());
-				cfg.graphUseVarSet.put(varDecl.name, new ArrayList<>());
+				cfg.graphVarDefinitionSet.put(varDecl.name, new ArrayList<>());
+				cfg.graphVarUseSet.put(varDecl.name, new ArrayList<>());
 			}
 		}
 		for(int i = 0; i < mdecl.argumentNames.size()-1; i++){
@@ -38,9 +39,9 @@ public class CfgBuilder {
 			String type = mdecl.argumentTypes.get(i);
 			if(type.equals("int") || type.equals("boolean")){
 				// todo: not sure if you can assume the var (param) is set...
-				cfg.graphDefinitionVarSet.put(name, new ArrayList<>());
-				cfg.graphDefinitionVarSet.get(name).add("d_0");	// Marks the variable as defined from the beginning
-				cfg.graphUseVarSet.put(name, new ArrayList<>());
+				cfg.graphVarDefinitionSet.put(name, new ArrayList<>());
+				cfg.graphVarDefinitionSet.get(name).add(0);	// Marks the variable as defined from the beginning
+				cfg.graphVarUseSet.put(name, new ArrayList<>());
 			}
 		}
 
@@ -48,19 +49,7 @@ public class CfgBuilder {
 		BasicBlock lastInBody = new Visitor().visit(mdecl.body(), cfg.start);
 		if (lastInBody != null) {cfg.connect(lastInBody, cfg.end);}
 
-		// Create DU and UD chains
-	   /* To find out all def-use-chains for variable d, do the following steps:
-	 	* 1.Search for the first time, the variable is defined (write access).
-				* In this case it is "d=b" (l.3)
-	 	* 2.Search for the first time, the variable is read.
-				* In this case it is "return d"
-				* 3.Write down this information in the following style:
-	 	* [name of the variable you are creating a def-use-chain for, the concrete write access, the concrete read access]
-	 	* In this case it is: [d, d=b, return d]
-	 	* Repeat this steps in the following style: combine each write access with each read access (but NOT the other way round).
-	 	*/
-	   for(cfg.)
-	   cfg.defUseChain.add()
+
 
 		// CFG and AST are not synchronized, only use CFG from now on
 		mdecl.setBody(null);
@@ -70,8 +59,7 @@ public class CfgBuilder {
 	protected class Visitor extends AstVisitor<BasicBlock, BasicBlock> {
 
 		/** Save the current stmt "d_x" in here*/
-		private String currentStmtLabel = null;
-		private Integer currentStmtLabelCounter = 1; // 0 is for parameters
+		private Integer currentStmtLabel = 0; // 0 is for parameters and before use it will be updated
 
 		@Override
 		protected BasicBlock dfltStmt(Stmt ast, BasicBlock arg) {
@@ -98,8 +86,8 @@ public class CfgBuilder {
 				// Add to block definition set (List<String>)
 				arg.blockDefinitionSet.add(currentStmtLabel);
 
-				// Add to graphDefinitionVarSet (hashMap<varName, arrayList<definition_label>>)
-				cfg.graphDefinitionVarSet.get(varName).add(currentStmtLabel);
+				// Add to graphVarDefinitionSet (hashMap<varName, arrayList<definition_label>>)
+				cfg.graphVarDefinitionSet.get(varName).add(currentStmtLabel);
 
 				// Add to definitionVarMap (hashMap<definition_label, varName>)
 				cfg.definitionVarMap.put(currentStmtLabel, varName);
@@ -160,7 +148,7 @@ public class CfgBuilder {
 			return super.methodCall(ast, arg);
 		}
 
-		// Create the use set (only the right side of an assign statement will reach var) and add to graphUseVarSet
+		// Create the use set (only the right side of an assign statement will reach var) and add to graphVarUseSet
         @Override
         public BasicBlock var(Ast.Var ast, BasicBlock arg) {
 			if (arg == null) return null; // dead code, no need to generate anything
@@ -169,7 +157,7 @@ public class CfgBuilder {
             	if(!arg.def.contains(ast.sym.name) && !arg.use.contains(ast.sym.name)){
 					arg.use.add(ast.sym.name);
 				}
-				cfg.graphUseVarSet.get(ast.name).add(currentStmtLabel);
+				cfg.graphVarUseSet.get(ast.name).add(currentStmtLabel);
 			}
 		    return null;
         }
@@ -249,8 +237,7 @@ public class CfgBuilder {
 		 * @return nothing
 		 */
 		private void updateStmtLabel(){
-			currentStmtLabel = "d_" + currentStmtLabelCounter.toString();
-			currentStmtLabelCounter++;
+			currentStmtLabel++;
 		}
 
 

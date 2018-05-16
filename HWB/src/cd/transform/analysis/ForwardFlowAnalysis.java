@@ -3,23 +3,31 @@ package cd.transform.analysis;
 import cd.ir.BasicBlock;
 import cd.ir.ControlFlowGraph;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
-public class ForwardFlowAnalysis extends DataFlowAnalysis<Set<String>> {
+public class ForwardFlowAnalysis extends DataFlowAnalysis<Set<Integer>> {
 
-    public forwardFlowAnalysis(ControlFlowGraph cfg){
+    public ForwardFlowAnalysis(ControlFlowGraph cfg){
         super(cfg);
     }
 
-    public void analyze()
+    private Map<String, Integer> liveVar = new HashMap<>();
+
+    public void analysis() {
+        super.iterate();
+    }
+
+    // Create DU and UD chains
 
     /**
      * OUT[Bi] = U (U is the set of all expressions that appear in the program
      * @return all definitions this method contains
      */
     @Override
-    protected Set<String> initialState() {
+    protected Set<Integer> initialState() {
         return cfg.definitionVarMap.keySet();
     }
 
@@ -28,7 +36,7 @@ public class ForwardFlowAnalysis extends DataFlowAnalysis<Set<String>> {
      * @return empty hash_set
      */
     @Override
-    protected Set<String> startState() {
+    protected Set<Integer> startState() {
         return new HashSet<>();
     }
 
@@ -40,8 +48,8 @@ public class ForwardFlowAnalysis extends DataFlowAnalysis<Set<String>> {
      */
 
     @Override
-    protected Set<String> transferFunction(BasicBlock block, Set<String> inState) {
-        Set<String> ret = inState;
+    protected Set<Integer> transferFunction(BasicBlock block, Set<Integer> inState) {
+        Set<Integer> ret = inState;
         ret.removeAll(block.kill);
         ret.addAll(block.gen);
         return ret;
@@ -54,8 +62,8 @@ public class ForwardFlowAnalysis extends DataFlowAnalysis<Set<String>> {
      * @return concatenation of all definition sets
      */
     @Override
-    protected Set<String> join(Set<Set<String>> sets) {
-        Set<String> ret = new HashSet<>();
+    protected Set<Integer> join(Set<Set<Integer>> sets) {
+        Set<Integer> ret = new HashSet<>();
         sets.forEach(ret::addAll);
         return ret;
     }

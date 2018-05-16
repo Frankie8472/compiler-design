@@ -11,16 +11,16 @@ import org.antlr.v4.runtime.misc.Triple;
 /** Represents the control flow graph of a single method. */
 public class ControlFlowGraph {
 	/** Hashmap that maps all local vars in method to definition_label */
-	public Map<String, List<String>> graphDefinitionVarSet = new HashMap<>();
+	public Map<String, List<Integer>> graphVarDefinitionSet = new HashMap<>();
 
 	/** Hashmap that maps all used local vars in method to definition_label */
-	public Map<String, List<String>> graphUseVarSet = new HashMap<>();
+	public Map<String, List<Integer>> graphVarUseSet = new HashMap<>();
 
 	/** Hashmap that maps all definition_labels to the respective variable */
-	public Map<String, String> definitionVarMap = new HashMap<>();
+	public Map<Integer, String> definitionVarMap = new HashMap<>();
 
 	/** Hashmap that maps all definition_labels to the respective block */
-	public Map<String, Integer> definitionBlockMap = new HashMap<>();
+	public Map<Integer, Integer> definitionBlockMap = new HashMap<>();
 
 	/**
 	 * A Use-Definition Chain which consists of
@@ -37,7 +37,7 @@ public class ControlFlowGraph {
 	 * In this case it is: [d, d=b, return d]
 	 * Repeat this steps in the following style: combine each write access with each read access (but NOT the other way round).
 	 */
-	public List<Triple<String, String, String>> defUseChain = new ArrayList<>();
+	public List<Triple<String, Integer, Integer>> defUseChain = new ArrayList<>();
 
 	/**
 	 * Definition-Use Chain which consists
@@ -50,7 +50,7 @@ public class ControlFlowGraph {
 	 * 4. Set the statement s(i), as definition statement
 	 * 5. Kill previous definitions
 	 */
-	public List<Triple<String, String, String>> useDefChain = new ArrayList<>();
+	public List<Triple<Integer, Integer, Integer>> useDefChain = new ArrayList<>();
 
 	public BasicBlock start, end;
 	public final List<BasicBlock> allBlocks = new ArrayList<>();

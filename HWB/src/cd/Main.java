@@ -10,7 +10,6 @@ import java.io.Writer;
 import java.util.*;
 
 import cd.ir.BasicBlock;
-import cd.transform.analysis.DataFlowAnalysis;
 import cd.transform.analysis.ForwardFlowAnalysis;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
@@ -134,7 +133,7 @@ public class Main {
 				for (BasicBlock block : md.cfg.allBlocks) {
 
 					// Iterate through all definitions in a block
-					for (String d : block.blockDefinitionSet) {
+					for (Integer d : block.blockDefinitionSet) {
 
 						// Get variableName which is defined in d
 						String var = md.cfg.definitionVarMap.get(d);
@@ -143,8 +142,8 @@ public class Main {
 						block.gen.add(d);
 
 						// Iterate through all definition occurrences of var
-						for (String defs : md.cfg.graphDefinitionVarSet.get(var)) {
-							if (!defs.equals(d)) {
+						for (Integer defs : md.cfg.graphVarDefinitionSet.get(var)) {
+							if (defs != d) {
 
 								// Remove from gen set if gen contains defs and is not equals d
 								if (block.gen.contains(defs)) {
@@ -163,8 +162,8 @@ public class Main {
 				/* DataFlowAnalysis for the current method
 				 * State = Set<String> new HashSet<>() = {d_1,d_2, ...}
 				 */
-				new ForwardFlowAnalysis(md.cfg);
-
+				ForwardFlowAnalysis ffa = new ForwardFlowAnalysis(md.cfg);
+				ffa.analysis();
 			}
 		}
 		CfgDump.toString(astRoots, ".cfg", cfgdumpbase, false);

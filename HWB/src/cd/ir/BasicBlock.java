@@ -101,22 +101,22 @@ public class BasicBlock {
 	}
 
 	/**
-	 * graphDefinitionVarSet, all d_X in this block <br>
+	 * graphVarDefinitionSet, all d_X in this block <br>
 	 * Index is equal to <code>stmts</code> index
 	 **/
-	public List<String> blockDefinitionSet = new ArrayList<>();
+	public List<Integer> blockDefinitionSet = new ArrayList<>();
 
 	/**
 	 * kill B = { d | d is killed in B } <br>
 	 * Method-local
 	 */
-	public List<String> kill = new ArrayList<>();
+	public List<Integer> kill = new ArrayList<>();
 
 	/**
 	 * gen B ={ d | d appears in B and no subsequent statement in B kills d } <br>
 	 * Method-local
 	 */
-	public List<String> gen = new ArrayList<>();
+	public List<Integer> gen = new ArrayList<>();
 
 	/**
 	 * use B = { var | var is used in B prior to any definition of var in B } <br>
