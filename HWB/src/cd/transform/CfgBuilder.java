@@ -34,7 +34,7 @@ public class CfgBuilder {
 				cfg.graphVarUseSet.put(varDecl.name, new ArrayList<>());
 			}
 		}
-		for(int i = 0; i < mdecl.argumentNames.size()-1; i++){
+		for(int i = 0; i < mdecl.argumentNames.size(); i++){
 			String name = mdecl.argumentNames.get(i);
 			String type = mdecl.argumentTypes.get(i);
 			if(type.equals("int") || type.equals("boolean")){
@@ -48,8 +48,6 @@ public class CfgBuilder {
 		// Visit the body of the method for block creation
 		BasicBlock lastInBody = new Visitor().visit(mdecl.body(), cfg.start);
 		if (lastInBody != null) {cfg.connect(lastInBody, cfg.end);}
-
-
 
 		// CFG and AST are not synchronized, only use CFG from now on
 		mdecl.setBody(null);
@@ -153,11 +151,12 @@ public class CfgBuilder {
         public BasicBlock var(Ast.Var ast, BasicBlock arg) {
 			if (arg == null) return null; // dead code, no need to generate anything
 
-			if(ast.sym.type instanceof Symbol.PrimitiveTypeSymbol){
+			if(ast.sym.type instanceof Symbol.PrimitiveTypeSymbol
+					&& !(ast.sym.kind.equals(Symbol.VariableSymbol.Kind.FIELD))){
             	if(!arg.def.contains(ast.sym.name) && !arg.use.contains(ast.sym.name)){
 					arg.use.add(ast.sym.name);
 				}
-				cfg.graphVarUseSet.get(ast.name).add(currentStmtLabel);
+				cfg.graphVarUseSet.get(ast.sym.name).add(currentStmtLabel);
 			}
 		    return null;
         }
