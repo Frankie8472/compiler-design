@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import cd.ir.Ast.Expr;
+import org.antlr.v4.runtime.misc.Triple;
 
 /** Represents the control flow graph of a single method. */
 public class ControlFlowGraph {
@@ -17,6 +18,9 @@ public class ControlFlowGraph {
 
 	/** Hashmap that maps all definition_labels to the respective variable */
 	public Map<String, String> definitionVarMap = new HashMap<>();
+
+	/** Hashmap that maps all definition_labels to the respective block */
+	public Map<String, Integer> definitionBlockMap = new HashMap<>();
 
 	/**
 	 * A Use-Definition Chain which consists of
@@ -33,7 +37,7 @@ public class ControlFlowGraph {
 	 * In this case it is: [d, d=b, return d]
 	 * Repeat this steps in the following style: combine each write access with each read access (but NOT the other way round).
 	 */
-	public Map<String, String> defUseChain = new HashMap<>();
+	public List<Triple<String, String, String>> defUseChain = new ArrayList<>();
 
 	/**
 	 * Definition-Use Chain which consists
@@ -46,7 +50,7 @@ public class ControlFlowGraph {
 	 * 4. Set the statement s(i), as definition statement
 	 * 5. Kill previous definitions
 	 */
-	public Map<String, String> useDefChain = new HashMap<>();
+	public List<Triple<String, String, String>> useDefChain = new ArrayList<>();
 
 	public BasicBlock start, end;
 	public final List<BasicBlock> allBlocks = new ArrayList<>();

@@ -11,6 +11,7 @@ import java.util.*;
 
 import cd.ir.BasicBlock;
 import cd.transform.analysis.DataFlowAnalysis;
+import cd.transform.analysis.ForwardFlowAnalysis;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -159,58 +160,11 @@ public class Main {
 					}
 				}
 
-
 				/* DataFlowAnalysis for the current method
 				 * State = Set<String> new HashSet<>() = {d_1,d_2, ...}
 				 */
+				new ForwardFlowAnalysis(md.cfg);
 
-				new DataFlowAnalysis<Set<String>>(md.cfg) {
-
-					/**
-					 * OUT[Bi] = U (U is the set of all expressions that appear in the program
-					 * @return all definitions this method contains
-					 */
-					@Override
-					protected Set<String> initialState() {
-						return cfg.definitionVarMap.keySet();
-					}
-
-					/**
-					 * Safe assumption OUT[ENTRY] = ∅
-					 * @return empty hash_set
-					 */
-					@Override
-					protected Set<String> startState() {
-						return new HashSet<>();
-					}
-
-					/**
-					 * OUT(B) = gen_B ∪ (IN(B) – kill_B )
-					 * @param block containing it's kill and gen set
-					 * @param inState as List of definitions (IN(B))
-					 * @return OUT(B)
-					 */
-					@Override
-					protected Set<String> transferFunction(BasicBlock block, Set<String> inState) {
-						Set<String> ret = inState;
-						ret.removeAll(block.kill);
-						ret.addAll(block.gen);
-						return ret;
-					}
-
-					/**
-					 * Simple join function for HashSets <br>
-					 * A Set does not contain duplicates by nature.
-					 * @param sets List of definition sets
-					 * @return concatenation of all definition sets
-					 */
-					@Override
-					protected Set<String> join(Set<Set<String>> sets) {
-						Set<String> ret = new HashSet<>();
-						sets.forEach(ret::addAll);
-						return ret;
-					}
-				};
 			}
 		}
 		CfgDump.toString(astRoots, ".cfg", cfgdumpbase, false);

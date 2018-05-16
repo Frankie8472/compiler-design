@@ -48,6 +48,20 @@ public class CfgBuilder {
 		BasicBlock lastInBody = new Visitor().visit(mdecl.body(), cfg.start);
 		if (lastInBody != null) {cfg.connect(lastInBody, cfg.end);}
 
+		// Create DU and UD chains
+	   /* To find out all def-use-chains for variable d, do the following steps:
+	 	* 1.Search for the first time, the variable is defined (write access).
+				* In this case it is "d=b" (l.3)
+	 	* 2.Search for the first time, the variable is read.
+				* In this case it is "return d"
+				* 3.Write down this information in the following style:
+	 	* [name of the variable you are creating a def-use-chain for, the concrete write access, the concrete read access]
+	 	* In this case it is: [d, d=b, return d]
+	 	* Repeat this steps in the following style: combine each write access with each read access (but NOT the other way round).
+	 	*/
+	   for(cfg.)
+	   cfg.defUseChain.add()
+
 		// CFG and AST are not synchronized, only use CFG from now on
 		mdecl.setBody(null);
 	}
@@ -63,6 +77,7 @@ public class CfgBuilder {
 		protected BasicBlock dfltStmt(Stmt ast, BasicBlock arg) {
 			if (arg == null) return null; // dead code, no need to generate anything
 			arg.stmts.add(ast);
+			cfg.definitionBlockMap.put(currentStmtLabel, arg.index);
 			return arg;
 		}
 
@@ -167,6 +182,7 @@ public class CfgBuilder {
 
 			// Visit to add vars to global use set
 			visit(ast.condition(), arg);
+			cfg.definitionBlockMap.put(currentStmtLabel, arg.index);
 
 			cfg.terminateInCondition(arg, ast.condition());
 			BasicBlock then = visit(ast.then(), arg.trueSuccessor());
@@ -202,6 +218,7 @@ public class CfgBuilder {
 
 			// Visit to add vars to global use set
 			visit(ast.condition(), arg);
+			cfg.definitionBlockMap.put(currentStmtLabel, arg.index);
 
 			BasicBlock cond = cfg.join(arg);
 			cfg.terminateInCondition(cond, ast.condition());
@@ -222,6 +239,7 @@ public class CfgBuilder {
 			}
 
 			arg.stmts.add(ast);
+			cfg.definitionBlockMap.put(currentStmtLabel, arg.index);
 			cfg.connect(arg, cfg.end);
 			return null; // null means that this block leads nowhere else 
 		}
@@ -230,10 +248,9 @@ public class CfgBuilder {
 		 * Method which updates the definition label with the correct number
 		 * @return nothing
 		 */
-		private Void updateStmtLabel(){
+		private void updateStmtLabel(){
 			currentStmtLabel = "d_" + currentStmtLabelCounter.toString();
 			currentStmtLabelCounter++;
-			return null;
 		}
 
 
