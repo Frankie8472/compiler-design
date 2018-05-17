@@ -10,3 +10,4 @@ bin/
 *.s
 *.semantic.ref
 *.parser.ref
+*.cfg.dot
