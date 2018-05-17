@@ -10,7 +10,10 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
+<<<<<<< Updated upstream
 import cd.transform.optimizer.ConstantPropagationOptimizer;
+=======
+>>>>>>> Stashed changes
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -125,6 +128,7 @@ public class Main {
 		new SemanticAnalyzer(this).check(astRoots);
 
 		// Build control flow graph:
+<<<<<<< Updated upstream
 		for (ClassDecl cd : astRoots) {
             for (MethodDecl md : cd.methods()) {
                 new CfgBuilder().build(md);
@@ -132,6 +136,11 @@ public class Main {
             }
         }
 
+=======
+		for (ClassDecl cd : astRoots)
+			for (MethodDecl md : cd.methods())
+				new CfgBuilder().build(md);
+>>>>>>> Stashed changes
 		CfgDump.toString(astRoots, ".cfg", cfgdumpbase, false);
 	}
 

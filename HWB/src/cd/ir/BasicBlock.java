@@ -73,7 +73,12 @@ public class BasicBlock {
 	 * computed).
 	 */
 	public final List<BasicBlock> dominatorTreeChildren = new ArrayList<BasicBlock>();
-	
+
+	/**
+	 * All dominators of a block (they dominate this block)
+	 */
+	public List<BasicBlock> dominators = new ArrayList<BasicBlock>();
+
 	/**
 	 * Contains the dominance frontier of this block.  A block b is in the dominance
 	 * frontier of another block c if c does not dominate b, but c DOES dominate a 

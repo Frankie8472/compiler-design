@@ -6,9 +6,15 @@ import cd.ir.Ast.MethodDecl;
 import cd.ir.Ast.Seq;
 import cd.ir.Ast.Stmt;
 import cd.ir.Ast.WhileLoop;
+<<<<<<< Updated upstream
 import cd.ir.AstVisitor;
 import cd.ir.BasicBlock;
 import cd.ir.ControlFlowGraph;
+=======
+
+import java.util.ArrayList;
+import java.util.List;
+>>>>>>> Stashed changes
 
 public class CfgBuilder {
 	
@@ -18,12 +24,22 @@ public class CfgBuilder {
 		cfg = mdecl.cfg = new ControlFlowGraph();
 		cfg.start = cfg.newBlock(); // Note: Use newBlock() to create new basic blocks
 		cfg.end = cfg.newBlock(); // unique exit block to which all blocks that end with a return stmt. lead
+<<<<<<< Updated upstream
 		
 		{
 			BasicBlock lastInBody = new Visitor().visit(mdecl.body(), cfg.start);
 			if (lastInBody != null) cfg.connect(lastInBody, cfg.end);
 		}
 		
+=======
+
+		BasicBlock lastInBody = new Visitor().visit(mdecl.body(), cfg.start);
+		if (lastInBody != null) cfg.connect(lastInBody, cfg.end);
+
+		// Build dominatorTreeStructure
+		new DominatorTreeAlgorithm(cfg).build();
+
+>>>>>>> Stashed changes
 		// CFG and AST are not synchronized, only use CFG from now on
 		mdecl.setBody(null);
 	}
