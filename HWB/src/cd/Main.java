@@ -10,10 +10,8 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
-<<<<<<< Updated upstream
+import cd.ir.DominatorTreeAlgorithm;
 import cd.transform.optimizer.ConstantPropagationOptimizer;
-=======
->>>>>>> Stashed changes
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -128,20 +126,14 @@ public class Main {
 		new SemanticAnalyzer(this).check(astRoots);
 
 		// Build control flow graph:
-<<<<<<< Updated upstream
 		for (ClassDecl cd : astRoots) {
             for (MethodDecl md : cd.methods()) {
                 new CfgBuilder().build(md);
+                new DominatorTreeAlgorithm(md.cfg).build();
                 new ConstantPropagationOptimizer(md).optimize();
             }
         }
-
-=======
-		for (ClassDecl cd : astRoots)
-			for (MethodDecl md : cd.methods())
-				new CfgBuilder().build(md);
->>>>>>> Stashed changes
-		CfgDump.toString(astRoots, ".cfg", cfgdumpbase, false);
+    	CfgDump.toString(astRoots, ".cfg", cfgdumpbase, false);
 	}
 
 	public void generateCode(List<ClassDecl> astRoots, Writer out) {
