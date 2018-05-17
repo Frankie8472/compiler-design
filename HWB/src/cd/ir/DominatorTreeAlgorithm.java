@@ -59,7 +59,7 @@ public class DominatorTreeAlgorithm {
     }
 
     private void searchParent(BasicBlock basicBlock){
-        Queue<BasicBlock> todo = new LinkedBlockingQueue<>();
+        List<BasicBlock> todo = new LinkedList<>();
         todo.addAll(basicBlock.predecessors);
         while(!todo.isEmpty()) {
             BasicBlock currentBlock = todo.iterator().next();
