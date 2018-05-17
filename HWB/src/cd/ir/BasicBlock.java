@@ -99,39 +99,4 @@ public class BasicBlock {
 	public String toString() {
 		return "BB"+index;
 	}
-
-	/**
-	 * graphVarDefinitionSet, all d_X in this block <br>
-	 * Index is equal to <code>stmts</code> index
-	 **/
-	public List<Integer> blockDefinitionSet = new ArrayList<>();
-
-	/**
-	 * kill B = { d | d is killed in B } <br>
-	 * Method-local
-	 */
-	public List<Integer> kill = new ArrayList<>();
-
-	/**
-	 * gen B ={ d | d appears in B and no subsequent statement in B kills d } <br>
-	 * Method-local
-	 */
-	public List<Integer> gen = new ArrayList<>();
-
-	/**
-	 * use B = { var | var is used in B prior to any definition of var in B } <br>
-	 * In use if there is a chance that the value is used
-	 **/
-	public List<String> use = new ArrayList<>();
-
-	/**
-	 * def B = { var | var is defined in B prior to any use of var in B } <br>
-	 * In def only if we are sure the variable is set
-	 */
-	public List<String> def = new ArrayList<>();
-
-	/* todo: The set of alive definitions at statement i is denoted as A(i) and the number of alive definitions as |A(i)|.
-	 * (A(i) is a simple but powerful concept: theoretical and practical results in space complexity theory,
-	 * access complexity(I/O complexity), register allocation and cache locality exploitation are based on A(i).)
-	 */
 }

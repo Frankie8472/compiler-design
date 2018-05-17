@@ -7,10 +7,9 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import cd.ir.BasicBlock;
-import cd.transform.analysis.ForwardFlowAnalysis;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -125,47 +124,9 @@ public class Main {
 		new SemanticAnalyzer(this).check(astRoots);
 
 		// Build control flow graph:
-		for (ClassDecl cd : astRoots) {
-			for (MethodDecl md : cd.methods()) {
+		for (ClassDecl cd : astRoots)
+			for (MethodDecl md : cd.methods())
 				new CfgBuilder().build(md);
-
-				// Iterate through all blocks in a method
-				for (BasicBlock block : md.cfg.allBlocks) {
-
-					// Iterate through all definitions in a block
-					for (Integer d : block.blockDefinitionSet) {
-
-						// Get variableName which is defined in d
-						String var = md.cfg.definitionVarMap.get(d);
-
-						// Add d to gen set (as default)
-						block.gen.add(d);
-
-						// Iterate through all definition occurrences of var
-						for (Integer defs : md.cfg.graphVarDefinitionSet.get(var)) {
-							if (defs != d) {
-
-								// Remove from gen set if gen contains defs and is not equals d
-								if (block.gen.contains(defs)) {
-									block.gen.remove(defs);
-								}
-
-								// Add to kill set if not equals d
-								if (!block.kill.contains(defs)) {
-									block.kill.add(defs);
-								}
-							}
-						}
-					}
-				}
-
-				/* DataFlowAnalysis for the current method
-				 * State = Set<String> new HashSet<>() = {d_1,d_2, ...}
-				 */
-				ForwardFlowAnalysis ffa = new ForwardFlowAnalysis(md.cfg);
-				ffa.analysis();
-			}
-		}
 		CfgDump.toString(astRoots, ".cfg", cfgdumpbase, false);
 	}
 
