@@ -1,7 +1,7 @@
 package cd.transform.optimizer;
 
 import cd.ir.*;
-import cd.transform.analysis.ConstantPropagationAnalysis;
+import cd.transform.analysis.ConstantPropagationDataFlowAnalysis;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,11 +9,11 @@ import java.util.Map;
 public class ConstantPropagationOptimizer extends AstVisitor<Void, Map<String, Integer>> {
 
     private Ast.MethodDecl methodDecl;
-    private ConstantPropagationAnalysis analysis;
+    private ConstantPropagationDataFlowAnalysis analysis;
 
     public ConstantPropagationOptimizer(Ast.MethodDecl methodDecl) {
         this.methodDecl = methodDecl;
-        this.analysis = new ConstantPropagationAnalysis(methodDecl.cfg);
+        this.analysis = new ConstantPropagationDataFlowAnalysis(methodDecl.cfg);
     }
 
     public void optimize() {
@@ -28,7 +28,7 @@ public class ConstantPropagationOptimizer extends AstVisitor<Void, Map<String, I
                         if (assign.right() instanceof Ast.IntConst) {
                             currState.put(((Ast.Var) assign.left()).name, ((Ast.IntConst) assign.right()).value);
                         } else {
-                            currState.put(((Ast.Var) assign.left()).name, ConstantPropagationAnalysis.TOP_SYMBOL);
+                            currState.put(((Ast.Var) assign.left()).name, ConstantPropagationDataFlowAnalysis.TOP_SYMBOL);
                         }
                     }
                 }

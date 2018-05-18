@@ -11,21 +11,21 @@ import cd.ir.BasicBlock;
 import cd.ir.ControlFlowGraph;
 
 /**
- * The abstract superclass of all backward data-flow analyses. This class provides a framework to
+ * The abstract superclass of all data-flow analyses. This class provides a framework to
  * implement concrete analyses by providing {@link #initialState()},
- * {@link #endState()}, {@link #transferFunction(BasicBlock, Object)}, and
+ * {@link #startState()}, {@link #transferFunction(BasicBlock, Object)}, and
  * {@link #join(Set)} methods.
  *
  * @param <State> The type of states the analysis computes, specified by a concrete subclass.
  *                Typically, this is a set or map type.
  */
-public abstract class BackwardDataFlowAnalysis<State> {
+public abstract class ForwardDataFlowAnalysis<State> {
 
     protected final ControlFlowGraph cfg;
     private Map<BasicBlock, State> inStates;
     private Map<BasicBlock, State> outStates;
 
-    public BackwardDataFlowAnalysis(ControlFlowGraph cfg) {
+    public ForwardDataFlowAnalysis(ControlFlowGraph cfg) {
         this.cfg = cfg;
     }
 
@@ -44,7 +44,7 @@ public abstract class BackwardDataFlowAnalysis<State> {
     }
 
     /**
-     * Do backward flow fixed-point iteration until out-states do not change anymore.
+     * Do forward flow fixed-point iteration until out-states do not change anymore.
      * Subclasses should call this method in their constructor after the required
      * initialization.
      */
@@ -61,47 +61,47 @@ public abstract class BackwardDataFlowAnalysis<State> {
             todo.remove(block);
 
             /* calculate in-state */
-            State outState;
-            if (block == cfg.end)
-                outState = endState();
+            State inState;
+            if (block == cfg.start)
+                inState = startState();
             else {
-                Set<State> predInStates = new HashSet<>();
-                for (BasicBlock pred : block.successors)
-                    predInStates.add(inStates.get(pred));
-                outState = join(predInStates);
+                Set<State> predOutStates = new HashSet<>();
+                for (BasicBlock pred : block.predecessors)
+                    predOutStates.add(outStates.get(pred));
+                inState = join(predOutStates);
             }
-            outStates.put(block, outState);
+            inStates.put(block, inState);
 
-            State newInState = transferFunction(block, outState);
+            State newOutState = transferFunction(block, inState);
 
             /* if out-state changed, recalculate successors */
-            if (!newInState.equals(inStates.get(block))) {
-                outStates.put(block, newInState);
-                todo.addAll(block.predecessors);
+            if (!newOutState.equals(outStates.get(block))) {
+                outStates.put(block, newOutState);
+                todo.addAll(block.successors);
             }
         }
-        inStates = unmodifiableMap(inStates);
+        outStates = unmodifiableMap(outStates);
     }
 
     /**
-     * Returns the initial state for all blocks except the {@link ControlFlowGraph#end end}
+     * Returns the initial state for all blocks except the {@link ControlFlowGraph#start start}
      * block.
      */
     protected abstract State initialState();
 
     /**
-     * Returns the initial state for the {@link ControlFlowGraph#end end} block.
+     * Returns the initial state for the {@link ControlFlowGraph#start start} block.
      */
-    protected abstract State endState();
+    protected abstract State startState();
 
     /**
-     * Calculates the in-state for a basic block <code>block</code> and an out-state
-     * <code>outState</code>
+     * Calculates the out-state for a basic block <code>block</code> and an in-state
+     * <code>inState</code>
      */
-    protected abstract State transferFunction(BasicBlock block, State outState);
+    protected abstract State transferFunction(BasicBlock block, State inState);
 
     /**
-     * Merges together several in-states and returns the out-state for the transfer function.
+     * Merges together several out-states and returns the in-state for the transfer function.
      */
     protected abstract State join(Set<State> states);
 }

@@ -6,12 +6,12 @@ import cd.ir.ControlFlowGraph;
 
 import java.util.*;
 
-public class ConstantPropagationAnalysis extends DataFlowAnalysis<Map<String, Integer>> {
+public class ConstantPropagationDataFlowAnalysis extends ForwardDataFlowAnalysis<Map<String, Integer>> {
 
     public final static Integer TOP_SYMBOL = null;
 
 
-    public ConstantPropagationAnalysis(ControlFlowGraph cfg) {
+    public ConstantPropagationDataFlowAnalysis(ControlFlowGraph cfg) {
         super(cfg);
         iterate();
     }
