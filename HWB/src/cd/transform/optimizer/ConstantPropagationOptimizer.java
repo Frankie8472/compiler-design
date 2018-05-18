@@ -40,25 +40,25 @@ public class ConstantPropagationOptimizer extends AstVisitor<Void, Map<String, I
     }
 
     @Override
-    protected Void dfltExpr(Ast.Expr ast, Map<String, Integer> arg) {
+    public Void dfltExpr(Ast.Expr ast, Map<String, Integer> arg) {
         return replaceVarWithIntConst(ast, arg);
 
     }
 
     @Override
-    protected Void dfltStmt(Ast.Stmt ast, Map<String, Integer> arg) {
-        if (ast instanceof Ast.Assign) {
-            Ast.Assign assign = (Ast.Assign) ast;
-            if(assign.right() instanceof Ast.Var){
-                Ast.Var var = (Ast.Var) assign.right();
-                if(arg.get(var.name) != null) {
-                    assign.setRight(new Ast.IntConst(arg.get(var.name)));
-                }
-            }
-            return visitChildren(ast, arg);
-        } else {
+    public Void dfltStmt(Ast.Stmt ast, Map<String, Integer> arg) {
             return replaceVarWithIntConst(ast, arg);
+    }
+
+    @Override
+    public Void assign(Ast.Assign ast, Map<String, Integer> arg) {
+        if(ast.right() instanceof Ast.Var){
+            Ast.Var var = (Ast.Var) ast.right();
+            if(arg.get(var.name) != null) {
+                ast.setRight(new Ast.IntConst(arg.get(var.name)));
+            }
         }
+        return visitChildren(ast, arg);
     }
 
     private Void replaceVarWithIntConst(Ast ast, Map<String, Integer> arg) {
