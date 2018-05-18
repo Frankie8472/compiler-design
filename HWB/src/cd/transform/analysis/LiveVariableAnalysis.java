@@ -7,18 +7,19 @@ import cd.ir.AstVisitor;
 import cd.ir.BasicBlock;
 import cd.ir.ControlFlowGraph;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import cd.ir.Symbol.VariableSymbol.Kind;
 
 
-public class LiveVariablesAnalysis extends DataFlowAnalysis<Set<Var>>{
+public class LiveVariableAnalysis extends BackwardDataFlowAnalysis<Set<Var>>{
     private Map<BasicBlock, Set<Ast.Var>> def;
     private Map<BasicBlock, Set<Ast.Var>> use;
     private Map<Ast.Var, Set<Ast.Stmt>> varDefMap;
 
-    public LiveVariablesAnalysis(ControlFlowGraph cfg){
+    public LiveVariableAnalysis(ControlFlowGraph cfg){
         super(cfg);
         generateDefUse();
         iterate();
@@ -26,22 +27,27 @@ public class LiveVariablesAnalysis extends DataFlowAnalysis<Set<Var>>{
 
     @Override
     protected Set<Var> initialState() {
-        return null;
+        return new HashSet<>();
     }
 
     @Override
-    protected Set<Var> startState() {
-        return null;
+    protected Set<Var> endState() {
+        return new HashSet<>();
     }
 
     @Override
-    protected Set<Var> transferFunction(BasicBlock block, Set<Var> inState) {
-        return null;
+    protected Set<Var> transferFunction(BasicBlock block, Set<Var> outState) {
+        Set<Var> in = outState;
+        in.removeAll(def.get(block));
+        in.addAll(use.get(block));
+        return in;
     }
 
     @Override
     protected Set<Var> join(Set<Set<Var>> objects) {
-        return null;
+        Set<Var> out = new HashSet<>();
+        objects.forEach(vars -> out.addAll(vars));
+        return out;
     }
 
     private void generateDefUse(){
@@ -71,6 +77,7 @@ public class LiveVariablesAnalysis extends DataFlowAnalysis<Set<Var>>{
         }
     }
 
+    // Visitor for detecting all var's in an expr
     protected class Visitor extends AstVisitor<Void, BasicBlock> {
         @Override
         public Void assign(Ast.Assign ast, BasicBlock arg) {
