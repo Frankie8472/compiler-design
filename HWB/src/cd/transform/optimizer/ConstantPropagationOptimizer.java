@@ -40,14 +40,17 @@ public class ConstantPropagationOptimizer extends AstVisitor<Void, Map<String, I
     }
 
     @Override
-    public Void dfltExpr(Ast.Expr ast, Map<String, Integer> arg) {
-        return replaceVarWithIntConst(ast, arg);
-
-    }
-
-    @Override
-    public Void dfltStmt(Ast.Stmt ast, Map<String, Integer> arg) {
-            return replaceVarWithIntConst(ast, arg);
+    protected Void dflt(Ast ast, Map<String, Integer> arg) {
+        for (int i = 0; i < ast.rwChildren.size(); i++) {
+            Ast child = ast.rwChildren.get(i);
+            if (child instanceof Ast.Var) {
+                Ast.Var var = (Ast.Var) child;
+                if (arg.get(var.name) != null) {
+                    ast.rwChildren.set(i, new Ast.IntConst(arg.get(var.name)));
+                }
+            }
+        }
+        return visitChildren(ast, arg);
     }
 
     @Override
@@ -56,19 +59,6 @@ public class ConstantPropagationOptimizer extends AstVisitor<Void, Map<String, I
             Ast.Var var = (Ast.Var) ast.right();
             if(arg.get(var.name) != null) {
                 ast.setRight(new Ast.IntConst(arg.get(var.name)));
-            }
-        }
-        return visitChildren(ast, arg);
-    }
-
-    private Void replaceVarWithIntConst(Ast ast, Map<String, Integer> arg) {
-        for (int i = 0; i < ast.rwChildren.size(); i++) {
-            Ast child = ast.rwChildren.get(i);
-            if (child instanceof Ast.Var) {
-                Ast.Var var = (Ast.Var) child;
-                if (arg.get(var.name) != null) {
-                    ast.rwChildren.set(i, new Ast.IntConst(arg.get(var.name)));
-                }
             }
         }
         return visitChildren(ast, arg);

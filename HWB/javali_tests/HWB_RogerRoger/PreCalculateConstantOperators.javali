@@ -1,0 +1,15 @@
+class Main {
+	void main() {
+		int i0;
+		boolean b;
+		b = true && false == false && (1 < (6 / (4 - 2))) || (6 >= 4);
+		i0 = 1 + 2 * (4 % 8) - (4 / (90 - 4));
+		i0 = 1 + 2 * (4 % 8) - (4 / (90 - 4));
+		i0 = hui() + ((4 + 3) + -((1 / 0) * 5)) ;
+		i0 = -(1/0);
+	}
+	int hui(){
+	    write(99);
+	    return 0;
+	}
+}
