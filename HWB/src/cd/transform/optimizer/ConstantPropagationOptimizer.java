@@ -17,13 +17,11 @@ public class ConstantPropagationOptimizer extends AstVisitor<Void, Map<String, O
     }
 
     public void optimize() {
-
         for (BasicBlock block : methodDecl.cfg.allBlocks) {
             Map<String, Object> currState = new HashMap<>(analysis.inStateOf(block));
             for (Ast.Stmt stmt : block.stmts) {
                 visit(stmt, currState);
             }
-
             if (block.condition != null) {
                 visit(block.condition, currState);
             }
@@ -37,9 +35,9 @@ public class ConstantPropagationOptimizer extends AstVisitor<Void, Map<String, O
             if (child instanceof Ast.Var) {
                 Ast.Var var = (Ast.Var) child;
                 if (arg.get(var.name) != null) {
-                    if (arg.get(var.name) instanceof Ast.IntConst){
+                    if (arg.get(var.name) instanceof Ast.IntConst) {
                         ast.rwChildren.set(i, new Ast.IntConst(((Ast.IntConst) arg.get(var.name)).value));
-                    } else if (arg.get(var.name) instanceof Ast.BooleanConst){
+                    } else if (arg.get(var.name) instanceof Ast.BooleanConst) {
                         ast.rwChildren.set(i, new Ast.BooleanConst(((Ast.BooleanConst) arg.get(var.name)).value));
                     }
                 }
@@ -57,7 +55,7 @@ public class ConstantPropagationOptimizer extends AstVisitor<Void, Map<String, O
         if (ast.left() instanceof Ast.Var) {
             Ast.Var left = (Ast.Var) ast.left();
             if (!left.sym.kind.equals(Symbol.VariableSymbol.Kind.FIELD)) {
-                if (ast.right() instanceof Ast.IntConst){
+                if (ast.right() instanceof Ast.IntConst) {
                     arg.put(left.sym.name, ((Ast.IntConst) ast.right()).value);
                 } else if (ast.right() instanceof Ast.BooleanConst) {
                     arg.put(left.sym.name, ((Ast.BooleanConst) ast.right()).value);
