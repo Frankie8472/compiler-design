@@ -3,7 +3,6 @@ package cd.transform.optimizer;
 import cd.ir.Ast;
 import cd.ir.AstVisitor;
 import cd.ir.Ast.Expr;
-import cd.ir.ControlFlowGraph;
 import cd.ir.Symbol;
 import cd.transform.analysis.AvailableExpressionDataFlowAnalysis;
 
@@ -12,13 +11,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class AvailableExpressionOptimizer extends AstVisitor<> {
-    private ControlFlowGraph cfg;
-    private AvailableExpressionDataFlowAnalysis aedfa;
+    private Ast.MethodDecl methodDecl;
+    private AvailableExpressionDataFlowAnalysis analysis;
     private Integer leafCounter = 0;
     private Map<Object, Integer> leafValue = new HashMap<>();
 
-    public AvailableExpressionOptimizer(ControlFlowGraph cfg, AvailableExpressionDataFlowAnalysis aedfa){
-        this.aedfa = aedfa;
+    public AvailableExpressionOptimizer(Ast.MethodDecl methodDecl, AvailableExpressionDataFlowAnalysis analysis) {
+        this.methodDecl = methodDecl;
+        this.analysis = new AvailableExpressionDataFlowAnalysis(methodDecl.cfg);
     }
 
     // check if outstates have something in common, that can be replaced!
@@ -32,11 +32,11 @@ public class AvailableExpressionOptimizer extends AstVisitor<> {
         //-- Leafs --
         @Override
         public BigInteger var(Ast.Var ast, Expr arg) {
-            if(ast.sym.kind.equals(Symbol.VariableSymbol.Kind.FIELD)){
+            if (ast.sym.kind.equals(Symbol.VariableSymbol.Kind.FIELD)) {
                 return null;
             }
 
-            if (!leafValue.containsKey(ast.sym.name){
+            if (!leafValue.containsKey(ast.sym.name) {
                 leafValue.put(ast.sym.name, ++leafCounter);
             }
 
@@ -45,7 +45,7 @@ public class AvailableExpressionOptimizer extends AstVisitor<> {
 
         @Override
         public BigInteger booleanConst(Ast.BooleanConst ast, Expr arg) {
-            if (!leafValue.containsKey(ast.value){
+            if (!leafValue.containsKey(ast.value) {
                 leafValue.put(ast.value, ++leafCounter);
             }
 
@@ -54,11 +54,12 @@ public class AvailableExpressionOptimizer extends AstVisitor<> {
 
         @Override
         public BigInteger intConst(Ast.IntConst ast, Expr arg) {
-            if (!leafValue.containsKey(ast.value){
+            if (!leafValue.containsKey(ast.value) {
                 leafValue.put(ast.value, ++leafCounter);
             }
 
-            return leafValue.get(ast.value);        }
+            return leafValue.get(ast.value);
+        }
 
         //-----------
         //-- Skip ---
@@ -75,7 +76,7 @@ public class AvailableExpressionOptimizer extends AstVisitor<> {
             BigInteger right = visit(ast.right(), arg);
             Integer tmp;
 
-            switch(ast.operator){
+            switch (ast.operator) {
                 case B_GREATER_OR_EQUAL:
                     tmp = 2;
                     break;
@@ -120,7 +121,7 @@ public class AvailableExpressionOptimizer extends AstVisitor<> {
                     break;
             }
 
-            if (tmp == null || left == null || right == null){
+            if (tmp == null || left == null || right == null) {
                 return null;
             }
 
@@ -145,7 +146,7 @@ public class AvailableExpressionOptimizer extends AstVisitor<> {
         @Override
         public BigInteger unaryOp(Ast.UnaryOp ast, Expr arg) {
             Integer tmp;
-            switch(ast.operator){
+            switch (ast.operator) {
                 case U_BOOL_NOT:
                     tmp = 59;
                     break;
@@ -162,7 +163,7 @@ public class AvailableExpressionOptimizer extends AstVisitor<> {
             return super.unaryOp(ast, arg);
         }
 
-        private BigInteger extendedContor(BigInteger op, BigInteger left, BigInteger right){
+        private BigInteger extendedContor(BigInteger op, BigInteger left, BigInteger right) {
             return op.pow(left.add(right));
             // todo: make in a first step all integer, second boolean
         }
