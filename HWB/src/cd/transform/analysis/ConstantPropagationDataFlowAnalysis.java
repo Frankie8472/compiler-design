@@ -3,10 +3,11 @@ package cd.transform.analysis;
 import cd.ir.Ast;
 import cd.ir.BasicBlock;
 import cd.ir.ControlFlowGraph;
+import cd.ir.Symbol;
 
 import java.util.*;
 
-public class ConstantPropagationDataFlowAnalysis extends ForwardDataFlowAnalysis<Map<String, Integer>> {
+public class ConstantPropagationDataFlowAnalysis extends ForwardDataFlowAnalysis<Map<String, Object>> {
 
     public final static Integer TOP_SYMBOL = null;
 
@@ -17,40 +18,41 @@ public class ConstantPropagationDataFlowAnalysis extends ForwardDataFlowAnalysis
     }
 
     @Override
-    protected Map<String, Integer> initialState() {
+    protected Map<String, Object> initialState() {
         return new HashMap<>();
     }
 
     @Override
-    protected Map<String, Integer> startState() {
+    protected Map<String, Object> startState() {
         return new HashMap<>();
     }
 
     @Override
-    protected Map<String, Integer> transferFunction(BasicBlock block, Map<String, Integer> inState) {
-        Map<String, Integer> outState = new HashMap<>(inState);
+    protected Map<String, Object> transferFunction(BasicBlock block, Map<String, Object> inState) {
+        // If somethings not in the set -> bottom
+        Map<String, Object> outState = new HashMap<>(inState);
 
         for (Ast.Stmt stmt : block.stmts) {
             if (stmt instanceof Ast.Assign) {
                 Ast.Assign assign = (Ast.Assign) stmt;
-                if (assign.left() instanceof Ast.Var) {
+                if (assign.left() instanceof Ast.Var && !((Ast.Var) assign.left()).sym.kind.equals(Symbol.VariableSymbol.Kind.FIELD)) {
                     if (assign.right() instanceof Ast.IntConst) {
                         outState.put(((Ast.Var) assign.left()).name, ((Ast.IntConst) assign.right()).value);
+                    } else if (assign.right() instanceof Ast.BooleanConst) {
+                        outState.put(((Ast.Var) assign.left()).name, ((Ast.BooleanConst) assign.right()).value);
                     } else {
                         outState.put(((Ast.Var) assign.left()).name, TOP_SYMBOL);
                     }
                 }
             }
         }
-
-
         return outState;
     }
 
     @Override
-    protected Map<String, Integer> join(Set<Map<String, Integer>> maps) {
-        Map<String, Integer> outstate = new HashMap<>();
-        for (Map<String, Integer> map : maps) {
+    protected Map<String, Object> join(Set<Map<String, Object>> maps) {
+        Map<String, Object> outstate = new HashMap<>();
+        for (Map<String, Object> map : maps) {
             for (String key : map.keySet()) {
                 if (outstate.containsKey(key) && !Objects.equals(outstate.get(key), map.get(key))) {
                     outstate.put(key, TOP_SYMBOL);
@@ -59,7 +61,6 @@ public class ConstantPropagationDataFlowAnalysis extends ForwardDataFlowAnalysis
                 }
             }
         }
-
         return outstate;
     }
 }
