@@ -1,0 +1,7 @@
+class Main{
+    void main(){
+        int[] b;
+        b = new int[4];
+        b[4] = 7;
+    }
+}

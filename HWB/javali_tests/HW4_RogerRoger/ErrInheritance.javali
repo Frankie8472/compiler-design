@@ -1,0 +1,39 @@
+class Main{
+    void main(){
+        B b;
+        A a;
+        a = new A();
+        b = new B();
+        write(a.foo());
+        write(a.foobar());
+        write(b.foo());
+        write(b.bar());
+        a = b;
+        write(a.foo());
+        write(a.foobar());
+        write(a.bar()); // this should not be possible
+
+    }
+}
+
+class B extends A{
+    int foo(){
+        return 1;
+    }
+
+    int bar(){
+        return 2;
+    }
+}
+
+
+class A{
+    int foo(){
+        return 0;
+    }
+
+    int foobar(){
+        return 3;
+    }
+}
+

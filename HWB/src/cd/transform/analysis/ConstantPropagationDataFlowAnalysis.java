@@ -35,11 +35,13 @@ public class ConstantPropagationDataFlowAnalysis extends ForwardDataFlowAnalysis
         for (Ast.Stmt stmt : block.stmts) {
             if (stmt instanceof Ast.Assign) {
                 Ast.Assign assign = (Ast.Assign) stmt;
-                if (assign.left() instanceof Ast.Var && !((Ast.Var) assign.left()).sym.kind.equals(Symbol.VariableSymbol.Kind.FIELD)) {
+                if (assign.left() instanceof Ast.Var ){//&& !((Ast.Var) assign.left()).sym.kind.equals(Symbol.VariableSymbol.Kind.FIELD)) {
                     if (assign.right() instanceof Ast.IntConst) {
                         outState.put(((Ast.Var) assign.left()).name, ((Ast.IntConst) assign.right()).value);
                     } else if (assign.right() instanceof Ast.BooleanConst) {
                         outState.put(((Ast.Var) assign.left()).name, ((Ast.BooleanConst) assign.right()).value);
+                    }else if(assign.right() instanceof Ast.Var){
+                        outState.put(((Ast.Var) assign.left()).name, outState.get(((Ast.Var) assign.right()).name));
                     } else {
                         outState.put(((Ast.Var) assign.left()).name, TOP_SYMBOL);
                     }

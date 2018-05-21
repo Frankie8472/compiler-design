@@ -1,0 +1,24 @@
+class Main{
+    void main(){
+        A a;
+        Object b;
+        B c;
+        C d;
+        a = new B();
+        b = a;
+        c = (B)b;
+        d = (C)b;
+    }
+}
+
+class A{
+
+}
+
+class B extends A{
+
+}
+
+class C extends A{
+
+}

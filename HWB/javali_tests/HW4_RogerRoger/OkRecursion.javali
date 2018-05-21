@@ -1,0 +1,19 @@
+class Main{
+    void main(){
+        B b;
+        b = new B();
+        b.recurse(100);
+    }
+
+}
+
+class B{
+    void recurse(int times){
+        int a, b;
+        a = times * (1 % 6 / times);
+        b = a - times;
+        if(times != 0){
+            recurse(times - 1);
+        }
+    }
+}

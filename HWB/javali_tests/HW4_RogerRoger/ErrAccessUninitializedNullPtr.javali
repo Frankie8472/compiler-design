@@ -1,0 +1,27 @@
+class A{
+    int field;
+    int method(){
+        return 4;
+    }
+}
+
+class Main{
+    void main(){
+        int i, j;
+        boolean b;
+        A a, c;
+        a = new A();
+
+
+
+        j = i;      //?
+
+        write(i);   //?
+
+        if(b){      //?
+            write(1);
+        }
+
+        c.field = 6;        //?
+    }
+}

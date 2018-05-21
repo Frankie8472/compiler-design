@@ -1,0 +1,43 @@
+//todo, look through tests of tim and complete your list
+
+//writeln
+//write
+//read (dont forget input file)
+//test each ( int, boolean, obejct, array int, array boolean, array object)
+//test vtable with combination of function and fields
+//use value in var which has not been set yet
+
+//binaryop (plus, minus, mult, div, mod)
+//binaryop (==, !=)
+//binaryop (<, >, <=, >=, &&, ||)
+//unaryop (!)
+//unaryop (+, -)
+
+//indirect down cast
+//down cast
+//up cast
+//cast of
+//cast of primitive types (only to each other possible)
+this test
+null ptr access on (field, methods, array?)
+
+correct return (stack clean)
+//statements after return should not be reachable
+//if else
+//while loop
+//assign var (int, boolean, object)
+//assign field (int, boolean, object)
+//assign method to (int, boolean, object)
+//assign index (int, boolean, object)
+//access on a field, var which was not initialized yet
+//inheritance
+
+
+ERRORS:
+//Invalid downcast
+//invalid array store
+//invalid array bounds >arrsize -1
+//invalid array bounds <0
+//invalid array size
+//division by zero
+null pointer check

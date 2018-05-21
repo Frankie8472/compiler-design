@@ -5,7 +5,7 @@ import cd.ir.AstVisitor;
 import cd.ir.BasicBlock;
 import cd.util.debug.AstDump;
 
-public class PreCalculateOperatorsOptimizer extends AstVisitor<Ast, Void> {
+public class PreCalculateOperatorsOptimizer extends BaseOptimizer<Void> {
 
     private Ast.MethodDecl methodDecl;
 
@@ -17,29 +17,12 @@ public class PreCalculateOperatorsOptimizer extends AstVisitor<Ast, Void> {
         for (BasicBlock block : methodDecl.cfg.allBlocks) {
             for (int i = 0; i < block.stmts.size(); i++) {
                 visit(block.stmts.get(i), null);
+                System.out.println(cd.util.debug.AstDump.toString(block.stmts.get(i)));
             }
             if (block.condition != null) {
                 visit(block.condition, null);
             }
         }
-    }
-
-    @Override
-    protected Ast dflt(Ast ast, Void arg) {
-        for (int i = 0; i < ast.rwChildren.size(); i++) {
-            Ast child = ast.rwChildren.get(i);
-            if (child != null) {
-                try {
-                    Ast returnValue = visit(child, arg);
-                    if (returnValue != null) {
-                        ast.rwChildren.set(i, returnValue);
-                    }
-                } catch (ArithmeticException ignored) {
-
-                }
-            }
-        }
-        return null;
     }
 
     /**
@@ -107,20 +90,14 @@ public class PreCalculateOperatorsOptimizer extends AstVisitor<Ast, Void> {
     @Override
     public Ast unaryOp(Ast.UnaryOp ast, Void arg) {
         dflt(ast, arg);
-        if (ast.arg() instanceof Ast.IntConst) {
-            switch (ast.operator) {
-                case U_PLUS:
-                    return ast.arg();
-                case U_MINUS:
-                    return new Ast.IntConst(((Ast.IntConst) ast.arg()).value);
-                default:
-                    return null;
-            }
+        if (ast.operator == Ast.UnaryOp.UOp.U_PLUS) {
+            return ast.arg();
         }
-        if (ast.arg() instanceof Ast.BooleanConst) {
-            if (ast.operator == Ast.UnaryOp.UOp.U_BOOL_NOT) {
-                return new Ast.BooleanConst(!((Ast.BooleanConst) ast.arg()).value);
-            }
+        if (ast.arg() instanceof Ast.IntConst && ast.operator == Ast.UnaryOp.UOp.U_MINUS) {
+            return new Ast.IntConst(-((Ast.IntConst) ast.arg()).value);
+        }
+        if (ast.arg() instanceof Ast.BooleanConst && ast.operator == Ast.UnaryOp.UOp.U_BOOL_NOT) {
+            return new Ast.BooleanConst(!((Ast.BooleanConst) ast.arg()).value);
         }
         return null;
     }

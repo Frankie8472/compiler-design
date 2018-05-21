@@ -1,0 +1,9 @@
+class Main{
+    void main(){
+        int i;
+        i = 0;
+        write(i);
+        return;
+        write(i);  // Unreachable
+    }
+}

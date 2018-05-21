@@ -1,0 +1,15 @@
+class Main{
+    void main(){
+        boolean a;
+        if(!a){
+            a = true;
+        }
+
+        if(a && a){
+            a = false;
+        } else {
+            a = true;
+        }
+    }
+}
+

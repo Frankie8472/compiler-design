@@ -1,0 +1,15 @@
+class Main{
+    void main(){
+        int i1, i2;
+        boolean b1, b2;
+        i1 = 0;
+        i2 = 1;
+        b1 = true;
+        b2 = false;
+
+        i1 = +i2;
+        i1 = -i2;
+
+        b1 = !b2;
+    }
+}

@@ -10,7 +10,7 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AvailableExpressionOptimizer extends AstVisitor<> {
+public class AvailableExpressionOptimizer extends AstVisitor<BigInteger, Expr> {
     private Ast.MethodDecl methodDecl;
     private AvailableExpressionDataFlowAnalysis analysis;
     private Integer leafCounter = 0;
@@ -36,29 +36,29 @@ public class AvailableExpressionOptimizer extends AstVisitor<> {
                 return null;
             }
 
-            if (!leafValue.containsKey(ast.sym.name) {
+            if (!leafValue.containsKey(ast.sym.name)) {
                 leafValue.put(ast.sym.name, ++leafCounter);
             }
 
-            return leafValue.get(ast.sym.name);
+            return BigInteger.valueOf(leafValue.get(ast.sym.name));
         }
 
         @Override
         public BigInteger booleanConst(Ast.BooleanConst ast, Expr arg) {
-            if (!leafValue.containsKey(ast.value) {
+            if (!leafValue.containsKey(ast.value)) {
                 leafValue.put(ast.value, ++leafCounter);
             }
 
-            return leafValue.get(ast.value);
+            return  BigInteger.valueOf(leafValue.get(ast.value));
         }
 
         @Override
         public BigInteger intConst(Ast.IntConst ast, Expr arg) {
-            if (!leafValue.containsKey(ast.value) {
+            if (!leafValue.containsKey(ast.value)) {
                 leafValue.put(ast.value, ++leafCounter);
             }
 
-            return leafValue.get(ast.value);
+            return  BigInteger.valueOf(leafValue.get(ast.value));
         }
 
         //-----------
@@ -156,6 +156,8 @@ public class AvailableExpressionOptimizer extends AstVisitor<> {
                 case U_PLUS:
                     tmp = 67;
                     break;
+                default:
+                    tmp = null;
             }
 
             BigInteger node = new BigInteger(String.valueOf(tmp));
@@ -164,7 +166,7 @@ public class AvailableExpressionOptimizer extends AstVisitor<> {
         }
 
         private BigInteger extendedContor(BigInteger op, BigInteger left, BigInteger right) {
-            return op.pow(left.add(right));
+            return op.pow(left.add(right).intValue());
             // todo: make in a first step all integer, second boolean
         }
     }

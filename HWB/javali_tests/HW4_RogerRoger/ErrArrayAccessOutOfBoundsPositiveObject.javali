@@ -1,0 +1,11 @@
+class A{
+
+}
+
+class Main{
+    void main(){
+        A[] a;
+        a = new A[4];
+        a[4] = new A();
+    }
+}

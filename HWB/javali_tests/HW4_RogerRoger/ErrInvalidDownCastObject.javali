@@ -1,0 +1,18 @@
+class Main{
+    void main(){
+        A a;
+        Object b;
+        B c;
+        a = new A();
+        b = a;
+        c = (B)b;
+    }
+}
+
+class A{
+
+}
+
+class B{
+
+}

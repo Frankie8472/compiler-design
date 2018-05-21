@@ -1,0 +1,13 @@
+class Main {
+    int a;
+	void main() {
+	    int b;
+	    boolean c;
+	    boolean d;
+		this.a = 5;
+		a = 5;
+		b = 5;
+		c = true;
+		d = c;
+	}
+}
