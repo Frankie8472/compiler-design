@@ -2,6 +2,7 @@ package cd.transform.optimizer;
 
 import cd.ir.Ast;
 import cd.ir.AstVisitor;
+import cd.ir.BasicBlock;
 import cd.transform.analysis.ReachingDefinitionDataFlowAnalysis;
 
 public class ReachingDefinitionOptimizer extends AstVisitor<Object, Object> {
@@ -14,6 +15,7 @@ public class ReachingDefinitionOptimizer extends AstVisitor<Object, Object> {
     }
 
     public void optimize() {
-
+        // todo: for what is reaching definitions good?
+        // we already have constant propagation...
     }
 }
