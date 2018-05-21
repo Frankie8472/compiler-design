@@ -56,7 +56,7 @@ public class ReachingDefinitionDataFlowAnalysis extends ForwardDataFlowAnalysis<
                     Ast.Expr dest = ((Ast.Assign) stmt).left();
                     if (dest instanceof Var) {
                         Var var = (Var) dest;
-                        if (var.sym.kind.equals(Kind.LOCAL) || var.sym.kind.equals(Kind.PARAM)) { //todo: check if field is a thing here
+                        if (!var.sym.kind.equals(Kind.FIELD)) {
                             if (!varDefMap.containsKey(var)) {
                                 varDefMap.put(var, new HashSet<>());
                             }
