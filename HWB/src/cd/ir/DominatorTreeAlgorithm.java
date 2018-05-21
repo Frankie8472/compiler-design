@@ -79,7 +79,7 @@ public class DominatorTreeAlgorithm {
             if (basicBlock.predecessors.size() >= 2) {
                 for (BasicBlock predecessorBlock : basicBlock.predecessors) {
                     BasicBlock runner = predecessorBlock;
-                    while(!runner.equals(basicBlock.dominatorTreeParent)){
+                    while(!Objects.equals(runner, basicBlock.dominatorTreeParent)){
                         runner.dominanceFrontier.add(basicBlock);
                         runner = runner.dominatorTreeParent;
                     }

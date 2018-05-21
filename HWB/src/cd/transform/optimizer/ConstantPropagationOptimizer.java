@@ -42,21 +42,6 @@ public class ConstantPropagationOptimizer extends BaseOptimizer<Map<String, Obje
         return null;
     }
 
-    //        public Void assign(Ast.Assign ast, Map<String, Object> arg) {
-//            if (ast.right() instanceof Ast.Var) {
-//                Ast.Var var = (Ast.Var) ast.right();
-//                Object varConstant = arg.get(var.name);
-//                if (varConstant != null) {
-//                    if(varConstant instanceof Integer){
-//                        ast.setRight(new Ast.IntConst((Integer)varConstant));
-//                    } else if (varConstant instanceof Boolean){
-////                        ast.setRight(new Ast.BooleanConst((Boolean)varConstant));
-//                    }
-//                }
-//            }
-//            return visitChildren(ast, arg);
-//        }
-
     @Override
     public Ast assign(Ast.Assign ast, Map<String, Object> arg) {
         // Update var in currState if redefined

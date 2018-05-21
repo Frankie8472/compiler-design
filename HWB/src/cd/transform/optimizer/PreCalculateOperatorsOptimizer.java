@@ -17,7 +17,7 @@ public class PreCalculateOperatorsOptimizer extends BaseOptimizer<Void> {
         for (BasicBlock block : methodDecl.cfg.allBlocks) {
             for (int i = 0; i < block.stmts.size(); i++) {
                 visit(block.stmts.get(i), null);
-                System.out.println(cd.util.debug.AstDump.toString(block.stmts.get(i)));
+//                System.out.println(cd.util.debug.AstDump.toString(block.stmts.get(i)));
             }
             if (block.condition != null) {
                 visit(block.condition, null);
@@ -78,13 +78,41 @@ public class PreCalculateOperatorsOptimizer extends BaseOptimizer<Void> {
                     return new Ast.BooleanConst(leftValue || rightValue);
                 case B_EQUAL:
                     return new Ast.BooleanConst(leftValue.equals(rightValue));
+                case B_NOT_EQUAL:
+                    return new Ast.BooleanConst(!leftValue.equals(rightValue));
                 default:
                     return null;
             }
 
-        } else {
-            return null;
+        } else if(isConstantValue(ast.left()) || isConstantValue(ast.right())){
+            Ast constant;
+            Ast.BinaryOp other;
+            Ast otherConstant;
+            if(isConstantValue(ast.left())){
+                constant = ast.left();
+                if(!(ast.right() instanceof Ast.BinaryOp)){
+                    return null;
+                }
+                other = (Ast.BinaryOp) ast.right();
+            } else {
+                constant = ast.right();
+                if(!(ast.left() instanceof Ast.BinaryOp)){
+                    return null;
+                }
+                other = (Ast.BinaryOp) ast.left();
+            }
+//            if(other.operator == Ast.BinaryOp.BOp.B_PLUS && ast.operator == Ast.BinaryOp.BOp.B_PLUS){
+//                if(isConstantValue(other.right())){
+//                    ast.setLeft(new Ast.IntConst(((Ast.IntConst)constant).value + ((Ast.IntConst)other.right()).value));
+//                    ast.setRight(other.left());
+//                }
+//            }
+
+            // (1 + 2 + (x / 5)) -> 3 + x/5 -> 15/5 + x/5 ->(15 + x) /5
+            // (1 + 2 + (5 / x)) -> 3 + 5/x -> (3*x))/x + 5/x ->(3x + 5)/x
+
         }
+        return null;
     }
 
     @Override
@@ -100,5 +128,9 @@ public class PreCalculateOperatorsOptimizer extends BaseOptimizer<Void> {
             return new Ast.BooleanConst(!((Ast.BooleanConst) ast.arg()).value);
         }
         return null;
+    }
+
+    private boolean isConstantValue(Ast ast){
+        return ast instanceof Ast.IntConst || ast instanceof Ast.BooleanConst;
     }
 }
