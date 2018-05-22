@@ -141,8 +141,10 @@ public class Main {
                 new DominatorTreeAlgorithm(md).build();
                 new ConstantPropagationOptimizer(md).optimize();
                 new PreCalculateOperatorsOptimizer(md).optimize();
+                new ConstantPropagationOptimizer(md).optimize();
+                new PreCalculateOperatorsOptimizer(md).optimize();
                 new RemoveUnusedOptimizer(md).optimize();
-                new ForkOptimizer(md).optimize();
+//                new ForkOptimizer(md).optimize();
             }
         }
         CfgDump.toString(astRoots, ".cfg", cfgdumpbase, false);

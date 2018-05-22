@@ -84,86 +84,125 @@ public class PreCalculateOperatorsOptimizer extends BaseOptimizer<Void> {
                     return null;
             }
 
-        } else if (isConstantValue(ast.left())) {
+        } else if (ast.left() instanceof Ast.IntConst) {
             Ast constant = ast.left();
             if (!(ast.right() instanceof Ast.BinaryOp)) {
                 return null;
             }
             Ast.BinaryOp other = (Ast.BinaryOp) ast.right();
-            if ((ast.operator == Ast.BinaryOp.BOp.B_MINUS || ast.operator == Ast.BinaryOp.BOp.B_PLUS) &&
-                    (other.operator == Ast.BinaryOp.BOp.B_MINUS || other.operator == Ast.BinaryOp.BOp.B_PLUS)) {
-                if (isConstantValue(other.left())) {
-                    if (ast.operator == Ast.BinaryOp.BOp.B_PLUS) {
-                        ast.setLeft(new Ast.IntConst(((Ast.IntConst) constant).value + ((Ast.IntConst) other.left()).value));
-                        if (other.operator == Ast.BinaryOp.BOp.B_PLUS) {
+            simplifyIntEquation(ast, other, ((Ast.IntConst) constant).value, true);
+        } else if (ast.right() instanceof Ast.IntConst) {
+            Ast constant = ast.right();
+            if (!(ast.left() instanceof Ast.BinaryOp)) {
+                return null;
+            }
+            Ast.BinaryOp other = (Ast.BinaryOp) ast.left();
+            simplifyIntEquation(ast, other, ((Ast.IntConst) constant).value, false);
+        }
+        return null;
+    }
+
+    /**
+     * This function simplifies equations with only plus and minus. Constants that are known are put together to reduce
+     * the amount of operators used in the calculation. An expression like (a + (1 + ( (4 - 5) + 3))) simplifies to
+     * (a + 3). Since the Minus is not commutative the method got big and ugly.
+     *
+     * @param ast
+     * @param other
+     * @param astConstant
+     * @param leftSideConstant
+     */
+    private void simplifyIntEquation(Ast.BinaryOp ast, Ast.BinaryOp other, int astConstant, boolean leftSideConstant) {
+        if ((ast.operator == Ast.BinaryOp.BOp.B_MINUS || ast.operator == Ast.BinaryOp.BOp.B_PLUS) &&
+                (other.operator == Ast.BinaryOp.BOp.B_MINUS || other.operator == Ast.BinaryOp.BOp.B_PLUS)) {
+
+            if (ast.operator == other.operator) {
+                if (ast.operator == Ast.BinaryOp.BOp.B_PLUS) {
+                    if (other.left() instanceof Ast.IntConst) {
+                        ast.setLeft(new Ast.IntConst(astConstant + ((Ast.IntConst) other.left()).value));
+                        ast.setRight(other.right());
+                    } else if (other.right() instanceof Ast.IntConst) {
+                        ast.setLeft(new Ast.IntConst(astConstant + ((Ast.IntConst) other.right()).value));
+                        ast.setRight(other.left());
+                    }
+                } else {
+                    if (leftSideConstant) {
+                        if (other.left() instanceof Ast.IntConst) {
+                            ast.setLeft(new Ast.IntConst(astConstant - ((Ast.IntConst) other.left()).value));
                             ast.setRight(other.right());
-                        } else {
-                            ast.setRight(other.right());
+                            ast.operator = Ast.BinaryOp.BOp.B_PLUS;
+                        } else if (other.right() instanceof Ast.IntConst) {
+                            ast.setLeft(new Ast.IntConst(astConstant + ((Ast.IntConst) other.right()).value));
+                            ast.setRight(other.left());
                             ast.operator = Ast.BinaryOp.BOp.B_MINUS;
                         }
                     } else {
-                        ast.setRight(new Ast.IntConst(((Ast.IntConst) other.left()).value - ((Ast.IntConst) constant).value));
-                        if (other.operator == Ast.BinaryOp.BOp.B_MINUS) {
-                            ast.setLeft(other.right());
-                        } else {
-                            ast.setLeft(new Ast.UnaryOp(Ast.UnaryOp.UOp.U_MINUS, other.right()));
+                        if (other.left() instanceof Ast.IntConst) {
+                            ast.setLeft(new Ast.IntConst(((Ast.IntConst) other.left()).value - astConstant));
+                            ast.setRight(other.right());
+                            ast.operator = Ast.BinaryOp.BOp.B_MINUS;
+                        } else if (other.right() instanceof Ast.IntConst) {
+                            ast.setLeft(new Ast.IntConst((-((Ast.IntConst) other.right()).value) - astConstant));
+                            ast.setRight(other.left());
+                            ast.operator = Ast.BinaryOp.BOp.B_PLUS;
                         }
                     }
+                }
 
-                } else if (isConstantValue(other.right())) {
-                    if (ast.operator == other.operator) {
-                        ast.setLeft(new Ast.IntConst(((Ast.IntConst) constant).value + ((Ast.IntConst) other.right()).value));
-                        ast.setRight(ast.left());
+            } else if (other.operator == Ast.BinaryOp.BOp.B_PLUS && ast.operator == Ast.BinaryOp.BOp.B_MINUS) {
+                if (other.left() instanceof Ast.IntConst) {
+                    if (leftSideConstant) {
+                        ast.setLeft(new Ast.IntConst(astConstant - ((Ast.IntConst) other.left()).value));
                     } else {
-                        ast.operator = Ast.BinaryOp.BOp.B_MINUS;
-                        ast.setRight(new Ast.IntConst(((Ast.IntConst) other.right()).value - ((Ast.IntConst) constant).value));
-                        if (ast.operator == Ast.BinaryOp.BOp.B_PLUS) {
-                            ast.setLeft(other.right());
-                        } else {
-                            ast.setLeft(new Ast.UnaryOp(Ast.UnaryOp.UOp.U_MINUS, other.right()));
-                        }
+                        ast.setLeft(new Ast.IntConst(((Ast.IntConst) other.left()).value - astConstant));
+                        ast.operator = Ast.BinaryOp.BOp.B_PLUS;
+                    }
+                    ast.setRight(other.right());
+                } else if (other.right() instanceof Ast.IntConst) {
+                    if (leftSideConstant) {
+                        ast.setLeft(new Ast.IntConst(astConstant - ((Ast.IntConst) other.right()).value));
+                    } else {
+                        ast.setLeft(new Ast.IntConst(((Ast.IntConst) other.right()).value - astConstant));
+                        ast.operator = Ast.BinaryOp.BOp.B_PLUS;
+                    }
+                    ast.setRight(other.left());
+                }
+            } else if (other.operator == Ast.BinaryOp.BOp.B_MINUS && ast.operator == Ast.BinaryOp.BOp.B_PLUS) {
+                if (other.right() instanceof Ast.IntConst) {
+                    ast.setLeft(new Ast.IntConst(astConstant - ((Ast.IntConst) other.right()).value));
+                    ast.setRight(other.left());
+                } else if (other.left() instanceof Ast.IntConst) {
+                    ast.setLeft(new Ast.IntConst(astConstant + ((Ast.IntConst) other.left()).value));
+                    ast.setRight(other.right());
+                    ast.operator = Ast.BinaryOp.BOp.B_MINUS;
+                }
+            }
+        }
+    }
+
+    private void simplifyBooleanEquation(Ast.BinaryOp ast, Ast.BinaryOp other, boolean astConstant) {
+        if ((ast.operator == Ast.BinaryOp.BOp.B_AND || ast.operator == Ast.BinaryOp.BOp.B_OR) &&
+                (other.operator == Ast.BinaryOp.BOp.B_AND || other.operator == Ast.BinaryOp.BOp.B_OR)) {
+            if (ast.operator == Ast.BinaryOp.BOp.B_AND && other.operator == Ast.BinaryOp.BOp.B_AND) {
+                if (other.left() instanceof Ast.BooleanConst) {
+                    ast.setLeft(new Ast.BooleanConst(astConstant && ((Ast.BooleanConst) other.left()).value));
+                    ast.setRight(other.right());
+                } else if (other.right() instanceof Ast.BooleanConst) {
+                    ast.setLeft(new Ast.BooleanConst(astConstant && ((Ast.BooleanConst) other.right()).value));
+                    ast.setRight(other.left());
+                }
+            } else if (ast.operator == Ast.BinaryOp.BOp.B_OR && other.operator == Ast.BinaryOp.BOp.B_OR) {
+                {
+                    if (other.left() instanceof Ast.BooleanConst) {
+                        ast.setLeft(new Ast.BooleanConst(astConstant || ((Ast.BooleanConst) other.left()).value));
+                        ast.setRight(other.right());
+                    } else if (other.right() instanceof Ast.BooleanConst) {
+                        ast.setLeft(new Ast.BooleanConst(astConstant || ((Ast.BooleanConst) other.right()).value));
+                        ast.setRight(other.left());
                     }
                 }
             }
         }
-
-
-//            if (ast.operator == Ast.BinaryOp.BOp.B_PLUS) {
-//                if (other.operator == Ast.BinaryOp.BOp.B_PLUS || other.operator == Ast.BinaryOp.BOp.B_MINUS) {
-//                    if (isConstantValue(other.left())) {
-//                        ast.setLeft(new Ast.IntConst(((Ast.IntConst) constant).value + ((Ast.IntConst) other.left()).value));
-//                        ast.setRight(other.right());
-//                        ast.operator = other.operator;
-//                    } else if (isConstantValue(other.right())) {
-//                        ast.setLeft(other.left());
-//                        ast.setRight(new Ast.IntConst(-((Ast.IntConst) constant).value + ((Ast.IntConst) other.right()).value));
-//                        ast.operator = other.operator;
-//                    }
-//                }
-//            } else if (ast.operator == Ast.BinaryOp.BOp.B_MINUS) {
-//                if (other.operator == Ast.BinaryOp.BOp.B_PLUS || other.operator == Ast.BinaryOp.BOp.B_MINUS) {
-//                    if (isConstantValue(other.left())) {
-//                        ast.setLeft(new Ast.IntConst(((Ast.IntConst) constant).value - ((Ast.IntConst) other.left()).value));
-//                        ast.setRight(other.right());
-//                        if (other.operator == Ast.BinaryOp.BOp.B_PLUS) {
-//                            ast.operator = Ast.BinaryOp.BOp.B_MINUS;
-//                        } else {
-//                            ast.operator = Ast.BinaryOp.BOp.B_PLUS;
-//                        }
-//                    } else if (isConstantValue(other.right())) {
-//                        if (other.operator == Ast.BinaryOp.BOp.B_PLUS) {
-//                            ast.setRight(new Ast.IntConst(((Ast.IntConst) other.right()).value - ((Ast.IntConst) constant).value));
-//                        } else {
-//                            ast.setRight(new Ast.IntConst(((Ast.IntConst) constant).value + ((Ast.IntConst) other.right()).value));
-//                        }
-//                        ast.setLeft(other.left());
-//                        ast.operator = Ast.BinaryOp.BOp.B_MINUS;
-//                    }
-//                }
-//            }
-
-        // 1 + ( 2 - x )
-        return null;
     }
 
     @Override
@@ -181,7 +220,4 @@ public class PreCalculateOperatorsOptimizer extends BaseOptimizer<Void> {
         return null;
     }
 
-    private boolean isConstantValue(Ast ast) {
-        return ast instanceof Ast.IntConst || ast instanceof Ast.BooleanConst;
-    }
 }
