@@ -1,21 +1,22 @@
 package cd.transform.analysis;
 
 import cd.ir.*;
-import cd.ir.Ast.Var;
 import cd.ir.Ast.Expr;
+import cd.ir.Ast.Var;
 import cd.ir.Symbol.VariableSymbol.Kind;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class AvailableExpressionDataFlowAnalysis extends ForwardDataFlowAnalysis<Set<Expr>> {
     private Map<BasicBlock, Set<Expr>> gen;
     private Map<BasicBlock, Set<Expr>> kill;
-    private Map<Var, Set<Expr>> varExprMap;
-    private Set<Expr> U;
+    public Map<Var, Set<Expr>> varExprMap;
+    public Map<Expr, Ast.Stmt> exprStmtMap;
+    private Set<Expr> allExpr; // U in the slides
 
-    public AvailableExpressionDataFlowAnalysis(ControlFlowGraph cfg){
+    // if tree/subtree the same in outstate, merge! but only then
+
+    public AvailableExpressionDataFlowAnalysis(ControlFlowGraph cfg) {
         super(cfg);
         generateSets();
         iterate();
@@ -23,176 +24,106 @@ public class AvailableExpressionDataFlowAnalysis extends ForwardDataFlowAnalysis
 
     @Override
     protected Set<Expr> initialState() {
-        return null;
+        return allExpr;
     }
 
     @Override
     protected Set<Expr> startState() {
-        return null;
+        return new LinkedHashSet<>();
     }
 
     @Override
     protected Set<Expr> transferFunction(BasicBlock block, Set<Expr> inState) {
-        return null;
+        Set<Expr> out = inState;
+        out.removeAll(kill.get(block));
+        out.addAll(gen.get(block));
+        return out;
     }
 
     @Override
     protected Set<Expr> join(Set<Set<Expr>> sets) {
-        return null;
+        Set<Expr> in = sets.iterator().next();
+        sets.forEach(in::retainAll);
+        return in;
     }
 
 
+    private void generateSets() {
+        // Initialize all maps and sets
+        allExpr = new LinkedHashSet<>();
+        gen = new HashMap<>();
+        kill = new HashMap<>();
+        varExprMap = new HashMap<>();
+        exprStmtMap = new HashMap<>();
 
-    private void generateSets(){
-        for (BasicBlock basicBlock : cfg.allBlocks){
+        // Generate allExpr set
+        for (BasicBlock basicBlock : cfg.allBlocks) {
+            ExprVisitor exprVisitor = new ExprVisitor();
+            basicBlock.stmts.forEach(stmt -> exprVisitor.visit(stmt, stmt));
+            if (basicBlock.condition != null) {
+                exprVisitor.visit(basicBlock.condition, null);
+            }
+        }
 
-            U = new HashSet<>();
+        // Generate varExprMap
+        VarVisitor varVisitor = new VarVisitor();
+        allExpr.forEach(expr -> varVisitor.visit(expr, expr));
+
+        // Generate gen and kill set
+        for (BasicBlock basicBlock : cfg.allBlocks) {
+            // Initialize gen and kill set
             gen.put(basicBlock, new HashSet<>());
             kill.put(basicBlock, new HashSet<>());
-
-            Visitor visitor = new Visitor();
-            basicBlock.stmts.forEach(stmt -> visitor.visit(stmt, basicBlock));
-            if(basicBlock.condition != null){
-                visitor.visit(basicBlock.condition, basicBlock);
+            AssVisitor assVisitor = new AssVisitor();
+            basicBlock.stmts.forEach(stmt -> assVisitor.visit(stmt, basicBlock));
+            if (basicBlock.condition != null) {
+                assVisitor.visit(basicBlock.condition, basicBlock);
             }
         }
     }
 
-    protected class Visitor extends AstVisitor<Void, BasicBlock> {
+    protected class ExprVisitor extends AstVisitor<Void, Ast.Stmt> {
         @Override
-        protected Void dfltExpr(Expr ast, BasicBlock arg) {
-            U.add(ast);
+        protected Void dfltExpr(Expr ast, Ast.Stmt arg) {
+            allExpr.add(ast);
+            exprStmtMap.put(ast, arg);
+
             return null;
         }
+    }
 
+    protected class VarVisitor extends AstVisitor<Void, Expr> {
+        @Override
+        public Void var(Ast.Var ast, Expr arg) {
+            if(!ast.sym.kind.equals(Kind.FIELD)) {
+                if(!varExprMap.containsKey(ast)){
+                    varExprMap.put(ast, new HashSet<>());
+                }
+                varExprMap.get(ast).add(arg);
+            }
+            return null;
+        }
+    }
+
+    protected class AssVisitor extends AstVisitor<Void, BasicBlock> {
         @Override
         public Void assign(Ast.Assign ast, BasicBlock arg) {
-            if (ast.left() instanceof Var){
+            visit(ast.right(), arg);
+            if (ast.left() instanceof Var) {
                 Var var = (Var) ast.left();
                 if (!var.sym.kind.equals(Kind.FIELD)){
-
+                    gen.get(arg).removeAll(varExprMap.get(var));
+                    kill.get(arg).addAll(varExprMap.get(var));
                 }
             }
+            return null;
+        }
 
+        @Override
+        protected Void dfltExpr(Expr ast, BasicBlock arg) {
+            gen.get(arg).add(ast);
             return null;
         }
     }
 
-    private class ExprWrapper{
-        Expr expr;
-
-        public ExprWrapper(Expr expr){
-            this.expr = expr;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if(obj instanceof ExprWrapper){
-                return new ExprComparer().visit(expr, ((ExprWrapper) obj).expr);
-            }
-            return false;
-        }
-    }
-
-    private class ExprComparer extends ExprVisitor<Boolean, Ast>{
-
-        @Override
-        protected Boolean dfltExpr(Expr ast, Ast arg) {
-            for(Ast child : ast.rwChildren){
-                boolean match = false;
-                for (Ast otherChild : arg.rwChildren){
-                    if (visit((Expr)child, otherChild)){
-                        match = true;
-                        break;
-                    }
-                }
-                if(!match){
-                    return false;
-                }
-            }
-            return false;
-        }
-
-        @Override
-        public Boolean var(Var ast, Ast arg) {
-            return arg instanceof Var && ast.name.equals(((Var) arg).name);
-        }
-
-        @Override
-        public Boolean binaryOp(Ast.BinaryOp ast, Ast arg) {
-            if(!(arg instanceof Ast.BinaryOp)){
-                return false;
-            }
-            Ast.BinaryOp other = (Ast.BinaryOp) arg;
-            if (ast.operator != other.operator){
-                return false;
-            }
-            if(ast.operator.isCommutative()){
-                return dfltExpr(ast, arg);
-            } else {
-                return visit(ast.left(), other.left()) && visit(ast.right(), other.right());
-            }
-        }
-
-        @Override
-        public Boolean booleanConst(Ast.BooleanConst ast, Ast arg) {
-            return arg instanceof Ast.BooleanConst && ast.value == ((Ast.BooleanConst) arg).value;
-        }
-
-        @Override
-        public Boolean intConst(Ast.IntConst ast, Ast arg) {
-            return arg instanceof Ast.IntConst && ast.value == ((Ast.IntConst) arg).value;
-        }
-
-        @Override
-        public Boolean index(Ast.Index ast, Ast arg) {
-            return super.index(ast, arg);
-        }
-
-        @Override
-        public Boolean builtInRead(Ast.BuiltInRead ast, Ast arg) {
-            return false;
-        }
-
-        @Override
-        public Boolean methodCall(Ast.MethodCallExpr ast, Ast arg) {
-            return false;
-        }
-
-        @Override
-        public Boolean newArray(Ast.NewArray ast, Ast arg) {
-            return false;
-        }
-
-        @Override
-        public Boolean newObject(Ast.NewObject ast, Ast arg) {
-            return false;
-        }
-
-        @Override
-        public Boolean nullConst(Ast.NullConst ast, Ast arg) {
-            return arg instanceof Ast.NullConst;
-        }
-
-        @Override
-        public Boolean unaryOp(Ast.UnaryOp ast, Ast arg) {
-            return (arg instanceof Ast.UnaryOp) && ast.operator == ((Ast.UnaryOp) arg).operator && visit(ast.arg(), ((Ast.UnaryOp) arg).arg());
-        }
-
-        @Override
-        public Boolean thisRef(Ast.ThisRef ast, Ast arg) {
-            return false;
-        }
-
-        @Override
-        public Boolean field(Ast.Field ast, Ast arg) {
-            return false;
-        }
-
-        @Override
-        public Boolean cast(Ast.Cast ast, Ast arg) {
-            return false;
-        }
-
-    }
 }

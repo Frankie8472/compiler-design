@@ -4,18 +4,6 @@
 =====
 TODO
 =====
- - block 0 is start and 1 is end, always. 1 is empty, always, so no problem with iteration through all blocks
- - controlflowgraph with blocks completet as far as I am concerned
- - dominator in block used for?
- - gen and kill sets where?
- - hash set: var -> list of assign occurences
-
- - implement backwardsflow analysis if needed
- - for concrete dataflowanalysis create subclass in DataFlowAnalysis
-   provide implementations for the methods initialState(), startState(), transferFunction(), and the methodjoin()
- - As presented in the lecture, data-flow analysis can be implemented efficiently by computing the gen and kill sets for each basic block.
-   This should be done in the constructor of the concrete data-flow analysis, before calling iterate(), such that these sets are ready when the transferFunction() is called.
-
 =======================
 What needs to be checked:
 =======================

@@ -11,10 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cd.ir.DominatorTreeAlgorithm;
-import cd.transform.optimizer.ConstantPropagationOptimizer;
-import cd.transform.optimizer.ForkOptimizer;
-import cd.transform.optimizer.PreCalculateOperatorsOptimizer;
-import cd.transform.optimizer.RemoveUnusedOptimizer;
+import cd.transform.optimizer.*;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -145,6 +142,7 @@ public class Main {
                 new PreCalculateOperatorsOptimizer(md).optimize();
                 new RemoveUnusedOptimizer(md).optimize();
 //                new ForkOptimizer(md).optimize();
+//                new AvailableExpressionOptimizer().optimize();
             }
         }
         CfgDump.toString(astRoots, ".cfg", cfgdumpbase, false);

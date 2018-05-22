@@ -2,172 +2,300 @@ package cd.transform.optimizer;
 
 import cd.ir.Ast;
 import cd.ir.AstVisitor;
-import cd.ir.Ast.Expr;
-import cd.ir.Symbol;
+import cd.ir.BasicBlock;
 import cd.transform.analysis.AvailableExpressionDataFlowAnalysis;
 
-import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
-public class AvailableExpressionOptimizer extends AstVisitor<BigInteger, Expr> {
+public class AvailableExpressionOptimizer {
+    private Integer index = 0;
     private Ast.MethodDecl methodDecl;
     private AvailableExpressionDataFlowAnalysis analysis;
-    private Integer leafCounter = 0;
-    private Map<Object, Integer> leafValue = new HashMap<>();
 
-    public AvailableExpressionOptimizer(Ast.MethodDecl methodDecl, AvailableExpressionDataFlowAnalysis analysis) {
+    public AvailableExpressionOptimizer(Ast.MethodDecl methodDecl) {
         this.methodDecl = methodDecl;
         this.analysis = new AvailableExpressionDataFlowAnalysis(methodDecl.cfg);
     }
 
-    // check if outstates have something in common, that can be replaced!
-    // if some expr in outstates equal -> replacable by tempVar (only calc one time)
-    // - tree equality
-    // - subtree equality
-    // traverse whole tree too the leaves and make prime(op)^(cantor(left,right)
-    //
+    public void optimize() {
+        for (BasicBlock basicBlock : methodDecl.cfg.allBlocks) {
+            Set<Ast.Expr> todo = new LinkedHashSet<>();
+            todo.addAll(analysis.outStateOf(basicBlock));
+            while (!todo.isEmpty()) {
+                Ast.Expr currExpr = todo.iterator().next();
+                todo.remove(currExpr);
+                for (Ast.Expr afterExpr : todo) {
+                    if (new EqVisitor().visit(currExpr, afterExpr)) {
+                        // calculate currexpr before currexpr in temp
+                        methodDecl.decls().children().add(new Ast.VarDecl(currExpr.type.name, "temp_" + index));
+                        rebuildStmtListEq(basicBlock, currExpr, afterExpr);
+                    } else if (new SubVisitor().visit(currExpr, afterExpr)) {
+                        // calculate afterexpr before currexpr in temp
+                        methodDecl.decls().children().add(new Ast.VarDecl(currExpr.type.name, "temp_" + index));
+                        rebuildStmtListSub(basicBlock, afterExpr, currExpr, afterExpr);
+                    } else if (new SubVisitor().visit(afterExpr, currExpr)) {
+                        // calculate currExpr before currExpr in temp
+                        methodDecl.decls().children().add(new Ast.VarDecl(currExpr.type.name, "temp_" + index));
+                        rebuildStmtListSub(basicBlock, currExpr, currExpr, afterExpr);
+                    }
+                }
+            }
 
-    protected class IdVisitor extends AstVisitor<BigInteger, Expr> {
-        //-- Leafs --
+        }
+    }
+
+    private void rebuildStmtListSub(BasicBlock currBlock, Ast.Expr calc, Ast.Expr currExpr, Ast.Expr afterExpr) {
+        // Add new Stmt
+        List<Ast.Stmt> newList = new ArrayList<>();
+        for (Ast.Stmt currStmt : currBlock.stmts) {
+            if (currStmt.equals(analysis.exprStmtMap.get(currExpr))) {
+                newList.add(new Ast.Assign(new Ast.Var("temp_" + index), calc));
+                new SubExchangeVisitor().visit(currStmt, calc);
+            } else if (currStmt.equals(analysis.exprStmtMap.get(afterExpr))){
+                new SubExchangeVisitor().visit(currStmt, calc);
+                index++;
+            }
+            newList.add(currStmt);
+        }
+    }
+
+    private void rebuildStmtListEq(BasicBlock currBlock, Ast.Expr currExpr, Ast.Expr afterExpr) {
+        // Add new Stmt
+        List<Ast.Stmt> newList = new ArrayList<>();
+        for (Ast.Stmt currStmt : currBlock.stmts) {
+            if (currStmt.equals(analysis.exprStmtMap.get(currExpr))) {
+                newList.add(new Ast.Assign(new Ast.Var("temp_" + index), currExpr));
+                new ExchangeVisitor().visit(currStmt, currExpr);
+            } else if (currStmt.equals(analysis.exprStmtMap.get(afterExpr))){
+                new ExchangeVisitor().visit(currStmt, afterExpr);
+                index++;
+            }
+            newList.add(currStmt);
+        }
+    }
+
+    protected class EqVisitor extends AstVisitor<Boolean, Ast.Expr> {
+        //--- Equality impossible
         @Override
-        public BigInteger var(Ast.Var ast, Expr arg) {
-            if (ast.sym.kind.equals(Symbol.VariableSymbol.Kind.FIELD)) {
-                return null;
+        protected Boolean dfltExpr(Ast.Expr ast, Ast.Expr arg) {
+            return false;
+        }
+
+        //--- Equality possible
+        @Override
+        public Boolean binaryOp(Ast.BinaryOp ast, Ast.Expr arg) {
+            if (!(arg instanceof Ast.BinaryOp)) {
+                return false;
             }
 
-            if (!leafValue.containsKey(ast.sym.name)) {
-                leafValue.put(ast.sym.name, ++leafCounter);
+            Ast.BinaryOp right = (Ast.BinaryOp) arg;
+
+            if (!Objects.equals(ast.operator, right.operator)) {
+                return false;
             }
 
-            return BigInteger.valueOf(leafValue.get(ast.sym.name));
+            return visit(ast.left(), right.left()) && visit(ast.right(), right.right());
         }
 
         @Override
-        public BigInteger booleanConst(Ast.BooleanConst ast, Expr arg) {
-            if (!leafValue.containsKey(ast.value)) {
-                leafValue.put(ast.value, ++leafCounter);
+        public Boolean booleanConst(Ast.BooleanConst ast, Ast.Expr arg) {
+            if (!(arg instanceof Ast.BooleanConst)) {
+                return false;
             }
 
-            return  BigInteger.valueOf(leafValue.get(ast.value));
+            Ast.BooleanConst right = (Ast.BooleanConst) arg;
+
+            if (ast.value && right.value) {
+                return true;
+            }
+
+            return false;
         }
 
         @Override
-        public BigInteger intConst(Ast.IntConst ast, Expr arg) {
-            if (!leafValue.containsKey(ast.value)) {
-                leafValue.put(ast.value, ++leafCounter);
+        public Boolean intConst(Ast.IntConst ast, Ast.Expr arg) {
+            if (!(arg instanceof Ast.IntConst)) {
+                return false;
             }
 
-            return  BigInteger.valueOf(leafValue.get(ast.value));
+            Ast.IntConst right = (Ast.IntConst) arg;
+
+            if (ast.value == right.value) {
+                return true;
+            }
+
+            return false;
         }
 
-        //-----------
-        //-- Skip ---
         @Override
-        protected BigInteger dfltExpr(Expr ast, Expr arg) {
+        public Boolean cast(Ast.Cast ast, Ast.Expr arg) {
+            if (!(arg instanceof Ast.Cast)) {
+                return false;
+            }
+
+            Ast.Cast right = (Ast.Cast) arg;
+
+            if (!right.typeName.equals(ast.typeName)) {
+                return false;
+            }
+
+            return visit(ast.arg(), right.arg());
+        }
+
+        @Override
+        public Boolean unaryOp(Ast.UnaryOp ast, Ast.Expr arg) {
+            if (!(arg instanceof Ast.UnaryOp)) {
+                return false;
+            }
+
+            Ast.UnaryOp right = (Ast.UnaryOp) arg;
+
+            if (!Objects.equals(ast.operator, right.operator)) {
+                return false;
+            }
+
+            return visit(ast.arg(), right.arg());
+        }
+
+        @Override
+        public Boolean var(Ast.Var ast, Ast.Expr arg) {
+            if (!(arg instanceof Ast.Var)) {
+                return false;
+            }
+
+            Ast.Var right = (Ast.Var) arg;
+
+            if (!Objects.equals(right.sym.name, ast.sym.name)) {
+                return false;
+            }
+
+            return true;
+        }
+    }
+
+    protected class SubVisitor extends AstVisitor<Boolean, Ast.Expr> {
+        // Check if ARG is a subtree of AST
+
+        //--- Equality impossible
+        @Override
+        protected Boolean dfltExpr(Ast.Expr ast, Ast.Expr arg) {
+            return false;
+        }
+
+        //--- Equality possible
+        @Override
+        public Boolean binaryOp(Ast.BinaryOp ast, Ast.Expr arg) {
+            if (!(arg instanceof Ast.BinaryOp)) {
+                return visit(ast.left(), arg) || visit(ast.right(), arg);
+            }
+
+            Ast.BinaryOp right = (Ast.BinaryOp) arg;
+
+            if (!Objects.equals(ast.operator, right.operator)) {
+                return visit(ast.left(), arg) || visit(ast.right(), arg);
+            }
+
+            return (visit(ast.left(), right.left()) && visit(ast.right(), right.right())) || (visit(ast.left(), arg) || visit(ast.right(), arg));
+        }
+
+        @Override
+        public Boolean booleanConst(Ast.BooleanConst ast, Ast.Expr arg) {
+            if (!(arg instanceof Ast.BooleanConst)) {
+                return false;
+            }
+
+            Ast.BooleanConst right = (Ast.BooleanConst) arg;
+
+            return ast.value && right.value;
+        }
+
+        @Override
+        public Boolean intConst(Ast.IntConst ast, Ast.Expr arg) {
+            if (!(arg instanceof Ast.IntConst)) {
+                return false;
+            }
+
+            Ast.IntConst right = (Ast.IntConst) arg;
+
+            if (ast.value == right.value) {
+                return true;
+            }
+
+            return false;
+        }
+
+        @Override
+        public Boolean cast(Ast.Cast ast, Ast.Expr arg) {
+            if (!(arg instanceof Ast.Cast)) {
+                return visit(ast.arg(), arg);
+            }
+
+            Ast.Cast right = (Ast.Cast) arg;
+
+            if (!right.typeName.equals(ast.typeName)) {
+                return visit(ast.arg(), arg);
+            }
+
+            return visit(ast.arg(), right.arg()) || visit(ast.arg(), arg);
+        }
+
+        @Override
+        public Boolean unaryOp(Ast.UnaryOp ast, Ast.Expr arg) {
+            if (!(arg instanceof Ast.UnaryOp)) {
+                return visit(ast.arg(), arg);
+            }
+
+            Ast.UnaryOp right = (Ast.UnaryOp) arg;
+
+            if (!Objects.equals(ast.operator, right.operator)) {
+                return visit(ast.arg(), arg);
+            }
+
+            return visit(ast.arg(), right.arg()) || visit(ast.arg(), arg);
+        }
+
+        @Override
+        public Boolean var(Ast.Var ast, Ast.Expr arg) {
+            if (!(arg instanceof Ast.Var)) {
+                return false;
+            }
+
+            Ast.Var right = (Ast.Var) arg;
+
+            if (!Objects.equals(right.sym.name, ast.sym.name)) {
+                return false;
+            }
+
+            return true;
+        }
+    }
+
+    protected class ExchangeVisitor extends AstVisitor<Void, Ast.Expr> {
+        // Replace ARG in AST through temp_number
+        @Override
+        protected Void dfltStmt(Ast.Stmt ast, Ast.Expr arg) {
+            for (int i = 0; i < ast.children().size(); i++) {
+                if (Objects.equals(ast.children().get(i), arg)) {
+                    ast.children().set(i, new Ast.Var("temp_" + index));
+                    return null;
+                }
+            }
             return null;
         }
+    }
 
-        //-----------
-        //-- Nodes --
+    protected class SubExchangeVisitor extends AstVisitor<Void, Ast.Expr> {
+        // Find and replace ARG in AST through temp_number
         @Override
-        public BigInteger binaryOp(Ast.BinaryOp ast, Expr arg) {
-            BigInteger left = visit(ast.left(), arg);
-            BigInteger right = visit(ast.right(), arg);
-            Integer tmp;
-
-            switch (ast.operator) {
-                case B_GREATER_OR_EQUAL:
-                    tmp = 2;
-                    break;
-                case B_LESS_OR_EQUAL:
-                    tmp = 3;
-                    break;
-                case B_GREATER_THAN:
-                    tmp = 5;
-                    break;
-                case B_LESS_THAN:
-                    tmp = 7;
-                    break;
-                case B_MOD:
-                    tmp = 11;
-                    break;
-                case B_NOT_EQUAL:
-                    tmp = 13;
-                    break;
-                case B_EQUAL:
-                    tmp = 17;
-                    break;
-                case B_AND:
-                    tmp = 19;
-                    break;
-                case B_OR:
-                    tmp = 23;
-                    break;
-                case B_PLUS:
-                    tmp = 29;
-                    break;
-                case B_TIMES:
-                    tmp = 31;
-                    break;
-                case B_DIV:
-                    tmp = 37;
-                    break;
-                case B_MINUS:
-                    tmp = 41;
-                    break;
-                default:
-                    tmp = null;
-                    break;
+        protected Void dflt(Ast ast, Ast.Expr arg) {
+            for (int i = 0; i < ast.children().size(); i++) {
+                if (new EqVisitor().visit(ast.children().get(i), arg)) {
+                    ast.children().set(i, new Ast.Var("temp_" + index));
+                    return null;
+                }
             }
-
-            if (tmp == null || left == null || right == null) {
-                return null;
-            }
-
-            BigInteger node = new BigInteger(String.valueOf(tmp));
-
-            return super.binaryOp(ast, arg);
-        }
-
-        @Override
-        public BigInteger builtInRead(Ast.BuiltInRead ast, Expr arg) {
-            BigInteger node = new BigInteger(String.valueOf(43));
-            return super.builtInRead(ast, arg);
-        }
-
-        @Override
-        public BigInteger cast(Ast.Cast ast, Expr arg) {
-            BigInteger node = new BigInteger(String.valueOf(47));
-
-            return super.cast(ast, arg);
-        }
-
-        @Override
-        public BigInteger unaryOp(Ast.UnaryOp ast, Expr arg) {
-            Integer tmp;
-            switch (ast.operator) {
-                case U_BOOL_NOT:
-                    tmp = 59;
-                    break;
-                case U_MINUS:
-                    tmp = 61;
-                    break;
-                case U_PLUS:
-                    tmp = 67;
-                    break;
-                default:
-                    tmp = null;
-            }
-
-            BigInteger node = new BigInteger(String.valueOf(tmp));
-
-            return super.unaryOp(ast, arg);
-        }
-
-        private BigInteger extendedContor(BigInteger op, BigInteger left, BigInteger right) {
-            return op.pow(left.add(right).intValue());
-            // todo: make in a first step all integer, second boolean
+            visitChildren(ast, arg);
+            return null;
         }
     }
 }
