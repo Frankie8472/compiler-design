@@ -6,8 +6,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class DominatorTreeAlgorithm {
     private ControlFlowGraph cfg;
 
-    public DominatorTreeAlgorithm(ControlFlowGraph cfg) {
-        this.cfg = cfg;
+    public DominatorTreeAlgorithm(Ast.MethodDecl methodDecl) {
+        this.cfg = methodDecl.cfg;
     }
 
     public void build(){

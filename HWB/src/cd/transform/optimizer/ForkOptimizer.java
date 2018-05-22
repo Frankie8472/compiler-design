@@ -15,7 +15,7 @@ public class ForkOptimizer extends AstVisitor<Object, Object> {
         this.methodDecl = methodDecl;
     }
 
-    private void optimize() {
+    public void optimize() {
         for (BasicBlock topBlock : methodDecl.cfg.allBlocks) {
             if (topBlock.condition != null && topBlock.condition instanceof Ast.BooleanConst) {
                 Boolean cond = ((Ast.BooleanConst) topBlock.condition).value;

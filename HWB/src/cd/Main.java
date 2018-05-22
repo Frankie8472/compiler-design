@@ -12,6 +12,7 @@ import java.util.List;
 
 import cd.ir.DominatorTreeAlgorithm;
 import cd.transform.optimizer.ConstantPropagationOptimizer;
+import cd.transform.optimizer.ForkOptimizer;
 import cd.transform.optimizer.PreCalculateOperatorsOptimizer;
 import cd.transform.optimizer.RemoveUnusedOptimizer;
 import org.antlr.v4.runtime.ANTLRInputStream;
@@ -137,10 +138,11 @@ public class Main {
         for (ClassDecl cd : astRoots) {
             for (MethodDecl md : cd.methods()) {
                 new CfgBuilder().build(md);
-                new DominatorTreeAlgorithm(md.cfg).build();
+                new DominatorTreeAlgorithm(md).build();
                 new ConstantPropagationOptimizer(md).optimize();
                 new PreCalculateOperatorsOptimizer(md).optimize();
                 new RemoveUnusedOptimizer(md).optimize();
+                new ForkOptimizer(md).optimize();
             }
         }
         CfgDump.toString(astRoots, ".cfg", cfgdumpbase, false);
