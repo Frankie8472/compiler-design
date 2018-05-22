@@ -85,26 +85,47 @@ public class PreCalculateOperatorsOptimizer extends BaseOptimizer<Void> {
             }
 
         } else if (isConstantValue(ast.left())) {
-//            Ast constant = ast.left();
-//            if (!(ast.right() instanceof Ast.BinaryOp)) {
-//                return null;
-//            }
-//            Ast.BinaryOp other = (Ast.BinaryOp) ast.right();
-//            int otherValue;
-//            if (isConstantValue(other.left())) {
-//                otherValue = ((Ast.IntConst)other.left()).value;
-//            } else if (isConstantValue(other.right())) {
-//                otherValue = ((Ast.IntConst)other.right()).value;
-//            } else {
-//                return null;
-//            }
-//
-//            if(ast.operator == other.operator){
-//                ast.setRight(new Ast.IntConst(((Ast.IntConst) constant).value + otherValue);
-//            } else {
-//                ast.setRight(new Ast.IntConst(((Ast.IntConst) constant).value - otherValue);
-//            }
+            Ast constant = ast.left();
+            if (!(ast.right() instanceof Ast.BinaryOp)) {
+                return null;
+            }
+            Ast.BinaryOp other = (Ast.BinaryOp) ast.right();
+            if ((ast.operator == Ast.BinaryOp.BOp.B_MINUS || ast.operator == Ast.BinaryOp.BOp.B_PLUS) &&
+                    (other.operator == Ast.BinaryOp.BOp.B_MINUS || other.operator == Ast.BinaryOp.BOp.B_PLUS)) {
+                if (isConstantValue(other.left())) {
+                    if (ast.operator == Ast.BinaryOp.BOp.B_PLUS) {
+                        ast.setLeft(new Ast.IntConst(((Ast.IntConst) constant).value + ((Ast.IntConst) other.left()).value));
+                        if (other.operator == Ast.BinaryOp.BOp.B_PLUS) {
+                            ast.setRight(other.right());
+                        } else {
+                            ast.setRight(other.right());
+                            ast.operator = Ast.BinaryOp.BOp.B_MINUS;
+                        }
+                    } else {
+                        ast.setRight(new Ast.IntConst(((Ast.IntConst) other.left()).value - ((Ast.IntConst) constant).value));
+                        if (other.operator == Ast.BinaryOp.BOp.B_MINUS) {
+                            ast.setLeft(other.right());
+                        } else {
+                            ast.setLeft(new Ast.UnaryOp(Ast.UnaryOp.UOp.U_MINUS, other.right()));
+                        }
+                    }
 
+                } else if (isConstantValue(other.right())) {
+                    if (ast.operator == other.operator) {
+                        ast.setLeft(new Ast.IntConst(((Ast.IntConst) constant).value + ((Ast.IntConst) other.right()).value));
+                        ast.setRight(ast.left());
+                    } else {
+                        ast.operator = Ast.BinaryOp.BOp.B_MINUS;
+                        ast.setRight(new Ast.IntConst(((Ast.IntConst) other.right()).value - ((Ast.IntConst) constant).value));
+                        if (ast.operator == Ast.BinaryOp.BOp.B_PLUS) {
+                            ast.setLeft(other.right());
+                        } else {
+                            ast.setLeft(new Ast.UnaryOp(Ast.UnaryOp.UOp.U_MINUS, other.right()));
+                        }
+                    }
+                }
+            }
+        }
 
 
 //            if (ast.operator == Ast.BinaryOp.BOp.B_PLUS) {
@@ -141,9 +162,7 @@ public class PreCalculateOperatorsOptimizer extends BaseOptimizer<Void> {
 //                }
 //            }
 
-            // 1 + ( 2 - x )
-
-        }
+        // 1 + ( 2 - x )
         return null;
     }
 
