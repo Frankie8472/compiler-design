@@ -51,9 +51,17 @@ public class PreCalculateOperatorsOptimizer extends BaseOptimizer<Void> {
                 case B_TIMES:
                     return createNewIntConst(leftValue * rightValue);
                 case B_DIV:
-                    return createNewIntConst(leftValue / rightValue);
+                    if (rightValue == 0) {
+                        return null;
+                    } else {
+                        return createNewIntConst(leftValue / rightValue);
+                    }
                 case B_MOD:
-                    return createNewIntConst(leftValue % rightValue);
+                    if (rightValue == 0) {
+                        return null;
+                    } else {
+                        return createNewIntConst(leftValue % rightValue);
+                    }
                 case B_EQUAL:
                     return createNewBoolConst(leftValue.equals(rightValue));
                 case B_NOT_EQUAL:
@@ -114,10 +122,13 @@ public class PreCalculateOperatorsOptimizer extends BaseOptimizer<Void> {
      * the amount of operators used in the calculation. An expression like (a + (1 + ( (4 - 5) + 3))) simplifies to
      * (a + 3). Since the Minus is not commutative the method got big and ugly.
      *
-     * @param ast
-     * @param other
-     * @param astConstant
-     * @param leftSideConstant
+     * This Method modifies the binary operation given to achieve the simplification.
+     *
+     * @param ast The Binary Operation to modify.
+     * @param other The subExpressiong of the binary operation ast.
+     * @param astConstant the value of the constant.
+     * @param leftSideConstant Indicates whether the constant in the expression to simplify is on the left or the right
+     *                         side of the binary operation other. In the example 1 + (3 + x) the 1 is on the left side.
      */
     private void simplifyIntEquation(Ast.BinaryOp ast, Ast.BinaryOp other, int astConstant, boolean leftSideConstant) {
         if ((ast.operator == Ast.BinaryOp.BOp.B_MINUS || ast.operator == Ast.BinaryOp.BOp.B_PLUS) &&
@@ -229,6 +240,9 @@ public class PreCalculateOperatorsOptimizer extends BaseOptimizer<Void> {
         } else if (ast.right() instanceof Ast.IntConst) {
             value = ((Ast.IntConst) ast.right()).value;
             other = ast.left();
+            if(ast.operator == Ast.BinaryOp.BOp.B_DIV && value == 1){
+                return other;
+            }
         } else {
             return null;
         }
@@ -239,8 +253,8 @@ public class PreCalculateOperatorsOptimizer extends BaseOptimizer<Void> {
             if (ast.operator == Ast.BinaryOp.BOp.B_TIMES) {
                 return createNewIntConst(0);
             }
-        } else if (value == 1){
-            if (ast.operator == Ast.BinaryOp.BOp.B_TIMES || ast.operator == Ast.BinaryOp.BOp.B_DIV) {
+        } else if (value == 1) {
+            if (ast.operator == Ast.BinaryOp.BOp.B_TIMES) {
                 return other;
             }
         }
