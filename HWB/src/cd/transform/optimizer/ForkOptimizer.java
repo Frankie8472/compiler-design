@@ -16,11 +16,11 @@ public class ForkOptimizer extends AstVisitor<Object, Object> {
     }
 
     public void optimize() {
+        Set<BasicBlock> killed = new HashSet<>();
         for (BasicBlock topBlock : methodDecl.cfg.allBlocks) {
             if (topBlock.condition != null && topBlock.condition instanceof Ast.BooleanConst) {
                 Boolean cond = ((Ast.BooleanConst) topBlock.condition).value;
                 BasicBlock currBlock;
-                Set<BasicBlock> killed = new HashSet<>();
                 Set<BasicBlock> todo = new LinkedHashSet<>();
                 if (cond) { // True, kill false
                     todo.add(topBlock.falseSuccessor());
@@ -37,12 +37,13 @@ public class ForkOptimizer extends AstVisitor<Object, Object> {
                     for (BasicBlock succBlock : currBlock.successors) {
                         if (!killed.contains(succBlock) && !topBlock.dominanceFrontier.contains(succBlock)) {
                             todo.add(succBlock);
+                        } else if (topBlock.dominanceFrontier.contains(succBlock)) {
+                            succBlock.predecessors.remove(currBlock);
                         }
                     }
                 }
-
-                methodDecl.cfg.allBlocks.removeAll(killed);
             }
         }
+        methodDecl.cfg.allBlocks.removeAll(killed);
     }
 }
