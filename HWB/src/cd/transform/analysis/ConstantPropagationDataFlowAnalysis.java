@@ -35,12 +35,12 @@ public class ConstantPropagationDataFlowAnalysis extends ForwardDataFlowAnalysis
         for (Ast.Stmt stmt : block.stmts) {
             if (stmt instanceof Ast.Assign) {
                 Ast.Assign assign = (Ast.Assign) stmt;
-                if (assign.left() instanceof Ast.Var ){//&& !((Ast.Var) assign.left()).sym.kind.equals(Symbol.VariableSymbol.Kind.FIELD)) {
+                if (assign.left() instanceof Ast.Var) {//&& !((Ast.Var) assign.left()).sym.kind.equals(Symbol.VariableSymbol.Kind.FIELD)) {
                     if (assign.right() instanceof Ast.IntConst) {
                         outState.put(((Ast.Var) assign.left()).name, ((Ast.IntConst) assign.right()).value);
                     } else if (assign.right() instanceof Ast.BooleanConst) {
                         outState.put(((Ast.Var) assign.left()).name, ((Ast.BooleanConst) assign.right()).value);
-                    }else if(assign.right() instanceof Ast.Var){
+                    } else if (assign.right() instanceof Ast.Var) {
                         outState.put(((Ast.Var) assign.left()).name, outState.get(((Ast.Var) assign.right()).name));
                     } else {
                         outState.put(((Ast.Var) assign.left()).name, TOP_SYMBOL);
@@ -56,10 +56,14 @@ public class ConstantPropagationDataFlowAnalysis extends ForwardDataFlowAnalysis
         Map<String, Object> outstate = new HashMap<>();
         for (Map<String, Object> map : maps) {
             for (String key : map.keySet()) {
-                if (outstate.containsKey(key) && !Objects.equals(outstate.get(key), map.get(key))) {
-                    outstate.put(key, TOP_SYMBOL);
-                } else {
-                    outstate.put(key, map.get(key));
+                for (Map<String, Object> other : maps) {
+                    if (other != map) {
+                        if (!other.containsKey(key) || (other.containsKey(key) && other.get(key) != map.get(key))) {
+                            outstate.put(key, TOP_SYMBOL);
+                        } else {
+                            outstate.put(key, map.get(key));
+                        }
+                    }
                 }
             }
         }

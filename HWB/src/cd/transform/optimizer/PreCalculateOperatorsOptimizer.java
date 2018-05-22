@@ -84,32 +84,64 @@ public class PreCalculateOperatorsOptimizer extends BaseOptimizer<Void> {
                     return null;
             }
 
-        } else if(isConstantValue(ast.left()) || isConstantValue(ast.right())){
-            Ast constant;
-            Ast.BinaryOp other;
-            Ast otherConstant;
-            if(isConstantValue(ast.left())){
-                constant = ast.left();
-                if(!(ast.right() instanceof Ast.BinaryOp)){
-                    return null;
-                }
-                other = (Ast.BinaryOp) ast.right();
-            } else {
-                constant = ast.right();
-                if(!(ast.left() instanceof Ast.BinaryOp)){
-                    return null;
-                }
-                other = (Ast.BinaryOp) ast.left();
-            }
-//            if(other.operator == Ast.BinaryOp.BOp.B_PLUS && ast.operator == Ast.BinaryOp.BOp.B_PLUS){
-//                if(isConstantValue(other.right())){
-//                    ast.setLeft(new Ast.IntConst(((Ast.IntConst)constant).value + ((Ast.IntConst)other.right()).value));
-//                    ast.setRight(other.left());
+        } else if (isConstantValue(ast.left())) {
+//            Ast constant = ast.left();
+//            if (!(ast.right() instanceof Ast.BinaryOp)) {
+//                return null;
+//            }
+//            Ast.BinaryOp other = (Ast.BinaryOp) ast.right();
+//            int otherValue;
+//            if (isConstantValue(other.left())) {
+//                otherValue = ((Ast.IntConst)other.left()).value;
+//            } else if (isConstantValue(other.right())) {
+//                otherValue = ((Ast.IntConst)other.right()).value;
+//            } else {
+//                return null;
+//            }
+//
+//            if(ast.operator == other.operator){
+//                ast.setRight(new Ast.IntConst(((Ast.IntConst) constant).value + otherValue);
+//            } else {
+//                ast.setRight(new Ast.IntConst(((Ast.IntConst) constant).value - otherValue);
+//            }
+
+
+
+//            if (ast.operator == Ast.BinaryOp.BOp.B_PLUS) {
+//                if (other.operator == Ast.BinaryOp.BOp.B_PLUS || other.operator == Ast.BinaryOp.BOp.B_MINUS) {
+//                    if (isConstantValue(other.left())) {
+//                        ast.setLeft(new Ast.IntConst(((Ast.IntConst) constant).value + ((Ast.IntConst) other.left()).value));
+//                        ast.setRight(other.right());
+//                        ast.operator = other.operator;
+//                    } else if (isConstantValue(other.right())) {
+//                        ast.setLeft(other.left());
+//                        ast.setRight(new Ast.IntConst(-((Ast.IntConst) constant).value + ((Ast.IntConst) other.right()).value));
+//                        ast.operator = other.operator;
+//                    }
+//                }
+//            } else if (ast.operator == Ast.BinaryOp.BOp.B_MINUS) {
+//                if (other.operator == Ast.BinaryOp.BOp.B_PLUS || other.operator == Ast.BinaryOp.BOp.B_MINUS) {
+//                    if (isConstantValue(other.left())) {
+//                        ast.setLeft(new Ast.IntConst(((Ast.IntConst) constant).value - ((Ast.IntConst) other.left()).value));
+//                        ast.setRight(other.right());
+//                        if (other.operator == Ast.BinaryOp.BOp.B_PLUS) {
+//                            ast.operator = Ast.BinaryOp.BOp.B_MINUS;
+//                        } else {
+//                            ast.operator = Ast.BinaryOp.BOp.B_PLUS;
+//                        }
+//                    } else if (isConstantValue(other.right())) {
+//                        if (other.operator == Ast.BinaryOp.BOp.B_PLUS) {
+//                            ast.setRight(new Ast.IntConst(((Ast.IntConst) other.right()).value - ((Ast.IntConst) constant).value));
+//                        } else {
+//                            ast.setRight(new Ast.IntConst(((Ast.IntConst) constant).value + ((Ast.IntConst) other.right()).value));
+//                        }
+//                        ast.setLeft(other.left());
+//                        ast.operator = Ast.BinaryOp.BOp.B_MINUS;
+//                    }
 //                }
 //            }
 
-            // (1 + 2 + (x / 5)) -> 3 + x/5 -> 15/5 + x/5 ->(15 + x) /5
-            // (1 + 2 + (5 / x)) -> 3 + 5/x -> (3*x))/x + 5/x ->(3x + 5)/x
+            // 1 + ( 2 - x )
 
         }
         return null;
@@ -130,7 +162,7 @@ public class PreCalculateOperatorsOptimizer extends BaseOptimizer<Void> {
         return null;
     }
 
-    private boolean isConstantValue(Ast ast){
+    private boolean isConstantValue(Ast ast) {
         return ast instanceof Ast.IntConst || ast instanceof Ast.BooleanConst;
     }
 }

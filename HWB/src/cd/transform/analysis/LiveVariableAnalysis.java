@@ -7,6 +7,7 @@ import cd.ir.AstVisitor;
 import cd.ir.BasicBlock;
 import cd.ir.ControlFlowGraph;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -14,10 +15,10 @@ import java.util.Set;
 import cd.ir.Symbol.VariableSymbol.Kind;
 
 
-public class LiveVariableAnalysis extends BackwardDataFlowAnalysis<Set<Var>> {
-    private Map<BasicBlock, Set<Var>> def;
-    private Map<BasicBlock, Set<Var>> use;
-    private Map<Var, Set<Stmt>> varDefMap;
+public class LiveVariableAnalysis extends BackwardDataFlowAnalysis<Set<String>> {
+    private Map<BasicBlock, Set<String>> def = new HashMap<>();
+    private Map<BasicBlock, Set<String>> use = new HashMap<>();
+    private Map<Var, Set<Stmt>> varDefMap = new HashMap<>();
 
     public LiveVariableAnalysis(ControlFlowGraph cfg) {
         super(cfg);
@@ -26,27 +27,31 @@ public class LiveVariableAnalysis extends BackwardDataFlowAnalysis<Set<Var>> {
     }
 
     @Override
-    protected Set<Var> initialState() {
+    protected Set<String> initialState() {
         return new HashSet<>();
     }
 
     @Override
-    protected Set<Var> endState() {
+    protected Set<String> endState() {
         return new HashSet<>();
     }
 
     @Override
-    protected Set<Var> transferFunction(BasicBlock block, Set<Var> outState) {
-        Set<Var> in = outState;
+    protected Set<String> transferFunction(BasicBlock block, Set<String> outState) {
+        Set<String> in = new HashSet<>(outState);
         in.removeAll(def.get(block));
         in.addAll(use.get(block));
         return in;
     }
 
     @Override
-    protected Set<Var> join(Set<Set<Var>> objects) {
-        Set<Var> out = new HashSet<>();
-        objects.forEach(vars -> out.addAll(vars));
+    protected Set<String> join(Set<Set<String>> objects) {
+        Set<String> out = new HashSet<>();
+        objects.forEach(vars -> {
+            if (vars != null) {
+                out.addAll(vars);
+            }
+        });
         return out;
     }
 
@@ -55,25 +60,25 @@ public class LiveVariableAnalysis extends BackwardDataFlowAnalysis<Set<Var>> {
             use.put(basicBlock, new HashSet<>());
             def.put(basicBlock, new HashSet<>());
 
+            Visitor visitor = new Visitor();
             for (Stmt stmt : basicBlock.stmts) {
-                Visitor visitor = new Visitor();
                 visitor.visit(stmt, basicBlock);
-                if (basicBlock.condition != null) {
-                    visitor.visit(basicBlock.condition, basicBlock);
-                }
+            }
+            if (basicBlock.condition != null) {
+                visitor.visit(basicBlock.condition, basicBlock);
             }
         }
     }
 
     private void addToUse(BasicBlock block, Var var) {
-        if (!def.get(block).contains(var)) {
-            use.get(block).add(var);
+        if (!def.get(block).contains(var.name)) {
+            use.get(block).add(var.name);
         }
     }
 
     private void addToDef(BasicBlock block, Var var) {
-        if (!use.get(block).contains(var)) {
-            def.get(block).add(var);
+        if (!use.get(block).contains(var.name)) {
+            def.get(block).add(var.name);
         }
     }
 
@@ -87,6 +92,8 @@ public class LiveVariableAnalysis extends BackwardDataFlowAnalysis<Set<Var>> {
                 if (!left.sym.kind.equals(Kind.FIELD)) {
                     addToDef(arg, left);
                 }
+            } else {
+                visit(ast.left(), arg);
             }
             return null;
         }

@@ -76,7 +76,7 @@ public abstract class BackwardDataFlowAnalysis<State> {
 
             /* if out-state changed, recalculate successors */
             if (!newInState.equals(inStates.get(block))) {
-                outStates.put(block, newInState);
+                inStates.put(block, newInState);
                 todo.addAll(block.predecessors);
             }
         }
