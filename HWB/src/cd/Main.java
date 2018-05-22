@@ -10,6 +10,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
+import cd.ir.DominatorTreeAlgorithm;
 import cd.transform.optimizer.ConstantPropagationOptimizer;
 import cd.transform.optimizer.PreCalculateOperatorsOptimizer;
 import cd.transform.optimizer.RemoveUnusedOptimizer;
@@ -136,7 +137,7 @@ public class Main {
         for (ClassDecl cd : astRoots) {
             for (MethodDecl md : cd.methods()) {
                 new CfgBuilder().build(md);
-//                new DominatorTreeAlgorithm(md.cfg).build();
+                new DominatorTreeAlgorithm(md.cfg).build();
                 new ConstantPropagationOptimizer(md).optimize();
                 new PreCalculateOperatorsOptimizer(md).optimize();
                 new RemoveUnusedOptimizer(md).optimize();

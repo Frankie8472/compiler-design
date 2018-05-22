@@ -1,0 +1,44 @@
+
+class A {
+	int a;
+	Object A;
+
+	Object foo(int a) {
+		if (a > 0) {
+			this.a = a - 1;
+			return foo(this.a);
+		} else {
+			return A;
+		}
+	}
+}
+
+class Main {
+	A a, A;
+
+	Object foo(Object Object) {
+		Object obj;
+		if (Object == null) {
+			obj = new Object();
+			return obj;
+		} else {
+			if (a == null) {
+				a = (A) foo(a);
+				return a;
+			} else {
+				if (A == null) {
+					A = (A) foo(A);
+				}
+				return A;
+			}
+		}
+	}
+
+	void main() {
+		A a, A;
+		Object obj;
+
+		A = (A) foo(obj);
+		a = (A) a.foo(0x5000);
+	}
+}

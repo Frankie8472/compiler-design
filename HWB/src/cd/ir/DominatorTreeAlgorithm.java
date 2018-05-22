@@ -16,7 +16,7 @@ public class DominatorTreeAlgorithm {
         buildDominatorFrontier();
     }
 
-    private void buildDominators() {
+    private void buildDominators() { //todo: find bug is in this method
         cfg.start.dominators.add(cfg.start);
         List<BasicBlock> allBlocksWithoutStartBlock = cfg.allBlocks.subList(1, cfg.count());
 
@@ -33,8 +33,10 @@ public class DominatorTreeAlgorithm {
 
                 newDominatorList.addAll(basicBlock.predecessors.get(0).dominators);
 
-                if (basicBlock.predecessors.size() == 2){
-                    newDominatorList.retainAll(basicBlock.predecessors.get(1).dominators);
+                if (basicBlock.predecessors.size() >= 2){
+                    for(int i = 1; i < basicBlock.predecessors.size(); i++){
+                        newDominatorList.retainAll(basicBlock.predecessors.get(i).dominators);
+                    }
                 }
 
                 if (!newDominatorList.contains(basicBlock)){
@@ -59,7 +61,7 @@ public class DominatorTreeAlgorithm {
     }
 
     private void searchParent(BasicBlock basicBlock){
-        List<BasicBlock> todo = new LinkedList<>();
+        Set<BasicBlock> todo = new LinkedHashSet<>();
         todo.addAll(basicBlock.predecessors);
         while(!todo.isEmpty()) {
             BasicBlock currentBlock = todo.iterator().next();
@@ -81,7 +83,7 @@ public class DominatorTreeAlgorithm {
                     BasicBlock runner = predecessorBlock;
                     while(!Objects.equals(runner, basicBlock.dominatorTreeParent)){
                         runner.dominanceFrontier.add(basicBlock);
-                        runner = runner.dominatorTreeParent;
+                        runner = runner.dominatorTreeParent; //this is the porblem
                     }
                 }
             }
