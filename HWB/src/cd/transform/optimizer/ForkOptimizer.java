@@ -25,31 +25,18 @@ public class ForkOptimizer extends AstVisitor<Object, Object> {
                 if (cond) { // True, kill false
                     todo.add(topBlock.falseSuccessor());
                     topBlock.successors.remove(topBlock.falseSuccessor());
-                    topBlock.condition = null;
-
-                    while (!todo.isEmpty()) {
-                        currBlock = todo.iterator().next();
-                        todo.remove(currBlock);
-                        killed.add(currBlock);
-                        for (BasicBlock succBlock : currBlock.successors) {
-                            if (!killed.contains(succBlock) && !topBlock.dominanceFrontier.contains(succBlock)) {
-                                todo.add(succBlock);
-                            }
-                        }
-                    }
                 } else { // False, kill true
                     todo.add(topBlock.trueSuccessor());
                     topBlock.successors.remove(topBlock.trueSuccessor());
-                    topBlock.condition = null;
-
-                    while (!todo.isEmpty()) {
-                        currBlock = todo.iterator().next();
-                        todo.remove(currBlock);
-                        killed.add(currBlock);
-                        for (BasicBlock succBlock : currBlock.successors) {
-                            if (!killed.contains(succBlock) && !topBlock.dominanceFrontier.contains(succBlock)) {
-                                todo.add(succBlock);
-                            }
+                }
+                topBlock.condition = null;
+                while (!todo.isEmpty()) {
+                    currBlock = todo.iterator().next();
+                    todo.remove(currBlock);
+                    killed.add(currBlock);
+                    for (BasicBlock succBlock : currBlock.successors) {
+                        if (!killed.contains(succBlock) && !topBlock.dominanceFrontier.contains(succBlock)) {
+                            todo.add(succBlock);
                         }
                     }
                 }
