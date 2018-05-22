@@ -90,6 +90,11 @@ class Main {
 
         writeln();
 
+        write(5 * (24 * x));
+        write((24 * x) * 5);
+
+        writeln();
+
         if((c && true) && true)   {
             write(133);
         }

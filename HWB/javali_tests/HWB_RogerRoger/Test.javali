@@ -1,7 +1,0 @@
-/* Test expression evaluation with 8 variables */
-class Main {
-	void main() {
-		int i0;
-		i0 = 0;
-	}
-}

@@ -5,15 +5,17 @@ import cd.ir.BasicBlock;
 import cd.ir.ControlFlowGraph;
 import cd.ir.Symbol;
 
+import javax.lang.model.type.PrimitiveType;
 import java.util.*;
 
 public class ConstantPropagationDataFlowAnalysis extends ForwardDataFlowAnalysis<Map<String, Object>> {
 
     public final static Integer TOP_SYMBOL = null;
+    private Ast.MethodDecl decl;
 
-
-    public ConstantPropagationDataFlowAnalysis(ControlFlowGraph cfg) {
-        super(cfg);
+    public ConstantPropagationDataFlowAnalysis(Ast.MethodDecl decl) {
+        super(decl.cfg);
+        this.decl = decl;
         iterate();
     }
 
@@ -24,7 +26,18 @@ public class ConstantPropagationDataFlowAnalysis extends ForwardDataFlowAnalysis
 
     @Override
     protected Map<String, Object> startState() {
-        return new HashMap<>();
+        Map<String, Object> startMap = new HashMap<>();
+        for (Ast astDecl : this.decl.decls().children()) {
+            if (astDecl instanceof Ast.VarDecl) {
+                Ast.VarDecl varDecl = (Ast.VarDecl) astDecl;
+                if (varDecl.type.equals(Symbol.PrimitiveTypeSymbol.intType.name)) {
+                    startMap.put(varDecl.name, 0);
+                } else if (varDecl.type.equals(Symbol.PrimitiveTypeSymbol.booleanType.name)) {
+                    startMap.put(varDecl.name, false);
+                }
+            }
+        }
+        return startMap;
     }
 
     @Override
@@ -56,14 +69,10 @@ public class ConstantPropagationDataFlowAnalysis extends ForwardDataFlowAnalysis
         Map<String, Object> outstate = new HashMap<>();
         for (Map<String, Object> map : maps) {
             for (String key : map.keySet()) {
-                for (Map<String, Object> other : maps) {
-                    if (other != map) {
-                        if (!other.containsKey(key) || (other.containsKey(key) && other.get(key) != map.get(key))) {
-                            outstate.put(key, TOP_SYMBOL);
-                        } else {
-                            outstate.put(key, map.get(key));
-                        }
-                    }
+                if (outstate.containsKey(key) && !Objects.equals(outstate.get(key), map.get(key))) {
+                    outstate.put(key, TOP_SYMBOL);
+                } else {
+                    outstate.put(key, map.get(key));
                 }
             }
         }

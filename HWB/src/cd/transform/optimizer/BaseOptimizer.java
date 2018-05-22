@@ -2,6 +2,7 @@ package cd.transform.optimizer;
 
 import cd.ir.Ast;
 import cd.ir.AstVisitor;
+import cd.ir.Symbol;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
@@ -26,5 +27,17 @@ public class BaseOptimizer<V> extends AstVisitor<Ast, V> {
             }
         }
         return null;
+    }
+
+    protected Ast.IntConst createNewIntConst(int value){
+        Ast.IntConst newConst = new Ast.IntConst(value);
+        newConst.type = Symbol.PrimitiveTypeSymbol.intType;
+        return newConst;
+    }
+
+    protected Ast.BooleanConst createNewBoolConst(boolean value){
+        Ast.BooleanConst newConst = new Ast.BooleanConst(value);
+        newConst.type = Symbol.PrimitiveTypeSymbol.booleanType;
+        return newConst;
     }
 }

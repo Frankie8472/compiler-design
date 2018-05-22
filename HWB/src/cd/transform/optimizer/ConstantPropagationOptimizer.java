@@ -13,7 +13,7 @@ public class ConstantPropagationOptimizer extends BaseOptimizer<Map<String, Obje
 
     public ConstantPropagationOptimizer(Ast.MethodDecl methodDecl) {
         this.methodDecl = methodDecl;
-        this.analysis = new ConstantPropagationDataFlowAnalysis(methodDecl.cfg);
+        this.analysis = new ConstantPropagationDataFlowAnalysis(methodDecl);
     }
 
     public void optimize() {
@@ -34,9 +34,9 @@ public class ConstantPropagationOptimizer extends BaseOptimizer<Map<String, Obje
         if(arg.get(ast.name) != null){
             Object value = arg.get(ast.name);
             if(value instanceof Integer){
-                return new Ast.IntConst((Integer) value);
+                return createNewIntConst((Integer) value);
             } else if(value instanceof Boolean){
-                return new Ast.BooleanConst((Boolean) value);
+                return createNewBoolConst((Boolean) value);
             }
         }
         return null;

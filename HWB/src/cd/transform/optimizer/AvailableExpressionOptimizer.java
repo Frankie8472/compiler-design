@@ -27,15 +27,15 @@ public class AvailableExpressionOptimizer {
                 for (Ast.Expr afterExpr : todo) {
                     if (new EqVisitor().visit(currExpr, afterExpr)) {
                         // calculate currexpr before currexpr in temp
-                        methodDecl.decls().children().add(new Ast.VarDecl(currExpr.type.name, "temp_" + index));
+                        methodDecl.decls().rwChildren.add(new Ast.VarDecl(currExpr.type.name, "temp_" + index));
                         rebuildStmtListEq(basicBlock, currExpr, afterExpr);
                     } else if (new SubVisitor().visit(currExpr, afterExpr)) {
                         // calculate afterexpr before currexpr in temp
-                        methodDecl.decls().children().add(new Ast.VarDecl(currExpr.type.name, "temp_" + index));
+                        methodDecl.decls().rwChildren.add(new Ast.VarDecl(currExpr.type.name, "temp_" + index));
                         rebuildStmtListSub(basicBlock, afterExpr, currExpr, afterExpr);
                     } else if (new SubVisitor().visit(afterExpr, currExpr)) {
                         // calculate currExpr before currExpr in temp
-                        methodDecl.decls().children().add(new Ast.VarDecl(currExpr.type.name, "temp_" + index));
+                        methodDecl.decls().rwChildren.add(new Ast.VarDecl(currExpr.type.name, "temp_" + index));
                         rebuildStmtListSub(basicBlock, currExpr, currExpr, afterExpr);
                     }
                 }

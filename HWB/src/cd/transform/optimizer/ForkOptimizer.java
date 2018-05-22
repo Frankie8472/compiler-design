@@ -30,18 +30,18 @@ public class ForkOptimizer extends AstVisitor<Object, Object> {
                     topBlock.successors.remove(topBlock.trueSuccessor());
                 }
                 topBlock.condition = null;
-                while (!todo.isEmpty()) {
-                    currBlock = todo.iterator().next();
-                    todo.remove(currBlock);
-                    killed.add(currBlock);
-                    for (BasicBlock succBlock : currBlock.successors) {
-                        if (!killed.contains(succBlock) && !topBlock.dominanceFrontier.contains(succBlock)) {
-                            todo.add(succBlock);
-                        } else if (topBlock.dominanceFrontier.contains(succBlock)) {
-                            succBlock.predecessors.remove(currBlock);
-                        }
-                    }
-                }
+//                while (!todo.isEmpty()) {
+//                    currBlock = todo.iterator().next();
+//                    todo.remove(currBlock);
+//                    killed.add(currBlock);
+//                    for (BasicBlock succBlock : currBlock.successors) {
+//                        if (!killed.contains(succBlock) && !topBlock.dominanceFrontier.contains(succBlock)) {
+//                            todo.add(succBlock);
+//                        } else if (topBlock.dominanceFrontier.contains(succBlock)) {
+//                            succBlock.predecessors.remove(currBlock);
+//                        }
+//                    }
+//                }
             }
         }
         methodDecl.cfg.allBlocks.removeAll(killed);
