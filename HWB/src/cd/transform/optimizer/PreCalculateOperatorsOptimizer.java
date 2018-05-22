@@ -85,17 +85,25 @@ public class PreCalculateOperatorsOptimizer extends BaseOptimizer<Void> {
                     return null;
             }
 
-        } else if (ast.left() instanceof Ast.IntConst) {
+        } else if (isConstant(ast.left())) {
             Ast constant = ast.left();
             if ((ast.right() instanceof Ast.BinaryOp)) {
                 Ast.BinaryOp other = (Ast.BinaryOp) ast.right();
-                simplifyIntEquation(ast, other, ((Ast.IntConst) constant).value, true);
+                if (ast.left() instanceof Ast.IntConst) {
+                    simplifyIntEquation(ast, other, ((Ast.IntConst) constant).value, true);
+                } else if (ast.left() instanceof Ast.BooleanConst) {
+                    simplifyBooleanEquation(ast, other, ((Ast.BooleanConst) constant).value);
+                }
             }
-        } else if (ast.right() instanceof Ast.IntConst) {
+        } else if (isConstant(ast.right())) {
             Ast constant = ast.right();
             if ((ast.left() instanceof Ast.BinaryOp)) {
                 Ast.BinaryOp other = (Ast.BinaryOp) ast.left();
-                simplifyIntEquation(ast, other, ((Ast.IntConst) constant).value, false);
+                if (ast.right() instanceof Ast.IntConst) {
+                    simplifyIntEquation(ast, other, ((Ast.IntConst) constant).value, false);
+                } else if (ast.right() instanceof Ast.BooleanConst) {
+                    simplifyBooleanEquation(ast, other, ((Ast.BooleanConst) constant).value);
+                }
             }
         }
         return handleSpecialCases(ast);
@@ -176,11 +184,11 @@ public class PreCalculateOperatorsOptimizer extends BaseOptimizer<Void> {
                     ast.operator = Ast.BinaryOp.BOp.B_MINUS;
                 }
             }
-        } else if(ast.operator == Ast.BinaryOp.BOp.B_TIMES  && other.operator == Ast.BinaryOp.BOp.B_TIMES){
-            if(other.left() instanceof Ast.IntConst){
+        } else if (ast.operator == Ast.BinaryOp.BOp.B_TIMES && other.operator == Ast.BinaryOp.BOp.B_TIMES) {
+            if (other.left() instanceof Ast.IntConst) {
                 ast.setLeft(createNewIntConst(astConstant * ((Ast.IntConst) other.left()).value));
                 ast.setRight(other.right());
-            } else if(other.right() instanceof Ast.IntConst){
+            } else if (other.right() instanceof Ast.IntConst) {
                 ast.setLeft(createNewIntConst(astConstant * ((Ast.IntConst) other.right()).value));
                 ast.setRight(other.left());
             }
@@ -212,17 +220,33 @@ public class PreCalculateOperatorsOptimizer extends BaseOptimizer<Void> {
         }
     }
 
-    private Ast.Expr handleSpecialCases(Ast.BinaryOp ast){
-        if(ast.operator == Ast.BinaryOp.BOp.B_PLUS || ast.operator == Ast.BinaryOp.BOp.B_MINUS){
-            if(ast.left() instanceof Ast.IntConst){
-
+    private Ast.Expr handleSpecialCases(Ast.BinaryOp ast) {
+        int value;
+        Ast.Expr other;
+        if (ast.left() instanceof Ast.IntConst) {
+            value = ((Ast.IntConst) ast.left()).value;
+            other = ast.right();
+        } else if (ast.right() instanceof Ast.IntConst) {
+            value = ((Ast.IntConst) ast.right()).value;
+            other = ast.left();
+        } else {
+            return null;
+        }
+        if (value == 0) {
+            if (ast.operator == Ast.BinaryOp.BOp.B_PLUS || ast.operator == Ast.BinaryOp.BOp.B_MINUS) {
+                return other;
             }
-
-        } else if(ast.operator == Ast.BinaryOp.BOp.B_TIMES || ast.operator == Ast.BinaryOp.BOp.B_DIV){
-
+            if (ast.operator == Ast.BinaryOp.BOp.B_TIMES) {
+                return createNewIntConst(0);
+            }
+        } else if (value == 1){
+            if (ast.operator == Ast.BinaryOp.BOp.B_TIMES || ast.operator == Ast.BinaryOp.BOp.B_DIV) {
+                return other;
+            }
         }
         return null;
     }
+
 
     @Override
     public Ast unaryOp(Ast.UnaryOp ast, Void arg) {
@@ -237,6 +261,10 @@ public class PreCalculateOperatorsOptimizer extends BaseOptimizer<Void> {
             return createNewBoolConst(!((Ast.BooleanConst) ast.arg()).value);
         }
         return null;
+    }
+
+    private boolean isConstant(Ast ast) {
+        return ast instanceof Ast.IntConst || ast instanceof Ast.BooleanConst;
     }
 
 }
