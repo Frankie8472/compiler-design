@@ -14,7 +14,7 @@ We pre-calculated constant expressions.
  - Equations with only plus and minus are simplified. Constants that are known are put together to reduce the amount of
    operators used in the calculation. An expression like (a + (1 + ( (4 - 5) + 3))) simplifies to (a + 3).
  - A special case we did not manage to optimize is that not every constant binary expression is concatenated.
-   For example division by zero.
+   For example if a division by zero occurs in an expression, the whole expression is not optimized.
 After all those optimizations, we removed the unused variables.
 We optimized if-else and while statements with the fork-optimizer, where we check, if the condition is true or false
 and delete one branch completely (Transform the condition block to a non-condition block with only one successor).
