@@ -3,6 +3,7 @@ package cd.transform.optimizer;
 import cd.ir.Ast;
 import cd.ir.AstVisitor;
 import cd.ir.BasicBlock;
+import cd.ir.Symbol;
 import cd.transform.analysis.AvailableExpressionDataFlowAnalysis;
 
 import java.util.*;
@@ -27,15 +28,21 @@ public class AvailableExpressionOptimizer {
                 for (Ast.Expr afterExpr : todo) {
                     if (new EqVisitor().visit(currExpr, afterExpr)) {
                         // calculate currexpr before currexpr in temp
-                        methodDecl.decls().rwChildren.add(new Ast.VarDecl(currExpr.type.name, "temp_" + index));
+                        Ast.VarDecl varDecl = new Ast.VarDecl(currExpr.type.name, "temp_" + index);
+                        varDecl.sym = new Symbol.VariableSymbol("temp_" + index, currExpr.type, Symbol.VariableSymbol.Kind.PARAM);
+                        methodDecl.decls().rwChildren.add(varDecl);
                         rebuildStmtListEq(basicBlock, currExpr, afterExpr);
                     } else if (new SubVisitor().visit(currExpr, afterExpr)) {
                         // calculate afterexpr before currexpr in temp
-                        methodDecl.decls().rwChildren.add(new Ast.VarDecl(currExpr.type.name, "temp_" + index));
+                        Ast.VarDecl varDecl = new Ast.VarDecl(currExpr.type.name, "temp_" + index);
+                        varDecl.sym = new Symbol.VariableSymbol("temp_" + index, currExpr.type, Symbol.VariableSymbol.Kind.PARAM);
+                        methodDecl.decls().rwChildren.add(varDecl);
                         rebuildStmtListSub(basicBlock, afterExpr, currExpr, afterExpr);
                     } else if (new SubVisitor().visit(afterExpr, currExpr)) {
                         // calculate currExpr before currExpr in temp
-                        methodDecl.decls().rwChildren.add(new Ast.VarDecl(currExpr.type.name, "temp_" + index));
+                        Ast.VarDecl varDecl = new Ast.VarDecl(currExpr.type.name, "temp_" + index);
+                        varDecl.sym = new Symbol.VariableSymbol("temp_" + index, currExpr.type, Symbol.VariableSymbol.Kind.PARAM);
+                        methodDecl.decls().rwChildren.add(varDecl);
                         rebuildStmtListSub(basicBlock, currExpr, currExpr, afterExpr);
                     }
                 }
@@ -49,7 +56,9 @@ public class AvailableExpressionOptimizer {
         List<Ast.Stmt> newList = new ArrayList<>();
         for (Ast.Stmt currStmt : currBlock.stmts) {
             if (currStmt.equals(analysis.exprStmtMap.get(currExpr))) {
-                newList.add(new Ast.Assign(new Ast.Var("temp_" + index), calc));
+                Ast.Var var = new Ast.Var("temp_" + index);
+                var.sym = new Symbol.VariableSymbol("temp_" + index, calc.type, Symbol.VariableSymbol.Kind.PARAM);
+                newList.add(new Ast.Assign(var, calc));
                 new SubExchangeVisitor().visit(currStmt, calc);
             } else if (currStmt.equals(analysis.exprStmtMap.get(afterExpr))){
                 new SubExchangeVisitor().visit(currStmt, calc);
@@ -66,7 +75,9 @@ public class AvailableExpressionOptimizer {
         List<Ast.Stmt> newList = new ArrayList<>();
         for (Ast.Stmt currStmt : currBlock.stmts) {
             if (currStmt.equals(analysis.exprStmtMap.get(currExpr))) {
-                newList.add(new Ast.Assign(new Ast.Var("temp_" + index), currExpr));
+                Ast.Var var = new Ast.Var("temp_" + index);
+                var.sym = new Symbol.VariableSymbol("temp_" + index, currExpr.type, Symbol.VariableSymbol.Kind.PARAM);
+                newList.add(new Ast.Assign(var, currExpr));
                 new ExchangeVisitor().visit(currStmt, currExpr);
             } else if (currStmt.equals(analysis.exprStmtMap.get(afterExpr))){
                 new ExchangeVisitor().visit(currStmt, afterExpr);
@@ -280,7 +291,9 @@ public class AvailableExpressionOptimizer {
         protected Void dfltStmt(Ast.Stmt ast, Ast.Expr arg) {
             for (int i = 0; i < ast.children().size(); i++) {
                 if (Objects.equals(ast.children().get(i), arg)) {
-                    ast.children().set(i, new Ast.Var("temp_" + index));
+                    Ast.Var var = new Ast.Var("temp_" + index);
+                    var.sym = new Symbol.VariableSymbol("temp_" + index, arg.type, Symbol.VariableSymbol.Kind.PARAM);
+                    ast.children().set(i, var);
                     return null;
                 }
             }
@@ -294,7 +307,9 @@ public class AvailableExpressionOptimizer {
         protected Void dflt(Ast ast, Ast.Expr arg) {
             for (int i = 0; i < ast.children().size(); i++) {
                 if (new EqVisitor().visit(ast.children().get(i), arg)) {
-                    ast.children().set(i, new Ast.Var("temp_" + index));
+                    Ast.Var var = new Ast.Var("temp_" + index);
+                    var.sym = new Symbol.VariableSymbol("temp_" + index, arg.type, Symbol.VariableSymbol.Kind.PARAM);
+                    ast.children().set(i, var);
                     return null;
                 }
             }
