@@ -11,11 +11,10 @@ implemented and any special cases that your implementation may not handle.
 We optimized constant propagation, where we replaced every variable which is equal an primitive-type with the actual
 primitive-type.
 We pre-calculated constant expressions.
- - Every constant binary expression is concatenated. If a division by zero exception occurs the exception is bubbled
-   up until the expression is not an constant binary expression. That way less computation has to be done to reach the
-   division by zero.
- - equations with only plus and minus are simplified. Constants that are known are put together to reduce the amount of
+ - Equations with only plus and minus are simplified. Constants that are known are put together to reduce the amount of
    operators used in the calculation. An expression like (a + (1 + ( (4 - 5) + 3))) simplifies to (a + 3).
+ - A special case we did not manage to optimize is that not every constant binary expression is concatenated.
+   For example division by zero.
 After all those optimizations, we removed the unused variables.
 We optimized if-else and while statements with the fork-optimizer, where we check, if the condition is true or false
 and delete one branch completely (Transform the condition block to a non-condition block with only one successor).
