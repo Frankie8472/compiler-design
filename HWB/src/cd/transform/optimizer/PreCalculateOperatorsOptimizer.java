@@ -114,7 +114,8 @@ public class PreCalculateOperatorsOptimizer extends BaseOptimizer<Void> {
                 }
             }
         }
-        return handleSpecialCases(ast);
+//        return handleSpecialCases(ast);
+        return null;
     }
 
     /**

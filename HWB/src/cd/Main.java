@@ -141,12 +141,12 @@ public class Main {
                 new PreCalculateOperatorsOptimizer(md).optimize();
                 new ConstantPropagationOptimizer(md).optimize();
                 new PreCalculateOperatorsOptimizer(md).optimize();
-                new ConstantPropagationOptimizer(md).optimize();
-                new PreCalculateOperatorsOptimizer(md).optimize();
+//                new ConstantPropagationOptimizer(md).optimize();
+//                new PreCalculateOperatorsOptimizer(md).optimize();
 
                 new RemoveUnusedOptimizer(md).optimize();
                 new ForkOptimizer(md).optimize();
-//                new AvailableExpressionOptimizer(md).optimize();
+                new AvailableExpressionOptimizer(md).optimize();
             }
         }
         CfgDump.toString(astRoots, ".cfg", cfgdumpbase, false);

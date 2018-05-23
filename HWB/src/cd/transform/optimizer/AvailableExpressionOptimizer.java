@@ -57,6 +57,8 @@ public class AvailableExpressionOptimizer {
             }
             newList.add(currStmt);
         }
+        currBlock.stmts.clear();
+        currBlock.stmts.addAll(newList);
     }
 
     private void rebuildStmtListEq(BasicBlock currBlock, Ast.Expr currExpr, Ast.Expr afterExpr) {
@@ -72,6 +74,8 @@ public class AvailableExpressionOptimizer {
             }
             newList.add(currStmt);
         }
+        currBlock.stmts.clear();
+        currBlock.stmts.addAll(newList);
     }
 
     protected class EqVisitor extends AstVisitor<Boolean, Ast.Expr> {
