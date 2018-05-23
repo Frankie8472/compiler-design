@@ -1,0 +1,19 @@
+class Main {
+    int a;
+	void main() {
+	    int b;
+	    int x;
+
+        x = getNumber();
+        write(x + 0);
+        write(x - 0);
+        write(x * 0);
+        write(x * 1);
+        write(x / 1);
+	}
+
+	int getNumber(){
+	    return 42;
+	}
+
+}

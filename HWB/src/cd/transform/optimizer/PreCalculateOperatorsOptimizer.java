@@ -114,20 +114,22 @@ public class PreCalculateOperatorsOptimizer extends BaseOptimizer<Void> {
                 }
             }
         }
-//        return handleSpecialCases(ast);
-        return null;
+        handleVariables(ast);
+        simplyfyIntBothEquation(ast);
+        return handleSpecialCases(ast);
+//        return null;
     }
 
     /**
      * This function simplifies equations with only plus and minus. Constants that are known are put together to reduce
      * the amount of operators used in the calculation. An expression like (a + (1 + ( (4 - 5) + 3))) simplifies to
      * (a + 3). Since the Minus is not commutative the method got big and ugly.
-     *
+     * <p>
      * This Method modifies the binary operation given to achieve the simplification.
      *
-     * @param ast The Binary Operation to modify.
-     * @param other The subExpressiong of the binary operation ast.
-     * @param astConstant the value of the constant.
+     * @param ast              The Binary Operation to modify.
+     * @param other            The subExpressiong of the binary operation ast.
+     * @param astConstant      the value of the constant.
      * @param leftSideConstant Indicates whether the constant in the expression to simplify is on the left or the right
      *                         side of the binary operation other. In the example 1 + (3 + x) the 1 is on the left side.
      */
@@ -207,6 +209,46 @@ public class PreCalculateOperatorsOptimizer extends BaseOptimizer<Void> {
         }
     }
 
+    private void simplyfyIntBothEquation(Ast.BinaryOp ast) {
+        if(ast.left() instanceof Ast.BinaryOp && ast.right() instanceof Ast.BinaryOp){
+            Ast.BinaryOp left = (Ast.BinaryOp) ast.left();
+            Ast.BinaryOp right = (Ast.BinaryOp) ast.right();
+            Integer leftConstant = null;
+            Integer rightConstant = null;
+            Ast.Var leftVar = null;
+            Ast.Var rightVar = null;
+            if(left.left() instanceof Ast.Var && left.right() instanceof Ast.IntConst){
+                leftConstant = ((Ast.IntConst) left.right()).value;
+                leftVar = (Ast.Var) left.left();
+            } else if(left.right() instanceof Ast.Var && left.left() instanceof Ast.IntConst){
+                leftConstant = ((Ast.IntConst) left.left()).value;
+                leftVar = (Ast.Var) left.right();
+            }
+
+            if(right.left() instanceof Ast.Var && right.right() instanceof Ast.IntConst){
+                rightConstant = ((Ast.IntConst) right.right()).value;
+                rightVar = (Ast.Var) right.left();
+            } else if(right.right() instanceof Ast.Var && right.left() instanceof Ast.IntConst){
+                rightConstant = ((Ast.IntConst) right.left()).value;
+                rightVar = (Ast.Var) right.right();
+            }
+            if(rightVar != null && leftVar != null){
+                if(rightVar.name.equals(leftVar.name)){
+                    if(ast.operator == Ast.BinaryOp.BOp.B_PLUS && left.operator == Ast.BinaryOp.BOp.B_TIMES && right.operator == Ast.BinaryOp.BOp.B_TIMES){
+                        ast.setLeft(createNewIntConst(leftConstant + rightConstant));
+                        ast.setRight(rightVar);
+                        ast.operator = Ast.BinaryOp.BOp.B_TIMES;
+                    }
+                    if(ast.operator == Ast.BinaryOp.BOp.B_MINUS && left.operator == Ast.BinaryOp.BOp.B_TIMES && right.operator == Ast.BinaryOp.BOp.B_TIMES){
+                        ast.setLeft(createNewIntConst(leftConstant - rightConstant));
+                        ast.setRight(rightVar);
+                        ast.operator = Ast.BinaryOp.BOp.B_TIMES;
+                    }
+                }
+            }
+        }
+    }
+
     private void simplifyBooleanEquation(Ast.BinaryOp ast, Ast.BinaryOp other, boolean astConstant) {
         if ((ast.operator == Ast.BinaryOp.BOp.B_AND || ast.operator == Ast.BinaryOp.BOp.B_OR) &&
                 (other.operator == Ast.BinaryOp.BOp.B_AND || other.operator == Ast.BinaryOp.BOp.B_OR)) {
@@ -232,6 +274,53 @@ public class PreCalculateOperatorsOptimizer extends BaseOptimizer<Void> {
         }
     }
 
+    private void handleVariables(Ast.BinaryOp ast) {
+        if (ast.left() instanceof Ast.Var && ast.right() instanceof Ast.Var) {
+            if (((Ast.Var) ast.left()).name.equals(((Ast.Var) ast.right()).name)) {
+                if (ast.operator == Ast.BinaryOp.BOp.B_PLUS) {
+                    ast.operator = Ast.BinaryOp.BOp.B_TIMES;
+                    ast.setLeft(createNewIntConst(2));
+                    ast.setRight(ast.right());
+                }
+            }
+        }
+        Ast.Var leftVar = null;
+        Ast.BinaryOp other = null;
+        if (ast.left() instanceof Ast.Var && ast.right() instanceof Ast.BinaryOp) {
+            leftVar = (Ast.Var) ast.left();
+            other = (Ast.BinaryOp) ast.right();
+        } else if (ast.right() instanceof Ast.Var && ast.left() instanceof Ast.BinaryOp) {
+            leftVar = (Ast.Var) ast.right();
+            other = (Ast.BinaryOp) ast.left();
+
+        }
+        if (leftVar != null && other != null && other.operator == Ast.BinaryOp.BOp.B_TIMES) {
+            Ast.Var otherVar = null;
+            Integer otherConst = null;
+            if (other.left() instanceof Ast.Var && other.right() instanceof Ast.IntConst) {
+                otherVar = (Ast.Var) other.left();
+                otherConst = ((Ast.IntConst) other.right()).value;
+            } else if (other.right() instanceof Ast.Var && other.left() instanceof Ast.IntConst) {
+                otherVar = (Ast.Var) other.right();
+                otherConst = ((Ast.IntConst) other.left()).value;
+            }
+
+            if (otherVar != null) {
+                if (leftVar.name.equals(otherVar.name)) {
+                    if(ast.operator == Ast.BinaryOp.BOp.B_PLUS) {
+                        ast.setLeft(createNewIntConst(otherConst + 1));
+                        ast.setRight(otherVar);
+                        ast.operator = Ast.BinaryOp.BOp.B_TIMES;
+                    } else if(ast.operator == Ast.BinaryOp.BOp.B_MINUS) {
+                        ast.setLeft(createNewIntConst(otherConst - 1));
+                        ast.setRight(otherVar);
+                        ast.operator = Ast.BinaryOp.BOp.B_TIMES;
+                    }
+                }
+            }
+        }
+    }
+
     private Ast.Expr handleSpecialCases(Ast.BinaryOp ast) {
         int value;
         Ast.Expr other;
@@ -241,7 +330,7 @@ public class PreCalculateOperatorsOptimizer extends BaseOptimizer<Void> {
         } else if (ast.right() instanceof Ast.IntConst) {
             value = ((Ast.IntConst) ast.right()).value;
             other = ast.left();
-            if(ast.operator == Ast.BinaryOp.BOp.B_DIV && value == 1){
+            if (ast.operator == Ast.BinaryOp.BOp.B_DIV && value == 1) {
                 return other;
             }
         } else {

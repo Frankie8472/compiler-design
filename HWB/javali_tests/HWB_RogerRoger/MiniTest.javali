@@ -1,0 +1,11 @@
+class Main{
+    void main(){
+        int a;
+        a = getNumber();
+        a = (a * 4 / 3 + 5 - 45 / a - a % a + 43 * a + 65 + 6 % a);
+    }
+
+    int getNumber(){
+        return 3242874;
+    }
+}
