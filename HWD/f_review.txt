@@ -14,15 +14,18 @@ ehhhm
 ~ why differntiate between caller sve and register uses?
 + nice helper funtions for errors
 + classcontext.java
-~ switch in a switch? nice for code compression but?
-~ for what atomicinteger?
+o Your Casts and inheritance does not always work.
+- You don't have to AtomicInteger. You are not in an Multithreading enviorment
+- Try to avoid static imports. In most cases they are less readable and confuses the reader.
 
 =======
 EpicXi 
 =======
-~ why save all registers on stack?
-~ emit Debug 1600?!
-~ emitclasstable why subl 8 on Calloc?
-~ binop why save all registers on stack?
-- comments, its calloc not malloc, big difference on implementation
-- comments bad and too less
++ Good Idea to use a debug function. Easier than using GDB all the time
++ Nice Register backup function in AstCodeGenerator
+o why save all registers on stack all the time (e.g. binop)?
+o Indentation is not consistent (Hint: IntelliJ has a auto code format feature; you can even customize it)
+- It's not very clear how you handle the super classes and inhherintance with your classNumber
+- ToDoException is not the right exception to indicate that the Main class was not found or any other failure. Prefer using RuntimeException.
+- When you use Calloc you write 'malloc' in the comments. It's a difference.
+- Too few comments and not very helpful

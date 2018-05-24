@@ -1,0 +1,20 @@
+General:
+	+ All 66 tests passed
+	+ Nice approach to build class Util
+	- Maybe could introduce JavaDoc as general documentation routine
+
+StmtGenerator
+	+ Descriptive comments inside methods
+	+ Nice and simple implementation
+	- Line 75: Why is label emitted twice ("cg.emit.emitLabel(name)")?
+
+ExprGenerator:
+	+ Verbose comments inside methods (description at beginning of method) --> Could also create JavaDoc here
+		
+VTable:
+	+ Nice approach with hashmap for methods
+	+ 
+	- Some comments would be appreciated
+	
+CurrentContext:
+	+ Nice documentation with JavaDoc and precise comments

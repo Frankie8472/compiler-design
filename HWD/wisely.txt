@@ -1,0 +1,11 @@
+General: 
+-No or very few comments - not always clear, what the idea of each part is
+-The comments for the layouts are nice.
+LabelUtil:
+-A good way of keeping an overview, and is easy to understand
+VTable:
+-You are adding all methods (from parents and current class) to the VTable od each class - what happens with the overwritten methods? Not clear how you handle this case
+ExprGenerator:
+-newArray()/newObject() - nice to see the array/object layout in memory 
+AstCodeGenerator:
+-You are printing the VTables very systematically. Makes it clean 

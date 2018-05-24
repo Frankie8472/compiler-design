@@ -1,0 +1,19 @@
+CurrentContext:
+	+ Nice way to implement it using a hashmap.
+	+ Well documented, clear comments.
+	- A overview of the stack layout would help to understand where the specific values go.
+
+LabelUtil:
+	+ Good to put it in a separate class. This makes the code cleaner.
+	- Special label for the main method is not generated in this class even though we have the current context which indicates if we are in the main method or not.
+
+VTable:
+	- Almost no comments. Here some comments would be helpful.
+
+ExprGenerator:
+	- Not clear what "call cast" refers to. A comment would help.
+	- The same holds for the checks. Where are they defined?
+	- In binaryOp having the entire code in the case statements makes them less clean. Instead setting some labels there and emitting the code afterwards would be a better idea.
+
+StmtGenerator:
+	- In methodDecl the label is emitted twice. I don't think this is necessary.
