@@ -1,0 +1,23 @@
+======
+ATeam
+======
++ comments
+- vtable on stack, rather have it on the heap?
+- some helperfunctions are exit code. no comments on that?
+
++ saved callee saved registers before method call!
+
+======
+ehhhm
+======
+- comments
+~ why differntiate between caller sve and register uses?
++ nice helper funtions for errors
++ classcontext.java
+~ switch in a switch? nice for code compression but?
+~ for what atomicinteger?
+
+=======
+EpicXi 
+=======
+

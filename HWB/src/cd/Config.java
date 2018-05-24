@@ -90,7 +90,7 @@ public class Config {
             EXIT = "_exit";
             // These are set up for a Cygwin installation on C:,
             // you can change as needed.
-            ASM = new String[]{"gcc", "-o", "$0", "$1"};
+            ASM = new String[]{"i686-w64-mingw32-gcc", "-o", "$0", "$1"};
             ASM_DIR = new File("C:\\CYGWIN\\BIN");
             JAVA_EXE = "javaw.exe";
             DOT_STRING = ".string";
