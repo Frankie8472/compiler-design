@@ -20,4 +20,9 @@ ehhhm
 =======
 EpicXi 
 =======
-
+~ why save all registers on stack?
+~ emit Debug 1600?!
+~ emitclasstable why subl 8 on Calloc?
+~ binop why save all registers on stack?
+- comments, its calloc not malloc, big difference on implementation
+- comments bad and too less
