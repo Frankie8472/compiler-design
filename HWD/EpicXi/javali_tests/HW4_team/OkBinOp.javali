@@ -1,0 +1,51 @@
+/* BinOp */
+
+class Main 
+{
+    void main() 
+    {
+		//Booleans
+		writeBoolean(false || true);
+		writeBoolean(false && true);
+		writeBoolean(!true);
+		writeBoolean(5 > 4);
+		writeBoolean(5 >= 4);
+		writeBoolean(5 < 4);
+		writeBoolean(4 <= 4);
+		writeBoolean(4 == 4);
+		writeBoolean(4 != 4);
+		writeBoolean(5 == 4);
+		writeBoolean(5 != 4);
+
+		//Ints
+		writeInt(5 + 6);
+		writeInt(5 - 6);
+		writeInt(7 % 5);
+		writeInt(17 / 6);
+		writeInt(2 / 6);
+		writeInt(---4);
+		writeInt(+4);
+		writeInt(4);
+	}
+
+	void writeBoolean(boolean b)
+	{
+		if(b)
+		{
+			write(1);
+		}
+		else
+		{
+			write(0);
+		}
+
+		writeln();
+	}
+
+	void writeInt(int i)
+	{
+		write(i);
+		writeln();
+	}
+	
+}

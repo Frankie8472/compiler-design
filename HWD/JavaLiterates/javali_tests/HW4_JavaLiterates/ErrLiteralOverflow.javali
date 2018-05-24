@@ -1,0 +1,11 @@
+/* Tests for ParseFailure when there is an int dec. literal overflow ;
+   Note: This may be semantically incorrect Javali code */
+   
+class Main extends OtherClass{
+	void method() {
+		int a;
+		
+		a = 22222222222222222222222222222222222222;
+		a = -22222222222222222222222222222222222222;
+	}
+}

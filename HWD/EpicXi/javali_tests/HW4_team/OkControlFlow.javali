@@ -1,0 +1,39 @@
+/* Test Control Flow */
+
+class Main 
+{
+    void main() 
+    {
+		//if else
+		writeBoolean(false);
+		writeBoolean(true);
+
+		//while
+		countDown(42);
+	}
+
+	void writeBoolean(boolean b)
+	{
+		if(b)
+		{
+			write(1);
+		}
+		else
+		{
+			write(0);
+		}
+
+		writeln();
+	}
+
+	void countDown(int param)
+	{
+		while (param >= 0)
+		{
+			write(param);
+			writeln();			
+			param = param - 1;
+		}
+	}
+	
+}

@@ -1,0 +1,17 @@
+class A{
+   int var;
+}
+
+class Main{
+  int res;
+  void main(){
+    A a = new A();
+    A b = new A();
+
+    b = null;
+
+    res = a.var;
+    res = b.var;
+
+  }
+}

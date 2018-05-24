@@ -1,0 +1,30 @@
+/* Tests identifier accesses
+ */
+
+class Main {
+	
+	void method(int a) {
+
+		a = this.method();
+		bla(2 + 2, 0);
+		a = arr[1].method(2);
+		a = obj.bla;
+		write(arr[3]);
+		write(this.method(3));
+		
+		while(arr[0]) {
+		}
+		
+		if (obj.bla(2)) {
+		
+		}
+		
+		if (obj.bla(2)) {
+		
+		} else {
+	
+		}
+		
+		return this.arr[2];
+	}
+}

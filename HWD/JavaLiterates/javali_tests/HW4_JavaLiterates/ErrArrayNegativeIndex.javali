@@ -1,0 +1,14 @@
+/* 
+ * Tests for error when using negative array indices 
+ */
+class Main {
+	void main() {
+		int i;
+		int[] arr;
+		arr = new int[1];
+		
+		i = read();
+		write(arr[i]);		
+	}
+	
+}

@@ -1,0 +1,24 @@
+/* Tests Read and Write more thoroughly */
+class Main {
+	void main() {
+		int v0, v1, v2;
+		
+		v0 = read();                // 0
+		v1 = read();                // 1
+		write(v2); writeln();
+		v2 = read();                // -2
+		
+		write(v0); writeln();
+		v0=read();                  // 14
+		write(v0); writeln();
+		
+		write(v1 + v2); writeln();
+		v1=read();                  // 32
+		write(v1 - v2); writeln();
+		write(v1 * v2); writeln();
+		write(v1 / v2); writeln();
+		
+		write(v0); v0=read(); write(v0); writeln();
+		write(v1); writeln();
+	}
+}

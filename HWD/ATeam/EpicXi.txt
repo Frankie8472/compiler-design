@@ -1,0 +1,20 @@
+Code Review - ATeam
+
+General:
++ nice use of labels
+- very few comments
+
+AstCodeGenerator:
++ nice solution to use labels for exit codes and subtype checking
++ good setup of vtables
+
+StmtGenerator:
+• AssemblyEmitter has already a method to get a unique label, but your version is more readable
+- sometimes your statements are a little complex
+
+ExprGenerator:
+• binaryOp():
+    - could have handled B_DIV and B_MOD in the same switch case
+    - no zero check in B_MOD
+    - lot of redundant code in comparison operations
+• are objects stored directly in array instead of pointers to objects?

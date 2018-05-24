@@ -1,0 +1,22 @@
+/* Tests some immediate types
+ */
+
+class Main extends OtherClass{
+	int method() {
+		boolean b;
+		int a,b,c;
+		Obj o;
+		
+		o = null;
+		
+		a = 0Xabdf + 12123;
+		
+		while (false || true){
+		}
+		
+		if (0xabcdef <= 0X12bdf) {
+		}
+		
+		return 0xabcdef + 12123;
+	}
+}

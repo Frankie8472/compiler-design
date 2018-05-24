@@ -1,0 +1,12 @@
+/* Tests new Expr
+ */
+
+class Main extends OtherClass{
+	void method() {
+		Obj a;
+		a = new Obj();
+		a = new Arr[2];
+		a = new int[2];
+		a = new boolean[2];
+	}
+}

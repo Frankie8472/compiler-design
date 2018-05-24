@@ -1,0 +1,20 @@
+/* Test division BinOp */
+class Main {
+	void main() {
+		int v1, v2, v3, v4, v5;
+		int r1, r2, r3;
+		v1 = 100;
+		v2 = 50;
+		v3 = 33;
+		v4 = 25;
+		v5 = 20;
+		
+		r1 = v1 / (v2 / v4);
+		r2 = r1 / v3;
+		r3 = v5 / r2;
+		
+		write(r1); writeln();
+		write(r2); writeln();
+		write(r3); writeln();
+	}
+}

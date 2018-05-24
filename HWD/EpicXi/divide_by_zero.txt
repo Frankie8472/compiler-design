@@ -1,0 +1,15 @@
+review by divide_by_zero
+
+AddressExprGenerator.java
+  - naming of savedReg1, savedReg2 ... makes it a bit confusing, why not savedRegEAX? would be clearer
+  + interesting idea to implement this part of the assignment in a seperate class
+
+AstCodeGenerator.java
+  + good idea to implement emitDebug methods
+
+Overall
+  - only very little comments
+  - lots of duplicated code in AddressExprGenerator and ExprGenerator
+
+VTableVisitor
+  - the two for-loops (line 57/58) aren't really readable since they are squeezed onto one line

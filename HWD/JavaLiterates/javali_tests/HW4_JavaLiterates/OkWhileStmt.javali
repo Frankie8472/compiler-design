@@ -1,0 +1,29 @@
+/* Tests the while statement
+ */
+
+class Main extends OtherClass{
+	void method() {
+		boolean b;
+		
+		while(b) {
+		}
+		
+		
+		if(b) {
+			if(b) {
+			}
+			else {
+				if(b) {
+				}
+				else {
+				}
+			}
+		}
+		else {
+			if(b || false) {
+				while(b) {
+				}
+			}
+		}
+	}
+}

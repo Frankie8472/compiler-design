@@ -1,0 +1,23 @@
+/* Tests memberList and methodDecl
+ */
+
+class Main {
+	int a;
+	
+	Obj method() {
+		Obj z;
+		return z;
+	}
+	
+	void method(int a, Obj a, Array[] c) {
+	}
+	
+	int method() {
+		return 1;
+	}
+	
+	int method(int a, boolean b) {
+		return 1;
+	}
+	
+}

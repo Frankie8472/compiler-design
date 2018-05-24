@@ -1,0 +1,35 @@
+/* BinOp */
+
+class Main 
+{
+	int field1;
+	int[] arr;
+
+    void main() 
+    {
+		arr = new int[5];
+
+		writeInt(arr[5]);
+	}
+
+	void writeBoolean(boolean b)
+	{
+		if(b)
+		{
+			write(1);
+		}
+		else
+		{
+			write(0);
+		}
+
+		writeln();
+	}
+
+	void writeInt(int i)
+	{
+		write(i);
+		writeln();
+	}
+	
+}

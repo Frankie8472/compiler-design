@@ -1,0 +1,10 @@
+/* Tests read expression
+ */
+
+class Main extends OtherClass{
+	void method() {
+		int a;
+		
+		a = read();
+	}
+}

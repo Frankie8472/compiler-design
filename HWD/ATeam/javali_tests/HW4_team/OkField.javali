@@ -1,0 +1,24 @@
+class Main{
+  int x;    //Field
+
+  void main(){
+  	Animal dog;
+  	dog = new Animal();
+    x = dog.classify();
+    write(x);
+    writeln();
+
+    dog.a = 3;
+    write(dog.a);
+    writeln();
+  }
+}
+
+class Animal {
+int a;  //Field
+int classify(){
+  int y;
+  y = 1;
+  return y;
+ }
+}

@@ -1,0 +1,64 @@
+/* Covers everything we implemented in one convenient test */
+class Main {
+	void main() {
+		int v1, v2, v3, v4, v5, v6, v7, v8;
+		
+		v1 = 2;                         // Assign immediate
+		write(v1); writeln();           // Write function
+		
+		v2 = read();                    // Read function: 12345
+		v2 = read();                    // 2018
+		v2 = read();                    // 8
+		write(v2); writeln();           
+		
+		v3 = v1;                        // Assign variable
+		write(v2); writeln();
+		
+		v1 = v2 + v3;                   // Addition of two variables
+		write(v1); writeln();
+		v1 = v2 + 16;                   //   of variable and immediate
+		write(v1); writeln();
+		v1 = 9 + 16;                    //   of two immediates
+		write(v1); writeln();
+		
+		v1 = v2 - v3;                   // Subtraction
+		write(v1); writeln();
+		v1 = v2 - 16;
+		write(v1); writeln();
+		v1 = 9 + 16;
+		write(v1); writeln();
+		
+		v1 = v2 * v3;                   // Multiplication
+		write(v1); writeln();
+		v1 = v2 * 16;
+		write(v1); writeln();
+		v1 = 9 + 16;
+		write(v1); writeln();
+		
+		v1 = v2 / v3;                   // Division
+		write(v1); writeln();
+		v1 = v2 / 4;
+		write(v1); writeln();
+		v1 = 9 + 16;
+		write(v1); writeln();
+		
+		v1 = +v2;                       // UnaryOp
+		write(v1); writeln();
+		v1 = +16;
+		write(v1); writeln();
+		v1 = -v2;
+		write(v1); writeln();
+		v1 = -16;
+		write(v1); writeln();
+		
+		v1 = v1 + v2 + v3 + v1 + v2 + v3 + v1 + v2;         // 8 Registers
+		write(v1); writeln();
+		v1 = 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8;
+		write(v1); writeln();
+		
+		write(v1 + v2 - v3 * v1 - v2 / v3 - v1 + v2); writeln();  // Eval Order
+		write(v1 + (v2 - v3) * (v1 - v2) / (v3 - v1) + v2); writeln();
+		write(1 + 2 / 3 + 4 * 5 + 6 / 7 + 8); writeln();
+		write(1 + (2 / (3 + (4 * 5))) + 6 / (7 + 8));
+	}
+}

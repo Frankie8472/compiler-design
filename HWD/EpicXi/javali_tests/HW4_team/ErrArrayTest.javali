@@ -1,0 +1,31 @@
+/* Test Array accesses */
+
+class Main 
+{
+	int[] arr;
+	int[] arr2;
+
+    void main() 
+    {
+		//error 5
+		//arr = new int[-5];
+
+
+		arr = new int[5];
+
+		arr[3] = 2;
+
+		//should be 2
+		write(this.arr[3]);
+
+		//should be 0
+		write(this.arr[3]);
+
+		//error 3
+		//arr[6] = 3;
+
+		//error 4
+		arr2[4] = 12;
+	}
+	
+}

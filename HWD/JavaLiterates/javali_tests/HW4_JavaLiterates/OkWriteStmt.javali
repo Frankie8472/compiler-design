@@ -1,0 +1,19 @@
+/* Tests write statement
+ */
+
+class Main {
+	void main() {
+		int a,b;
+		
+		write(a);
+		writeln();
+		
+		write(2*a + b);
+		writeln();
+		
+		if(a > b) {
+			write(a * b);
+			writeln();
+		}
+	 }
+}

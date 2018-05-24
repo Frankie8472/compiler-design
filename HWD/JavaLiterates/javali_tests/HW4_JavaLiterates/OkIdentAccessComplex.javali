@@ -1,0 +1,15 @@
+/* Tests more complicated identAccess grammar rule
+ */
+
+class Main {
+	
+	void method(int a) {
+
+		int a;
+		Obj o;
+		Arr1[] arr;
+		
+		write(12 * arr[2 + arr[3 + o.field]] / o.method(arr[this.bla]));
+	}
+}
+

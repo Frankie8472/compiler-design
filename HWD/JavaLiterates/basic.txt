@@ -1,0 +1,15 @@
+ObjTables:
+	- objSize also counts overridden fields. --> Why?
+	- In general the methods in these classes are not self explanatory. A few more comments would have been nice.
+
+StmtGenerator:
+	- In assign, why do you call initRegisters() in the end?
+	+ Doing a case distinction in the case of a Var using the VariableSymbol's Kind enum in a switch statement a clean way of doing it.
+	+ In binaryOp using the added methods from the AssemblyEmitter is a very smart way of keeping the code clean and more readable.
+	+ Having the stack layout as a comment in the code is helpful.
+
+AssemblyEmitter:
+	+ Adding often used emit methods here makes the entire project more readable.
+
+In general:
+	- There are none of the checks implemented.

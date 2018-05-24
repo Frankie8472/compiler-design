@@ -1,0 +1,8 @@
+Exception: STATUS_ACCESS_VIOLATION at eip=00000001
+eax=00000000 ebx=0062CC3C ecx=0062C9C4 edx=00000000 esi=2007194C edi=20071937
+ebp=0062CD18 esp=0062CBC0 program=C:\cygwin32\workspace\Javali-HW4\javali_tests\HW1\HelloWorld.javali.exe, pid 3852, thread main
+cs=0023 ds=002B es=002B fs=0053 gs=002B ss=002B
+Stack trace:
+Frame     Function  Args
+0062CD18  00000001 (00000000, 0062CD74, 61006A20, 00000000)
+End of stack trace

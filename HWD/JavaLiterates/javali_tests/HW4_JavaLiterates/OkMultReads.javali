@@ -1,0 +1,20 @@
+/* Test  multiple reads for stack errors */
+class Main {
+	void main() {
+		int r1, r2;
+		int i0,  i1,  i2, i3, i4;
+		
+		i0 = 2;
+		write(i0);
+		i0 = 5;
+		i1 = read();
+		
+		i2 = read();
+		r1 = i0 + i1;
+		
+		write(r1); writeln();
+		i3 = read();
+		write((r1 + r2 ) + 3); writeln();
+		i4 = read();
+	}
+}

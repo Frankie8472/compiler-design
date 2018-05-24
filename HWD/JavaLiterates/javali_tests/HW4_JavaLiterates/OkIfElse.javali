@@ -1,0 +1,23 @@
+/* 
+ * Tests implementation of If/Else statements
+ */
+class Main {
+	void main() {
+	
+		boolean b;
+		b = true;
+		
+		if(b) {
+			write(1);
+			b = false;
+		} else {
+			write(0);
+			b = true;
+		}
+		if(b) {
+			write(1);
+		} else {
+			write(0);
+		}
+	}
+}

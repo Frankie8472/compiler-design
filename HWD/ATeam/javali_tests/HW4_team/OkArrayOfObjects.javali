@@ -1,0 +1,30 @@
+class Main{
+  void main(){
+    int var;
+    A[] array;
+    A a;
+    B b;
+
+    a = new A();
+    b = new B();
+    array = new A[3];
+    array[0] = a;
+    array[1] = (A)b;
+    array[2] = new A();
+
+    a = array[0];
+    var = a.c();
+    a = array[1];
+    var = a.c();
+    a = array[2];
+    var = a.c();
+  }
+}
+
+class A{
+    int c() {
+        return 1;
+    }
+}
+class B extends A{
+}

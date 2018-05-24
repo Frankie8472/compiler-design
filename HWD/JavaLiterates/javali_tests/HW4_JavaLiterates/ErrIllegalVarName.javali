@@ -1,0 +1,8 @@
+/* Tests for ParseFailure when encountering illegal identifier name ;
+   Note: This may be semantically incorrect Javali code */
+
+class Main {
+	void main(int a) {
+		MyObject 5obj;
+	 }
+}

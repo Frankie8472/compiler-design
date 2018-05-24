@@ -1,0 +1,11 @@
+/* Testing return (without expr)
+ */
+
+class Main {
+	int a;
+	
+	void method() {
+		return;
+	}
+	
+}

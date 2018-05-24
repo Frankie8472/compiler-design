@@ -1,0 +1,40 @@
+/* 
+ * Tests implementation of BinOp <
+ */
+class Main {
+	void main() {
+		int i, j, k;
+		
+		i = 0;
+		j = 1;
+		k = -1;
+		
+		if(i < i){ write(1); } 
+		else { write(0); }
+		
+		if(j < j){ write(1); } 
+		else { write(0); }
+		
+		if(k < k){ write(1); } 
+		else { write(0); }
+		
+		if(i < j){ write(1); } 
+		else { write(0); }
+		
+		if(j < k){ write(1); } 
+		else { write(0); }
+		
+		if(k < i){ write(1); } 
+		else { write(0); }
+		
+		if(j < i){ write(1); } 
+		else { write(0); }
+		
+		if(k < j){ write(1); } 
+		else { write(0); }
+		
+		if(i < k){ write(1); } 
+		else { write(0); }
+	
+	}
+}

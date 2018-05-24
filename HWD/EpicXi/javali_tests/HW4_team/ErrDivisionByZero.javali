@@ -1,0 +1,19 @@
+class Main 
+{
+    void main() 
+    {
+		int x1;
+		int x2;
+		int x3;
+		int x4;
+
+		x1 = 6;
+		x2 = 1;
+
+		x3 = x1 % x2; // x3 = 0
+		x4 = 6/x3;
+
+		write(x4);
+	}
+	
+}

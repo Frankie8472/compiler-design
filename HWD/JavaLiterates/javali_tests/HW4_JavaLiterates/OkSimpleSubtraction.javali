@@ -1,0 +1,10 @@
+/* A simple subtraction test */
+class Main {
+	void main() {
+		int v1, v2;
+		v1 = -2;
+		v2 = 5;
+		
+		write(v2 - v1);
+	}
+}

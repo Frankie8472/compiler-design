@@ -1,0 +1,8 @@
+class Main {
+
+    void main() {
+        Object a;
+        a = (Object) a;
+    }
+
+}

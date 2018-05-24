@@ -1,0 +1,42 @@
+/* Test method call on casted object of overridden method*/
+
+class Base {
+	int field1;
+
+	void init(int param)
+	{
+		field1 = param;
+	}
+}
+
+class BaseChild extends Base {
+	int field2;
+	int field3;
+	int field4;
+	int field5;
+	int field6;
+
+	void init(int param)
+	{
+		field1 = param;
+	}
+}
+
+
+class Main 
+{
+
+    void main() 
+    {
+		BaseChild baseChild;
+		Base base;
+
+
+		baseChild = new BaseChild();
+		base = (Base)baseChild;
+		base.init(5);
+		write(base.field1);
+		
+	}
+	
+}

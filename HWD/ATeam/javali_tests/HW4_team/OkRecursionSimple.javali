@@ -1,0 +1,14 @@
+class Main{
+
+  void rec(int a){
+     if(a > 0){
+        rec(a-1);
+        write(a);
+        writeln();
+     }
+  }
+
+  void main(){
+     rec(10);
+  }
+}

@@ -1,0 +1,73 @@
+/* Method calls */
+
+class Base
+{
+	int field1;
+
+	int method1(int param1)
+	{
+		return param1 % field1;
+	}
+
+	boolean method2()
+	{
+		return true;
+	}
+
+	Base method3()
+	{
+		return null;
+	}
+
+	int method4(int param1, boolean param2, Main param3)
+	{
+		if(param2)
+		{
+			return param1 * param3.x;
+		}
+		else
+		{
+			return param1 / param3.x;
+		}
+	}
+}
+
+
+class Main 
+{
+	Base base;
+	int x;
+
+    void main() 
+    {
+		x = 7;
+
+		base = new Base();
+		base.field1 = 3;
+		writeInt(base.method1(11));
+		writeInt(base.method4(28, false, this));
+		writeBoolean(base.method2());
+		base = base.method3();
+	}
+
+	void writeBoolean(boolean b)
+	{
+		if(b)
+		{
+			write(1);
+		}
+		else
+		{
+			write(0);
+		}
+
+		writeln();
+	}
+
+	void writeInt(int i)
+	{
+		write(i);
+		writeln();
+	}
+	
+}

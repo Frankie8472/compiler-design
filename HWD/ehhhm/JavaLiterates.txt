@@ -1,0 +1,21 @@
+AstCodeGenerator
+ o Concise but hard to read lambda function style of programming.
+ + Good location to emit prologue and bootstrap main function.
+ + Includes error codes, and check methods for them.
+ - Would have benefitted from more comments.
+ 
+StmtGenerator
+ + Elegant solution for passing context through visitor (Tuple).
+ + Well commented.
+ 
+ExprGenerator
+ + Compact implementation of boolean expressions using set instructions.
+ - Some methods could have used more comments, e.g. methodCall.
+ 
+VTable, MemLayout
+ + Elegant functional style.
+ - Hard to read (And not a single comment).
+ 
+ClassContext, MethodContext
+ + Relatively simple solution that works well.
+ + Good place to handle the stack, and even aligns to 8 bytes.

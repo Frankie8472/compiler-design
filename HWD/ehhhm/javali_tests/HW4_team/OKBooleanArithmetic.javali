@@ -1,0 +1,45 @@
+class Main {
+
+    void main() {
+        if (true && true) {
+            write(1);
+        }
+
+        if (true && false) {
+            write(2);
+        }
+
+        if (false && false) {
+            write(3);
+        }
+
+        if (true || true) {
+            write(4);
+        }
+
+        if (false || true) {
+            write(5);
+        }
+
+        if (false || false) {
+            write(6);
+        }
+
+        if (false) {
+            write(7);
+        }
+
+        if (true) {
+            write(8);
+        }
+
+        if (!false) {
+            write(9);
+        }
+
+        if (!true) {
+            write(10);
+        }
+    }
+
+}

@@ -1,0 +1,11 @@
+class Main {
+
+    void main() {
+        int[] a;
+
+        a = new int[4];
+
+        a[4] = 1;
+    }
+
+}

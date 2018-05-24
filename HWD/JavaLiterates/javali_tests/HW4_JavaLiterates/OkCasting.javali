@@ -1,0 +1,11 @@
+/* Tests some simple casting
+ */
+
+class Main {
+	void main(int a) {
+		Obj a;
+		OObj b;
+	 	b = (OObj) a;
+	 	b = (Arr[]) a;
+	 }
+}

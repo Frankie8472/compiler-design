@@ -1,0 +1,19 @@
+/* 
+ * Tests for error when trying to access an array out of bounds
+ */
+class Main {
+	void main() {
+		int i;
+		Main m;
+		i = read();
+		if(i < 0){
+			m = new Main();
+		}
+		m.method();
+			
+	}
+	void method(){
+		write(1);
+	}
+	
+}

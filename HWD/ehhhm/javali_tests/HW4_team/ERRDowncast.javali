@@ -1,0 +1,32 @@
+class A {
+
+    void a() {
+        write(0);
+    }
+
+}
+
+class B extends A {
+
+    void a() {
+        write(1);
+    }
+
+}
+
+class C extends B {
+}
+
+
+class Main {
+
+    void main() {
+
+        A a;
+        B b;
+
+        a = new A();
+        b = (B) a;
+    }
+
+}

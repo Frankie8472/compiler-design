@@ -1,0 +1,13 @@
+/* Test operator precedence in expressions
+ */
+
+class Main extends OtherClass{
+	void method() {
+		boolean a,b,c,d,e,f;
+		int t,z,u,c,l;
+		
+		a = b || c && d || (e || f) && !a;
+		
+		t = t + z * u % -l - z % t - +z;
+	}
+}

@@ -1,0 +1,18 @@
+VTable/VTableVisitor:
+	+ Overridden methods have the same offset.
+	- The comments don't help much for understanding the code. (At least not for someone who didn't write it)
+
+AddressExprGenerator:
+	+ Check for nullpointers and valid array bounds.
+	- In index I'm not sure if backing up all those registers is really necessary.
+
+AstCodeGenerator:
+	+ Added some useful methods.
+	- These methods probably would fit better in the AssemblyEmitter class than in the AstCodeGenerator.
+
+StmtGenerator:
+	- In methodDecl if we are in the main method then we need to have a Main object created at some point. Where does that happen?
+
+ExprGenerator:
+	- In binaryOp a lot of code is emitted in the case statements (comparative operators). Instead you could have set the value of a string there that holds the operation that is needed in the specific case and then you only had to emit the entire code once.
+	+ Valid cast check implemented. However a few comments would have been nice there. 

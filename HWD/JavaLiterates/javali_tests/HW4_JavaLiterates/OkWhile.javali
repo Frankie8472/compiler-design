@@ -1,0 +1,36 @@
+/* 
+ * Tests implementation of a simple while loop
+ */
+class Main {
+	void main() {
+		int i;
+		boolean b;
+		
+		i = 0;
+		b = true;
+		
+		while(b) {
+			write(i);
+			i = i + 1;
+			b = false;
+		}
+		writeln();
+		
+		b = true;
+		while(b) {
+			write(i);
+			i = i + 1;
+			while(b){
+				write(i);
+				i = i + 1;
+				b = false;
+			}
+		}
+		writeln();
+		
+		while(b) {
+			write(i);
+			i = i + 1;
+		}
+	}
+}

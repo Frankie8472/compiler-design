@@ -1,0 +1,7 @@
+class Main{
+  void main(){
+    int[] arr;
+    arr = new int[-12]; //wrong declaration
+    arr[0] = 10;
+  }
+}

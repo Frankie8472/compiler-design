@@ -1,0 +1,31 @@
+/* Tests ifStmt
+ */
+
+class Main extends OtherClass{
+	void method() {
+		boolean b;
+		
+		if(b) {
+		}
+		
+		if(b) {
+		}
+		else {
+		}
+		
+		if(b) {
+			if(b) {
+			}
+			else {
+				if(b) {
+				}
+				else {
+				}
+			}
+		}
+		else {
+			if(b || false) {
+			}
+		}
+	}
+}

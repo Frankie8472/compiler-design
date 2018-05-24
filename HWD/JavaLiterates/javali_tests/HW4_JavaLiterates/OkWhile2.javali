@@ -1,0 +1,20 @@
+/* 
+ * Tests implementation of a more involved while loop
+ */
+class Main {
+	void main() {
+		
+		boolean b;
+		b = true;
+		
+		while(b) {
+			write(method());
+			b = false;
+		}
+		writeln();
+	}
+	
+	int method(){
+		return 1;
+	}
+}

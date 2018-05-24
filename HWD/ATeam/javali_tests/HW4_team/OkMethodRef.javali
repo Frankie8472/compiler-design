@@ -1,0 +1,30 @@
+class Main{
+  int a;
+  // method
+  int calculate(){
+    return 4;
+  }
+
+  Math math(){
+      	Math m;
+      	m = new Math();
+        return m;  // return a reference
+  }
+
+  void main(){
+    Math m1;
+    m1 = math();
+
+    a = m1.calculate(); //call method
+
+    write(a);
+    writeln();
+  }
+}
+
+class Math{
+  int a;
+  int calculate(){
+    return 5;
+  }
+}

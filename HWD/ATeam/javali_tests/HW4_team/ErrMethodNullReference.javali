@@ -1,0 +1,13 @@
+class Main{
+
+  void print(){
+    write(1);
+    writeln();
+  }
+
+  void main(){
+    Main m;
+    m = null;
+    m.print();
+  }
+}

@@ -1,0 +1,7 @@
+/* A simple variable declaration test */
+class Main {
+	void main() {
+		int aVariable;
+		aVariable = 8;
+	}
+}

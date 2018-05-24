@@ -1,0 +1,17 @@
+/* Test some additions */
+class Main {
+	void main() {
+		int v0, v1, v2, v3;
+		v0 = 0;
+		v1 = 1;
+		v2 = 41;
+		v3 = 65535;
+		write(v1 + v0); writeln();
+		write(v1 + v1); writeln();
+		write(v1 + v2); writeln();
+		write(v3 + v0); writeln();
+		write(v3 + v1); writeln();
+		write(v3 + v2); writeln();
+		write(v3 + v3);
+	}
+}

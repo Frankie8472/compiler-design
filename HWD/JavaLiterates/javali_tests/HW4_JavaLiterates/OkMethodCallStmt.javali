@@ -1,0 +1,17 @@
+/* Tests some simple method calls
+ */
+
+class Main {
+	void main(int a) {
+		Obj b;
+		OObj a;
+		
+		func(b, 2);
+		
+		a.something(2, b.value(), b);
+	 }
+	 
+	 void func(Obj t, int z) {
+	 
+	 }
+}

@@ -1,0 +1,14 @@
+/* Test the unary plus */
+class Main {
+	void main() {
+		int v1, v2;
+		v1 = 3;
+		v2 = -3;
+		
+		v1 = (+ v1);
+		v2 = (+ v2);
+		
+		write(v1); writeln();
+		write(v2); writeln();
+	}
+}

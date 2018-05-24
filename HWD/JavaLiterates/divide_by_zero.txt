@@ -1,0 +1,24 @@
+Review for JavaLiterates by divide_by_zero
+
+- AssemblyEmitter.java
+    + great that all the assembly code (e.g. toFile) is in this class and not in AstCodeGenerator
+    + makes everything really clean
+    + all the additional methods (e.g. sub, inc, neg) makes the code at other places easier to read
+
+- Overall
+    + many and really good comments -> really easy to understand what you did
+    + very clean code, a joy to read
+
+- AstCodeGenerator.java
+    + clean because assembly code not here
+
+- ExpGenerator.java
+    + we really liked the switch(ast.sym.kind) -> easy to understand
+
+- ObjectTables.java
+    + interesting solution with HashMap<String, ObjectTable>
+    - names ObjectTable and ObjectTables get a bit confusing
+    + nice solution with the writtenMethods (also reversing the list at the end)
+
+- Config.java
+    . why were the exit-strings changed?

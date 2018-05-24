@@ -1,0 +1,26 @@
+class Main {
+
+    int a(boolean bool) {
+
+        if (bool) {
+            return 0;
+        } else {
+            write(1);
+        }
+
+        if (bool) {
+            write(2);
+        } else {
+            return 1;
+        }
+
+        return 3;
+    }
+
+    void main() {
+
+        write(this.a(true));
+        write(this.a(false));
+    }
+
+}

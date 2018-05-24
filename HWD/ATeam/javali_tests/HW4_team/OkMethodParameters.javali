@@ -1,0 +1,16 @@
+class Main{
+
+  int calculateSum(int a, int b){
+    return a + b;
+  }
+
+  void printSum(int a, int b){
+     write(a+b);
+     writeln();
+  }
+
+  void main(){
+     calculateSum(2,7);
+     printSum(2,7);
+  }
+}

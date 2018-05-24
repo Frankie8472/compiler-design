@@ -1,0 +1,11 @@
+class Main{
+
+  int multipleReturns(int a){
+     return 1;
+     return a;
+  }
+
+  void main(){
+     write(multipleReturns(10));
+  }
+}

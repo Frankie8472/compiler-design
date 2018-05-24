@@ -1,0 +1,23 @@
+class A {
+
+}
+
+class B extends A{
+
+}
+
+class Main {
+
+    void main() {
+        A a;
+        B b;
+
+        a = new B();
+        b = (B) a;
+
+        if (a == b) {
+            write(1234);
+        }
+    }
+
+}

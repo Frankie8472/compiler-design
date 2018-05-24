@@ -1,0 +1,10 @@
+feedback for the group ehhhm - by divide_by_zero
+
++ neat solution with the Monads / Lambda Expressions (.strean, .map, .filter, .foreach)
+  --> decreases size of code
+  --> in combination with comments it would be a really nice solution
+
++ nice idea with parameterNeedsVisitor (in combination with if(save)...)
+
+- practically no comments
+  --> espacially for the Monads / Lambda expresssion  / inline functions the code was hard to read / understand

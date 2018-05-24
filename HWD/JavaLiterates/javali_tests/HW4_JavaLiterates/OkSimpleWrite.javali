@@ -1,0 +1,6 @@
+/* A simple write function test */
+class Main {
+	void main() {
+		write(8);
+	}
+}

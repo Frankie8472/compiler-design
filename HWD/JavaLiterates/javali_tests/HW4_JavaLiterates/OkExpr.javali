@@ -1,0 +1,33 @@
+/* Tests various expressons ;
+ */
+
+class Main extends OtherClass{
+	void method() {
+		int a,b,c,d;
+		boolean g,h,f,l;
+		
+		//Arithmetic expressions
+		a = ((a % b) - 2) / (-b) * (65 + (+2));
+		bla(((a % b) - 2) / (-b) * (65 + (+2)));
+		write(((a % b) - 2) / (-b) * (65 + (+2)));
+		return ((a % b) - 2) / (-b) * (65 + (+2));
+		
+		if(((a % b) - 2) / (-b) * (65 + (+2)) > 2) {
+		}
+		
+		while(((a % b) - 2) / (-b) * (65 + (+2)) > 2) {
+		}
+		
+		//Boolean expressions
+		a = (g && f) != ((l || !h) == (a < b) || (a > b) || (a <= b) || (a >= b));
+		bla((g && f) != ((l || !h) == (a < b) || (a > b) || (a <= b) || (a >= b)));
+		write((g && f) != ((l || !h) == (a < b) || (a > b) || (a <= b) || (a >= b)));
+		return ((g && f) != ((l || !h) == (a < b) || (a > b) || (a <= b) || (a >= b)));
+		
+		if((g && f) != ((l || !h) == (a < b) || (a > b) || (a <= b) || (a >= b))) {
+		}
+		
+		while((g && f) != ((l || !h) == (a < b) || (a > b) || (a <= b) || (a >= b))) {
+		}
+	}
+}

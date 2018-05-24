@@ -1,0 +1,11 @@
+/* test for ParseFailure when VarDecl and Stmt are not in the correct order in a MethodDecl ;
+   Note: This may be semantically incorrect Javali code */
+
+class Main {
+
+	void main() {
+		write(2);
+		
+		int a;
+	}
+}

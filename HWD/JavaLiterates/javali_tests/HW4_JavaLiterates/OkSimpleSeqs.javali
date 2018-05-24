@@ -1,0 +1,11 @@
+/* Only a class definition with some basic stuff
+ */
+
+class Main {
+	int i, j;
+	boolean k;
+	void main() {
+	}
+	int notMain() {
+	}
+}

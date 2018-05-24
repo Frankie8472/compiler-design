@@ -1,0 +1,7 @@
+class Main{
+  void main(){
+    Object obj;
+    int[] a;
+    a = (Array) obj;
+  }
+}

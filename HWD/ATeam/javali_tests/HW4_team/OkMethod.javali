@@ -1,0 +1,24 @@
+class Main{
+  int a;
+  // method
+  int calculate(){
+    return 4;
+  }
+
+  void main(){
+    m = new Math();
+    a = m.calculate(); //call method
+
+    write(calculate()); //call method
+    writeln();
+
+    write(a);
+    writeln();
+  }
+}
+
+class Math{
+  int calculate(){
+    return 5;
+  }
+}

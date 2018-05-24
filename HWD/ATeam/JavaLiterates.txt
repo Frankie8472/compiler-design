@@ -1,0 +1,21 @@
+AstCodeGenerator
+ + emitSuffix adds some useful functions to the binary like error codes and methods for true or false.
+ o Puts vTable on the stack, why not heap?
+ - emitSuffix could have had more explanation than "some helper functions".
+ 
+StmtGenerator
+ + Switching on lhs kind in assign node, and checking for errors.
+ + Stack Frame conveniently explained in a comment.
+ - Unfortunately this is pretty much the only comment.
+
+ExprGenerator
+ + Everything seems to be properly implemented.
+ o Very verbose BinOp implementation of boolean expressions.
+ - No selfmade comments.
+ 
+VTable, VTableCreator
+ + VTable itself is a compact solution for the vTable problem.
+ - Barely any comments.
+ 
+Code style pet peeve
+ o Minimal use of space character, e.g. for(int i=0;i<RegisterManager.CALLER_SAVE.length;i++)
