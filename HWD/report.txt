@@ -1,5 +1,5 @@
-## Report code review HW4 (Team JavaLiterates)
-### Participant roles
+# Report code review HW4 (Team JavaLiterates)
+## Participant roles
 Team RogerRoger
 - Josua Cantieni (Scribe)
 - Franz Knobel (Moderator)
@@ -8,7 +8,7 @@ Team JavaLiterates (Reviewed)
 
 Other Teams (Reviewers)
 
-### Presentation
+## Presentation
 The team introduces themselves. They point out that their implementation is not complete. Errorcodes are not implemented. 
 The parts which others implemented alike will be skipped.
 The first file the team presents is AstCodeGenerator. They added fields to that class for every new custom class.
@@ -30,7 +30,7 @@ In the ExprGenerator class they added the implementation where it they thought n
 They mentioned that they store their object in the heap.
 In the method methodCall they explain how they designed the stackframe for a method call. They store the parameter and the "this" pointer over the base pointer and put the local variables below.
 
-### Discussion
+## Discussion
 The moderator takes over, thanks the team for their presentation and opens the discussion. 
 
 In the AssemblyEmitter class, the additional functions were liked. 
@@ -43,5 +43,5 @@ Someone liked the comment where they described their stack-frame setup.
 
 They were asked why they use -1 and 1 for booleans in their assembly code, because in x86 assembly normaly 0 and 1 are used for boolean values. They answered, that they do two's complement for negating from true to false and vice versa. It's not possible to do two's complement with the 0-1 booleans. It was replied, that with the 0-1 booleans the values are negated in a two's complement way and then added with one.
 
-### Finish
+## Finish
 The moderator thanks all participants and closes the discussion. 
