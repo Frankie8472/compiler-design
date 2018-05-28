@@ -1,0 +1,47 @@
+## Report code review HW4 (Team JavaLiterates)
+### Participant roles
+Team RogerRoger
+- Josua Cantieni (Scribe)
+- Franz Knobel (Moderator)
+
+Team JavaLiterates (Reviewed)
+
+Other Teams (Reviewers)
+
+### Presentation
+The team introduces themselves. They point out that their implementation is not complete. Errorcodes are not implemented. 
+The parts which others implemented alike will be skipped.
+The first file the team presents is AstCodeGenerator. They added fields to that class for every new custom class.
+
+Changes were made to the AssemblyEmitter. They introduce separate StringBuilders to split the emitting output. Data and assembly instructions are emitted to separate StringBuilders and in the end written in order to the outputfile. That way they can order the sections in the file.
+Furthermore, they added methods for every assembly instruction and calloc. This way, they are easier to emit. 
+
+Next they present the ObjectTables class. 
+They map each classtype or array to the object in an ObjectTable, where they calculate the offset of the fields and methods.
+The method, which constructs the vtable computes it's offset
+The fields are ordered such that the fields of the most generic class is at the top and those of the most specific class is at the bottom.
+They implemented a method to calculate the size of the object.
+
+In both classes ObjectTables and AstCodeGenerator are fields named "ot". The resulting access code "ot.ot" is confusing.
+
+Back in the AstCodeGenerator the method emitBootstrap is presented, which emits code to create the first main-object and a call to the main-method.
+    
+In the ExprGenerator class they added the implementation where it they thought necessary. As for boolean operators, they decided to use -1 for true and 1 for false. They somehow completely forgot about the modulo operator and that's why it was not implemented.
+They mentioned that they store their object in the heap.
+In the method methodCall they explain how they designed the stackframe for a method call. They store the parameter and the "this" pointer over the base pointer and put the local variables below.
+
+### Discussion
+The moderator takes over, thanks the team for their presentation and opens the discussion. 
+
+In the AssemblyEmitter class, the additional functions were liked. 
+In the ObjectTable class it was critizized, that they return an object size somewhere and allocate too much memory in general. Furthermore they have two classes in the same file and sorting is applied when not needed in the generateMethod (Reason behind this was that every object has the same hierarchy). 
+They were complemented for the labels they made for loops and ifElse. That made the assembly code more readable.
+
+The team was asked why they call the method initRegs() at the end of the assign method and nowhere else. Their response was, that they constructed their code in a way, so that all variables are on the stack. Therefore they don't have to care about having too few registers. Sadly, they didn't have enough time for completion.
+
+Someone liked the comment where they described their stack-frame setup.
+
+They were asked why they use -1 and 1 for booleans in their assembly code, because in x86 assembly normaly 0 and 1 are used for boolean values. They answered, that they do two's complement for negating from true to false and vice versa. It's not possible to do two's complement with the 0-1 booleans. It was replied, that with the 0-1 booleans the values are negated in a two's complement way and then added with one.
+
+### Finish
+The moderator thanks all participants and closes the discussion. 
