@@ -40,4 +40,10 @@ public class BaseOptimizer<V> extends AstVisitor<Ast, V> {
         newConst.type = Symbol.PrimitiveTypeSymbol.booleanType;
         return newConst;
     }
+
+    protected Ast.UnaryOp createNewUnaryOp(Ast.UnaryOp.UOp uop, Ast.Expr expr){
+        Ast.UnaryOp unaryOp = new Ast.UnaryOp(uop, expr);
+        unaryOp.type = expr.type;
+        return unaryOp;
+    }
 }
