@@ -12,3 +12,5 @@ bin/
 *.parser.ref
 *.cfg.dot
 *.ref
+callgrind.out.*
+stdout-log.txt

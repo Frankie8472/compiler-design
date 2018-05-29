@@ -60,6 +60,14 @@ class StmtGenerator extends AstVisitor<Register, Void> {
 
 }
 
+class StmtGeneratorOpt extends StmtGeneratorRef{
+
+	StmtGeneratorOpt(AstCodeGeneratorRef astCodeGenerator) {
+		super(astCodeGenerator);
+	}
+
+}
+
 /*
  * StmtGenerator with the reference solution
  */
@@ -74,52 +82,49 @@ class StmtGeneratorRef extends StmtGenerator {
 		this.cgRef = astCodeGenerator;
 	}
 
-	@Override
-	public Register methodCall(MethodSymbol mthSymbol, List<Expr> allArgs) {
-		// Push the arguments and the method prefix (caller save register,
-		// and padding) onto the stack.
-		// Note that the space for the arguments is not already reserved,
-		// so we just push them in the Java left-to-right order.
-		//
-		// After each iteration of the following loop, reg holds the
-		// register used for the previous argument.
-		int padding = cgRef.emitCallPrefix(null, allArgs.size());
-
-		Register reg = null;
-		for (int i = 0; i < allArgs.size(); i++) {
-			if (reg != null) {
-				cgRef.rm.releaseRegister(reg);
-			}
-			reg = cgRef.eg.gen(allArgs.get(i));
-			cgRef.push(reg.repr);
-		}
-
-		// Since "this" is the first parameter that push
-		// we have to get it back to resolve the method call
-		cgRef.emit.emitComment("Load \"this\" pointer");
-		cgRef.emit.emitLoad((allArgs.size() - 1) * Config.SIZEOF_PTR, STACK_REG, reg);
-
-		// Check for a null receiver
-		int cnPadding = cgRef.emitCallPrefix(null, 1);
-		cgRef.push(reg.repr);
-		cgRef.emit.emit("call", AstCodeGeneratorRef.CHECK_NULL);
-		cgRef.emitCallSuffix(null, 1, cnPadding);
-
-		// Load the address of the method to call into "reg"
-		// and call it indirectly.
-		cgRef.emit.emitLoad(0, reg, reg);
-		int mthdoffset = 4 + mthSymbol.vtableIndex * Config.SIZEOF_PTR;
-		cgRef.emit.emitLoad(mthdoffset, reg, reg);
-		cgRef.emit.emit("call", "*" + reg);
-
-		cgRef.emitCallSuffix(reg, allArgs.size(), padding);
-
-		if (mthSymbol.returnType == PrimitiveTypeSymbol.voidType) {
-			cgRef.rm.releaseRegister(reg);
-			return null;
-		}
-		return reg;
-	}
+//	@Override
+//	public Register methodCall(MethodSymbol mthSymbol, List<Expr> allArgs) {
+//		// Push the arguments and the method prefix (caller save register,
+//		// and padding) onto the stack.
+//		// Note that the space for the arguments is not already reserved,
+//		// so we just push them in the Java left-to-right order.
+//		//
+//		// After each iteration of the following loop, reg holds the
+//		// register used for the previous argument.
+//		int padding = cgRef.emitCallPrefix(null, allArgs.size());
+//
+//		Register reg = null;
+//		for (int i = 0; i < allArgs.size(); i++) {
+//			if (reg != null) {
+//				cgRef.rm.releaseRegister(reg);
+//			}
+//			reg = cgRef.eg.gen(allArgs.get(i));
+//			cgRef.push(reg.repr);
+//		}
+//
+//		// Since "this" is the first parameter that push
+//		// we have to get it back to resolve the method call
+//		cgRef.emit.emitComment("Load \"this\" pointer");
+//		cgRef.emit.emitLoad((allArgs.size() - 1) * Config.SIZEOF_PTR, STACK_REG, reg);
+//
+//		// Check for a null receiver
+//		cgRef.emitNullCheck(reg);
+//
+//		// Load the address of the method to call into "reg"
+//		// and call it indirectly.
+//		cgRef.emit.emitLoad(0, reg, reg);
+//		int mthdoffset = 4 + mthSymbol.vtableIndex * Config.SIZEOF_PTR;
+//		cgRef.emit.emitLoad(mthdoffset, reg, reg);
+//		cgRef.emit.emit("call", "*" + reg);
+//
+//		cgRef.emitCallSuffix(reg, allArgs.size(), padding);
+//
+//		if (mthSymbol.returnType == PrimitiveTypeSymbol.voidType) {
+//			cgRef.rm.releaseRegister(reg);
+//			return null;
+//		}
+//		return reg;
+//	}
 
 	@Override
 	public Register methodCall(MethodCall ast, Void dummy) {
@@ -190,10 +195,7 @@ class StmtGeneratorRef extends StmtGenerator {
 			public Void field(Field ast, Expr right) {
 				final Register rhsReg = cgRef.eg.gen(right);
 				Pair<Register> regs = cgRef.egRef.genPushing(rhsReg, ast.arg());
-				int padding = cgRef.emitCallPrefix(null, 1);
-				cgRef.push(regs.b.repr);
-				cgRef.emit.emit("call", AstCodeGeneratorRef.CHECK_NULL);
-				cgRef.emitCallSuffix(null, 1, padding);
+				cgRef.emitNullCheck(regs.b, ast.arg());
 				
 				cgRef.emit.emitStore(regs.a, ast.sym.offset, regs.b);
 				cgRef.rm.releaseRegister(regs.b);
@@ -209,17 +211,14 @@ class StmtGeneratorRef extends StmtGenerator {
 				Pair<Register> regs = cgRef.egRef.genPushing(rhsReg, ast.left());
 				rhsReg = regs.a;
 				Register arrReg = regs.b;
-				int padding = cgRef.emitCallPrefix(null, 1);
-				cgRef.push(arrReg.repr);
-				cgRef.emit.emit("call", AstCodeGeneratorRef.CHECK_NULL);
-				cgRef.emitCallSuffix(null, 1, padding);
+				cgRef.emitNullCheck(arrReg, ast.left());
 				
 				regs = cgRef.egRef.genPushing(arrReg, ast.right());
 				arrReg = regs.a;
 				Register idxReg = regs.b;
 				
 				// Check array bounds
-				padding = cgRef.emitCallPrefix(null, 2);
+				int padding = cgRef.emitCallPrefix(null, 2);
 				cgRef.push(idxReg.repr);
 				cgRef.push(arrReg.repr);
 				cgRef.emit.emit("call", AstCodeGeneratorRef.CHECK_ARRAY_BOUNDS);

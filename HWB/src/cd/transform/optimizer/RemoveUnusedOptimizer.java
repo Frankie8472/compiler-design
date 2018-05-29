@@ -106,6 +106,11 @@ public class RemoveUnusedOptimizer extends AstVisitor<Void, Set<String>> {
         }
 
         @Override
+        public Boolean thisRef(Ast.ThisRef ast, Void arg) {
+            return false;
+        }
+
+        @Override
         public Boolean binaryOp(Ast.BinaryOp ast, Void arg) {
             if(ast.operator == Ast.BinaryOp.BOp.B_DIV || ast.operator == Ast.BinaryOp.BOp.B_MOD){
                 return ast.right() instanceof Ast.IntConst && ((Ast.IntConst) ast.right()).value != 0;

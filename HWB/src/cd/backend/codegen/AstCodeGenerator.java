@@ -96,6 +96,21 @@ public class AstCodeGenerator {
 	}
 }
 
+class AstCodeGeneratorOpt extends AstCodeGeneratorRef{
+
+	public AstCodeGeneratorOpt(Main main, Writer out) {
+		super(main, out);
+		this.sg = new StmtGeneratorOpt(this);
+		this.eg = new ExprGeneratorOpt(this);
+	}
+
+	@Override
+	protected void emitNullCheck(Register toCheck, Expr exprToCheck) {
+		//TODO: Do not emit if not necessary.
+		super.emitNullCheck(toCheck, exprToCheck);
+	}
+}
+
 class AstCodeGeneratorRef extends AstCodeGenerator {
 	/**
 	 * The address of the this ptr relative to the BP. Note that the this ptr is
@@ -755,5 +770,12 @@ class AstCodeGeneratorRef extends AstCodeGenerator {
 		emit.emitMove(BASE_REG, STACK_REG);
 		emit.emit("pop", BASE_REG);
 		emit.emitRaw("ret");
+	}
+
+	protected void emitNullCheck(Register toCheck, Expr exprToCheck){
+		int padding = emitCallPrefix(null, 1);
+		push(toCheck.repr);
+		emit.emit("call", AstCodeGeneratorRef.CHECK_NULL);
+		emitCallSuffix(null, 1, padding);
 	}
 }

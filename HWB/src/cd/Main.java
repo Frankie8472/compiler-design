@@ -48,6 +48,8 @@ public class Main {
     // Set to non-null to write dump of control flow graph
     public File cfgdumpbase;
 
+    public boolean deactivateOptimize;
+
     /**
      * Symbol for the Main type
      */
@@ -76,29 +78,36 @@ public class Main {
      */
     public static void main(String args[]) throws IOException {
         Main m = new Main();
+        List<String> toCompile = new ArrayList<>();
 
         for (String arg : args) {
-            if (arg.equals("-d"))
+            if (arg.equals("-d")) {
                 m.debug = new OutputStreamWriter(System.err);
-            else {
-                if (m.debug != null)
-                    m.cfgdumpbase = new File(arg);
-
-                FileReader fin = new FileReader(arg);
-
-                // Parse:
-                List<ClassDecl> astRoots = m.parse(fin);
-
-                // Run the semantic check:
-                m.semanticCheck(astRoots);
-
-                // Generate code:
-                String sFile = arg + Config.ASMEXT;
-                try (FileWriter fout = new FileWriter(sFile)) {
-                    m.generateCode(astRoots, fout);
-                }
+            } else if(arg.equals("--no")){
+                m.deactivateOptimize = true;
+            } else {
+                toCompile.add(arg);
             }
         }
+        for (String file : toCompile){
+            if (m.debug != null)
+                m.cfgdumpbase = new File(file);
+
+            FileReader fin = new FileReader(file);
+
+            // Parse:
+            List<ClassDecl> astRoots = m.parse(fin);
+
+            // Run the semantic check:
+            m.semanticCheck(astRoots);
+
+            // Generate code:
+            String sFile = file + Config.ASMEXT;
+            try (FileWriter fout = new FileWriter(sFile)) {
+                m.generateCode(astRoots, fout);
+            }
+        }
+
     }
 
     /**
@@ -138,17 +147,19 @@ public class Main {
             for (MethodDecl md : cd.methods()) {
                 new CfgBuilder().build(md);
                 new DominatorTreeAlgorithm(md).build();
+                if(!deactivateOptimize) {
 
-                new ConstantPropagationOptimizer(md).optimize();
-                new PreCalculateOperatorsOptimizer(md).optimize();
-                new ConstantPropagationOptimizer(md).optimize();
-                new PreCalculateOperatorsOptimizer(md).optimize();
-//                new ConstantPropagationOptimizer(md).optimize();
-//                new PreCalculateOperatorsOptimizer(md).optimize();
+                    new ConstantPropagationOptimizer(md).optimize();
+                    new PreCalculateOperatorsOptimizer(md).optimize();
+                    new ConstantPropagationOptimizer(md).optimize();
+                    new PreCalculateOperatorsOptimizer(md).optimize();
+//                  new ConstantPropagationOptimizer(md).optimize();
+//                  new PreCalculateOperatorsOptimizer(md).optimize();
 
-                new RemoveUnusedOptimizer(md).optimize();
-                new ForkOptimizer(md).optimize();
-//                new AvailableExpressionOptimizer(md).optimize();
+                    new RemoveUnusedOptimizer(md).optimize();
+                    new ForkOptimizer(md).optimize();
+//                  new AvailableExpressionOptimizer(md).optimize();
+                }
             }
         }
         CfgDump.toString(astRoots, ".cfg", cfgdumpbase, false);

@@ -3,6 +3,7 @@ package cd.backend.codegen;
 import static cd.backend.codegen.AssemblyEmitter.constant;
 import static cd.backend.codegen.AssemblyEmitter.labelAddress;
 import static cd.backend.codegen.RegisterManager.BASE_REG;
+import static cd.backend.codegen.RegisterManager.STACK_REG;
 
 import java.util.Arrays;
 import java.util.List;
@@ -27,6 +28,7 @@ import cd.ir.Ast.UnaryOp;
 import cd.ir.Ast.UnaryOp.UOp;
 import cd.ir.Ast.Var;
 import cd.ir.ExprVisitor;
+import cd.ir.Symbol;
 import cd.ir.Symbol.ArrayTypeSymbol;
 import cd.ir.Symbol.ClassSymbol;
 import cd.ir.Symbol.PrimitiveTypeSymbol;
@@ -90,6 +92,13 @@ class ExprGenerator extends ExprVisitor<Register, Void> {
 		}
 	}
 
+}
+
+class ExprGeneratorOpt extends ExprGeneratorRef{
+
+	ExprGeneratorOpt(AstCodeGeneratorRef astCodeGenerator) {
+		super(astCodeGenerator);
+	}
 }
 
 /*
@@ -305,16 +314,13 @@ class ExprGeneratorRef extends ExprGenerator {
 	@Override
 	public Register index(Index ast, Void arg) {
 		Register arr = gen(ast.left());
-		int padding = cgRef.emitCallPrefix(null, 1);
-		cgRef.push(arr.repr);
-		cgRef.emit.emit("call", AstCodeGeneratorRef.CHECK_NULL);
-		cgRef.emitCallSuffix(null, 1, padding);
+		cgRef.emitNullCheck(arr, ast.left());
 		Pair<Register> pair = genPushing(arr, ast.right());
 		arr = pair.a;
 		Register idx = pair.b;
 
 		// Check array bounds
-		padding = cgRef.emitCallPrefix(null, 2);
+		int padding = cgRef.emitCallPrefix(null, 2);
 		cgRef.push(idx.repr);
 		cgRef.push(arr.repr);
 		cgRef.emit.emit("call", AstCodeGeneratorRef.CHECK_ARRAY_BOUNDS);
@@ -328,10 +334,7 @@ class ExprGeneratorRef extends ExprGenerator {
 	@Override
 	public Register field(Field ast, Void arg) {
 		Register reg = gen(ast.arg());
-		int padding = cgRef.emitCallPrefix(null, 1);
-		cgRef.push(reg.repr);
-		cgRef.emit.emit("call", AstCodeGeneratorRef.CHECK_NULL);
-		cgRef.emitCallSuffix(null, 1, padding);
+		cgRef.emitNullCheck(reg, ast.arg());
 		assert ast.sym.offset != -1;
 		cgRef.emit.emitLoad(ast.sym.offset, reg, reg);
 		return reg;
@@ -399,7 +402,42 @@ class ExprGeneratorRef extends ExprGenerator {
 
 	@Override
 	public Register methodCall(MethodCallExpr ast, Void arg) {
-		return cgRef.sg.methodCall(ast.sym, ast.allArguments());
+		List<Expr> allArgs = ast.allArguments();
+		Symbol.MethodSymbol mthSymbol = ast.sym;
+
+		int padding = cgRef.emitCallPrefix(null, allArgs.size());
+
+		Register reg = null;
+		for (int i = 0; i < allArgs.size(); i++) {
+			if (reg != null) {
+				cgRef.rm.releaseRegister(reg);
+			}
+			reg = cgRef.eg.gen(allArgs.get(i));
+			cgRef.push(reg.repr);
+		}
+
+		// Since "this" is the first parameter that push
+		// we have to get it back to resolve the method call
+		cgRef.emit.emitComment("Load \"this\" pointer");
+		cgRef.emit.emitLoad((allArgs.size() - 1) * Config.SIZEOF_PTR, STACK_REG, reg);
+
+		// Check for a null receiver
+		cgRef.emitNullCheck(reg, ast.receiver());
+
+		// Load the address of the method to call into "reg"
+		// and call it indirectly.
+		cgRef.emit.emitLoad(0, reg, reg);
+		int mthdoffset = 4 + mthSymbol.vtableIndex * Config.SIZEOF_PTR;
+		cgRef.emit.emitLoad(mthdoffset, reg, reg);
+		cgRef.emit.emit("call", "*" + reg);
+
+		cgRef.emitCallSuffix(reg, allArgs.size(), padding);
+
+		if (mthSymbol.returnType == PrimitiveTypeSymbol.voidType) {
+			cgRef.rm.releaseRegister(reg);
+			return null;
+		}
+		return reg;
 	}
 
 	@Override
