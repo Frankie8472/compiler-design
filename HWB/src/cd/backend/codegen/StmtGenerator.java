@@ -218,11 +218,7 @@ class StmtGeneratorRef extends StmtGenerator {
 				Register idxReg = regs.b;
 				
 				// Check array bounds
-				int padding = cgRef.emitCallPrefix(null, 2);
-				cgRef.push(idxReg.repr);
-				cgRef.push(arrReg.repr);
-				cgRef.emit.emit("call", AstCodeGeneratorRef.CHECK_ARRAY_BOUNDS);
-				cgRef.emitCallSuffix(null, 2, padding);
+				cgRef.emitArrayBoundsCheck(arrReg, idxReg, ast);
 				
 				cgRef.emit.emitMove(rhsReg, arrayAddress(arrReg, idxReg));
 				cgRef.rm.releaseRegister(arrReg);

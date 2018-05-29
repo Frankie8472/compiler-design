@@ -21,7 +21,7 @@ public class CfgCodeGenerator {
 
     public CfgCodeGenerator(Main main, Writer out) {
         this.main = main;
-        if (main.deactivateOptimize) {
+        if (main.deactivateAssemblyOptimize) {
             cg = new AstCodeGeneratorRef(main, out);
         } else {
             cg = new AstCodeGeneratorOpt(main, out);

@@ -320,11 +320,7 @@ class ExprGeneratorRef extends ExprGenerator {
 		Register idx = pair.b;
 
 		// Check array bounds
-		int padding = cgRef.emitCallPrefix(null, 2);
-		cgRef.push(idx.repr);
-		cgRef.push(arr.repr);
-		cgRef.emit.emit("call", AstCodeGeneratorRef.CHECK_ARRAY_BOUNDS);
-		cgRef.emitCallSuffix(null, 2, padding);
+        cgRef.emitArrayBoundsCheck(arr, idx, ast);
 
 		cgRef.emit.emitMove(AssemblyEmitter.arrayAddress(arr, idx), idx);
 		cgRef.rm.releaseRegister(arr);

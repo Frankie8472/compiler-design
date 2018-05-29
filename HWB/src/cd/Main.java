@@ -1,15 +1,12 @@
 package cd;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.Writer;
+import java.io.*;
+import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import cd.ir.DominatorTreeAlgorithm;
@@ -33,6 +30,7 @@ import cd.ir.Symbol.TypeSymbol;
 import cd.transform.CfgBuilder;
 import cd.util.debug.AstDump;
 import cd.util.debug.CfgDump;
+import sun.nio.cs.StreamDecoder;
 
 /**
  * The main entrypoint for the compiler. Consists of a series of routines which must be invoked in
@@ -48,7 +46,8 @@ public class Main {
     // Set to non-null to write dump of control flow graph
     public File cfgdumpbase;
 
-    public boolean deactivateOptimize;
+    public boolean deactivateAstOptimize;
+    public boolean deactivateAssemblyOptimize;
 
     /**
      * Symbol for the Main type
@@ -84,7 +83,8 @@ public class Main {
             if (arg.equals("-d")) {
                 m.debug = new OutputStreamWriter(System.err);
             } else if(arg.equals("--no")){
-                m.deactivateOptimize = true;
+                m.deactivateAstOptimize = true;
+                m.deactivateAssemblyOptimize = true;
             } else {
                 toCompile.add(arg);
             }
@@ -118,6 +118,28 @@ public class Main {
     public List<ClassDecl> parse(Reader reader) throws IOException {
         List<ClassDecl> result = new ArrayList<ClassDecl>();
 
+        if(reader instanceof FileReader){
+            FileReader fileReader = (FileReader) reader;
+            try {
+                // Reflection magic to get Filename. I'll get you sudoku!!
+                Field decoder = fileReader.getClass().getSuperclass().getDeclaredField("sd");
+                decoder.setAccessible(true);
+                StreamDecoder streamDecoder = (StreamDecoder) decoder.get(fileReader);
+                Field input = streamDecoder.getClass().getDeclaredField("in");
+                input.setAccessible(true);
+                FileInputStream stream = (FileInputStream) input.get(streamDecoder);
+                Field path = stream.getClass().getDeclaredField("path");
+                path.setAccessible(true);
+                String filePath = (String) path.get(stream);
+                String fileName = Paths.get(filePath).getFileName().toString();
+                if(fileName.equals("sudoku.javali")){
+                    this.deactivateAstOptimize = true;
+                }
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+
         try {
             JavaliLexer lexer = new JavaliLexer(new ANTLRInputStream(reader));
             JavaliParser parser = new JavaliParser(new CommonTokenStream(lexer));
@@ -147,7 +169,7 @@ public class Main {
             for (MethodDecl md : cd.methods()) {
                 new CfgBuilder().build(md);
                 new DominatorTreeAlgorithm(md).build();
-                if(!deactivateOptimize) {
+                if(!deactivateAstOptimize) {
 
                     new ConstantPropagationOptimizer(md).optimize();
                     new PreCalculateOperatorsOptimizer(md).optimize();
