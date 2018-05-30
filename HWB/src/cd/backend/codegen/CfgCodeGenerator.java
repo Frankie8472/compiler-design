@@ -34,20 +34,22 @@ public class CfgCodeGenerator {
             new CfgStmtVisitor().visit(cdecl, null);
     }
 
-    private class CfgStmtVisitor extends AstVisitor<Void, Void> {
+    private class CfgStmtVisitor extends AstVisitor<Void, CurrentContext> {
 
         @Override
-        public Void classDecl(ClassDecl ast, Void arg) {
+        public Void classDecl(ClassDecl ast, CurrentContext arg) {
             cg.emit.emitCommentSection("Class " + ast.name);
             cg.emit.increaseIndent("");
-            super.classDecl(ast, arg);
+            CurrentContext context = new CurrentContext(ast);
+            super.classDecl(ast, context);
             cg.emit.decreaseIndent();
             return null;
         }
 
         @Override
-        public Void methodDecl(MethodDecl ast, Void arg) {
+        public Void methodDecl(MethodDecl ast, CurrentContext arg) {
             cg.emitMethodPrefix(ast);
+            CurrentContext context = new CurrentContext(arg, ast);
 
             ControlFlowGraph cfg = ast.cfg;
             assert cfg != null;
@@ -65,7 +67,7 @@ public class CfgCodeGenerator {
                 cg.emit.emitLabel(labels.get(blk));
 
                 for (Stmt stmt : blk.stmts)
-                    cg.sg.gen(stmt);
+                    cg.sg.gen(stmt, context);
 
                 if (blk == cfg.end) {
                     cg.emit.emitComment(String.format("Return"));

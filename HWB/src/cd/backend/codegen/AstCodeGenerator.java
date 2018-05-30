@@ -100,8 +100,6 @@ public class AstCodeGenerator {
 
 class AstCodeGeneratorOpt extends AstCodeGeneratorRef {
 
-    private Map<String, Integer> knownArrayBounds = new HashMap<>();
-
     public AstCodeGeneratorOpt(Main main, Writer out) {
         super(main, out);
         this.sg = new StmtGeneratorOpt(this);
@@ -120,6 +118,8 @@ class AstCodeGeneratorOpt extends AstCodeGeneratorRef {
     @Override
     protected void emitArrayBoundsCheck(Register reference, Register index, Ast.Index exprToCheck, CurrentContext context) {
         //TODO: Do not emit if not necessary.
+
+        Map<String, Integer> knownArrayBounds = context.getKnownLocalArrayBounds();
 
         if (exprToCheck.left() instanceof Ast.Var && exprToCheck.right() instanceof Ast.IntConst) {
             Ast.Var arrVar = (Ast.Var) exprToCheck.left();

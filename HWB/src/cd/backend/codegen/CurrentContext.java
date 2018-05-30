@@ -75,5 +75,7 @@ public final class CurrentContext {
     }
 
 
-
+    public Map<String, Integer> getKnownLocalArrayBounds() {
+        return knownLocalArrayBounds;
+    }
 }
