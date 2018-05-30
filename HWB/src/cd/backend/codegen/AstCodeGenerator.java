@@ -10,7 +10,9 @@ import static cd.backend.codegen.RegisterManager.BASE_REG;
 
 import java.io.Writer;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import cd.Config;
 import cd.Main;
@@ -77,7 +79,7 @@ public class AstCodeGenerator {
      */
     public void go(List<? extends ClassDecl> astRoots) {
         for (ClassDecl ast : astRoots) {
-            sg.gen(ast);
+            sg.gen(ast, null);
         }
     }
 
@@ -98,6 +100,8 @@ public class AstCodeGenerator {
 
 class AstCodeGeneratorOpt extends AstCodeGeneratorRef {
 
+    private Map<String, Integer> knownArrayBounds = new HashMap<>();
+
     public AstCodeGeneratorOpt(Main main, Writer out) {
         super(main, out);
         this.sg = new StmtGeneratorOpt(this);
@@ -105,20 +109,31 @@ class AstCodeGeneratorOpt extends AstCodeGeneratorRef {
     }
 
     @Override
-    protected void emitNullCheck(Register toCheck, Expr exprToCheck) {
+    protected void emitNullCheck(Register toCheck, Expr exprToCheck, CurrentContext context) {
         //TODO: Do not emit if not necessary.
 
         //you emit the check with this statement:
-        super.emitNullCheck(toCheck, exprToCheck);
+        super.emitNullCheck(toCheck, exprToCheck, context);
         // check the superclass, there you find the implementation.
     }
 
     @Override
-    protected void emitArrayBoundsCheck(Register reference, Register index, Expr exprToCheck) {
+    protected void emitArrayBoundsCheck(Register reference, Register index, Ast.Index exprToCheck, CurrentContext context) {
         //TODO: Do not emit if not necessary.
 
+        if (exprToCheck.left() instanceof Ast.Var && exprToCheck.right() instanceof Ast.IntConst) {
+            Ast.Var arrVar = (Ast.Var) exprToCheck.left();
+            Integer indexAccess = ((Ast.IntConst) exprToCheck.right()).value;
+            if (indexAccess >= 0) {
+                if (knownArrayBounds.get(arrVar.name) != null && indexAccess <= knownArrayBounds.get(arrVar.name)) {
+                    return;
+                } else {
+                    knownArrayBounds.put(arrVar.name, indexAccess);
+                }
+            }
+        }
         //you emit the check with this statement:
-        super.emitArrayBoundsCheck(reference, index, exprToCheck);
+        super.emitArrayBoundsCheck(reference, index, exprToCheck, context);
         // check the superclass, there you find the implementation.
     }
 }
@@ -449,7 +464,7 @@ class AstCodeGeneratorRef extends AstCodeGenerator {
         emit.emit("sub", constant(8), STACK_REG);
 
         emit.emit("and", -16, STACK_REG);
-        sg.gen(callMain);
+        sg.gen(callMain, null);
         emit.emit("movl", constant(ExitCode.OK.value), Register.EAX); // normal termination:
         emit.emitMove(BASE_REG, STACK_REG);
         emit.emit("pop", BASE_REG);
@@ -646,10 +661,10 @@ class AstCodeGeneratorRef extends AstCodeGenerator {
      * the value generated for {@code ast} is false.
      */
 
-    protected void genJumpIfFalse(Expr ast, String lbl) {
+    protected void genJumpIfFalse(Expr ast, String lbl, CurrentContext context) {
         // A better way to implement this would be with a separate
         // visitor.
-        Register reg = eg.gen(ast);
+        Register reg = eg.gen(ast, context);
         emit.emit("cmpl", "$0", reg);
         emit.emit("je", lbl);
         rm.releaseRegister(reg);
@@ -781,14 +796,14 @@ class AstCodeGeneratorRef extends AstCodeGenerator {
         emit.emitRaw("ret");
     }
 
-    protected void emitNullCheck(Register toCheck, Expr exprToCheck) {
+    protected void emitNullCheck(Register toCheck, Expr exprToCheck, CurrentContext context) {
         int padding = emitCallPrefix(null, 1);
         push(toCheck.repr);
         emit.emit("call", AstCodeGeneratorRef.CHECK_NULL);
         emitCallSuffix(null, 1, padding);
     }
 
-    protected void emitArrayBoundsCheck(Register reference, Register index, Expr exprToCheck) {
+    protected void emitArrayBoundsCheck(Register reference, Register index, Ast.Index exprToCheck, CurrentContext context) {
         int padding = emitCallPrefix(null, 2);
         push(index.repr);
         push(reference.repr);

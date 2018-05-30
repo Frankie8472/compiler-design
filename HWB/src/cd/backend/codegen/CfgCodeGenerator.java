@@ -76,7 +76,7 @@ public class CfgCodeGenerator {
                     cg.emit.emitComment(String.format(
                             "Exit to block %d if true, block %d if false",
                             blk.trueSuccessor().index, blk.falseSuccessor().index));
-                    cg.genJumpIfFalse(blk.condition, labels.get(blk.falseSuccessor()));
+                    cg.genJumpIfFalse(blk.condition, labels.get(blk.falseSuccessor()), arg);
                     cg.emit.emit("jmp", labels.get(blk.trueSuccessor()));
                 } else {
                     cg.emit.emitComment(String.format(

@@ -2,11 +2,9 @@ package cd.backend.codegen;
 
 import static cd.backend.codegen.AssemblyEmitter.arrayAddress;
 import static cd.backend.codegen.RegisterManager.BASE_REG;
-import static cd.backend.codegen.RegisterManager.STACK_REG;
 
 import java.util.List;
 
-import cd.Config;
 import cd.backend.codegen.RegisterManager.Register;
 import cd.ir.Ast;
 import cd.ir.Ast.Assign;
@@ -25,26 +23,25 @@ import cd.ir.Ast.WhileLoop;
 import cd.ir.AstVisitor;
 import cd.ir.ExprVisitor;
 import cd.ir.Symbol.MethodSymbol;
-import cd.ir.Symbol.PrimitiveTypeSymbol;
 import cd.util.Pair;
 import cd.util.debug.AstOneLine;
 
 /**
  * Generates code to process statements and declarations.
  */
-class StmtGenerator extends AstVisitor<Register, Void> {
+class StmtGenerator extends AstVisitor<Register, CurrentContext> {
 	protected final AstCodeGenerator cg;
 
 	StmtGenerator(AstCodeGenerator astCodeGenerator) {
 		cg = astCodeGenerator;
 	}
 
-	public void gen(Ast ast) {
-		visit(ast, null);
+	public void gen(Ast ast, CurrentContext context) {
+		visit(ast, context);
 	}
 
 	@Override
-	public Register visit(Ast ast, Void arg) {
+	public Register visit(Ast ast, CurrentContext arg) {
 		try {
 			cg.emit.increaseIndent("Emitting " + AstOneLine.toString(ast));
 			return super.visit(ast, arg);
@@ -127,8 +124,8 @@ class StmtGeneratorRef extends StmtGenerator {
 //	}
 
 	@Override
-	public Register methodCall(MethodCall ast, Void dummy) {
-		Register reg = cgRef.eg.gen(ast.getMethodCallExpr());
+	public Register methodCall(MethodCall ast, CurrentContext dummy) {
+		Register reg = cgRef.eg.gen(ast.getMethodCallExpr(), dummy);
 		if (reg != null)
 			cgRef.rm.releaseRegister(reg);
 
@@ -136,43 +133,45 @@ class StmtGeneratorRef extends StmtGenerator {
 	}
 	
 	@Override
-	public Register classDecl(ClassDecl ast, Void arg) {
+	public Register classDecl(ClassDecl ast, CurrentContext arg) {
 		// Emit each method:
 		cgRef.emit.emitCommentSection("Class " + ast.name);
-		return visitChildren(ast, arg);
+		CurrentContext context = new CurrentContext(ast);
+		return visitChildren(ast, context);
 	}
 
 	@Override
-	public Register methodDecl(MethodDecl ast, Void arg) {
+	public Register methodDecl(MethodDecl ast, CurrentContext arg) {
 		cgRef.emitMethodPrefix(ast);
-		gen(ast.body());
+		CurrentContext context = new CurrentContext(arg, ast);
+		gen(ast.body(), context);
 		cgRef.emitMethodSuffix(false);
 		return null;
 	}
 
 	@Override
-	public Register ifElse(IfElse ast, Void arg) {
+	public Register ifElse(IfElse ast, CurrentContext arg) {
 		String falseLbl = cgRef.emit.uniqueLabel();
 		String doneLbl = cgRef.emit.uniqueLabel();
 
-		cgRef.genJumpIfFalse(ast.condition(), falseLbl);
-		gen(ast.then());
+		cgRef.genJumpIfFalse(ast.condition(), falseLbl, arg);
+		gen(ast.then(), arg);
 		cgRef.emit.emit("jmp", doneLbl);
 		cgRef.emit.emitLabel(falseLbl);
-		gen(ast.otherwise());
+		gen(ast.otherwise(), arg);
 		cgRef.emit.emitLabel(doneLbl);
 
 		return null;
 	}
 
 	@Override
-	public Register whileLoop(WhileLoop ast, Void arg) {
+	public Register whileLoop(WhileLoop ast, CurrentContext arg) {
 		String nextLbl = cgRef.emit.uniqueLabel();
 		String doneLbl = cgRef.emit.uniqueLabel();
 
 		cgRef.emit.emitLabel(nextLbl);
-		cgRef.genJumpIfFalse(ast.condition(), doneLbl);
-		gen(ast.body());
+		cgRef.genJumpIfFalse(ast.condition(), doneLbl, arg);
+		gen(ast.body(), arg);
 		cgRef.emit.emit("jmp", nextLbl);
 		cgRef.emit.emitLabel(doneLbl);
 
@@ -180,12 +179,12 @@ class StmtGeneratorRef extends StmtGenerator {
 	}
 
 	@Override
-	public Register assign(Assign ast, Void arg) {
+	public Register assign(Assign ast, CurrentContext arg) {
 		class AssignVisitor extends ExprVisitor<Void, Expr> {
 
 			@Override
 			public Void var(Var ast, Expr right) {
-				final Register rhsReg = cgRef.eg.gen(right);
+				final Register rhsReg = cgRef.eg.gen(right, arg);
 				cgRef.emit.emitStore(rhsReg, ast.sym.offset, BASE_REG);
 				cgRef.rm.releaseRegister(rhsReg);
 				return null;
@@ -193,9 +192,9 @@ class StmtGeneratorRef extends StmtGenerator {
 
 			@Override
 			public Void field(Field ast, Expr right) {
-				final Register rhsReg = cgRef.eg.gen(right);
-				Pair<Register> regs = cgRef.egRef.genPushing(rhsReg, ast.arg());
-				cgRef.emitNullCheck(regs.b, ast.arg());
+				final Register rhsReg = cgRef.eg.gen(right, arg);
+				Pair<Register> regs = cgRef.egRef.genPushing(rhsReg, ast.arg(), arg);
+				cgRef.emitNullCheck(regs.b, ast.arg(), arg);
 				
 				cgRef.emit.emitStore(regs.a, ast.sym.offset, regs.b);
 				cgRef.rm.releaseRegister(regs.b);
@@ -206,19 +205,19 @@ class StmtGeneratorRef extends StmtGenerator {
 
 			@Override
 			public Void index(Index ast, Expr right) {
-				Register rhsReg = cgRef.egRef.gen(right);
+				Register rhsReg = cgRef.egRef.gen(right, arg);
 				
-				Pair<Register> regs = cgRef.egRef.genPushing(rhsReg, ast.left());
+				Pair<Register> regs = cgRef.egRef.genPushing(rhsReg, ast.left(), arg);
 				rhsReg = regs.a;
 				Register arrReg = regs.b;
-				cgRef.emitNullCheck(arrReg, ast.left());
+				cgRef.emitNullCheck(arrReg, ast.left(), arg);
 				
-				regs = cgRef.egRef.genPushing(arrReg, ast.right());
+				regs = cgRef.egRef.genPushing(arrReg, ast.right(), arg);
 				arrReg = regs.a;
 				Register idxReg = regs.b;
 				
 				// Check array bounds
-				cgRef.emitArrayBoundsCheck(arrReg, idxReg, ast);
+				cgRef.emitArrayBoundsCheck(arrReg, idxReg, ast, arg);
 				
 				cgRef.emit.emitMove(rhsReg, arrayAddress(arrReg, idxReg));
 				cgRef.rm.releaseRegister(arrReg);
@@ -240,8 +239,8 @@ class StmtGeneratorRef extends StmtGenerator {
 	}
 
 	@Override
-	public Register builtInWrite(BuiltInWrite ast, Void arg) {
-		Register reg = cgRef.eg.gen(ast.arg());
+	public Register builtInWrite(BuiltInWrite ast, CurrentContext arg) {
+		Register reg = cgRef.eg.gen(ast.arg(), arg);
 		int padding = cgRef.emitCallPrefix(null, 1);
 		cgRef.push(reg.repr);
 		cgRef.emit.emit("call", AstCodeGeneratorRef.PRINT_INTEGER);
@@ -252,7 +251,7 @@ class StmtGeneratorRef extends StmtGenerator {
 	}
 
 	@Override
-	public Register builtInWriteln(BuiltInWriteln ast, Void arg) {
+	public Register builtInWriteln(BuiltInWriteln ast, CurrentContext arg) {
 		int padding = cgRef.emitCallPrefix(null, 0);
 		cgRef.emit.emit("call", AstCodeGeneratorRef.PRINT_NEW_LINE);
 		cgRef.emitCallSuffix(null, 0, padding);
@@ -260,9 +259,9 @@ class StmtGeneratorRef extends StmtGenerator {
 	}
 
 	@Override
-	public Register returnStmt(ReturnStmt ast, Void arg) {
+	public Register returnStmt(ReturnStmt ast, CurrentContext arg) {
 		if (ast.arg() != null) {
-			Register reg = cgRef.eg.gen(ast.arg());
+			Register reg = cgRef.eg.gen(ast.arg(), arg);
 			cgRef.emit.emitMove(reg, "%eax");
 			cgRef.emitMethodSuffix(false);
 			cgRef.rm.releaseRegister(reg);

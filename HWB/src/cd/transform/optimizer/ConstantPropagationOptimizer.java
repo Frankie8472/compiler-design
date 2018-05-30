@@ -21,7 +21,7 @@ public class ConstantPropagationOptimizer extends BaseOptimizer<Map<String, Obje
             Map<String, Object> currState = new HashMap<>(analysis.inStateOf(block));
             for (Ast.Stmt stmt : block.stmts) {
                 visit(stmt, currState);
-                System.out.println(currState);
+//                System.out.println(currState);
             }
             if (block.condition != null) {
                 visit(block.condition, currState);
@@ -31,7 +31,7 @@ public class ConstantPropagationOptimizer extends BaseOptimizer<Map<String, Obje
 
     @Override
     public Ast var(Ast.Var ast, Map<String, Object> arg) {
-        System.out.println("Hallo du");
+//        System.out.println("Hallo du");
         if(arg.get(ast.name) != null){
             Object value = arg.get(ast.name);
             if(value instanceof Integer){

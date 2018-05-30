@@ -40,22 +40,22 @@ import cd.util.debug.AstOneLine;
  * Generates code to evaluate expressions. After emitting the code, returns a
  * String which indicates the register where the result can be found.
  */
-class ExprGenerator extends ExprVisitor<Register, Void> {
+class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
 	protected final AstCodeGenerator cg;
 
 	ExprGenerator(AstCodeGenerator astCodeGenerator) {
 		cg = astCodeGenerator;
 	}
 
-	public Register gen(Expr ast) {
-		return visit(ast, null);
+	public Register gen(Expr ast, CurrentContext context) {
+		return visit(ast, context);
 	}
 
 	@Override
-	public Register visit(Expr ast, Void arg) {
+	public Register visit(Expr ast, CurrentContext arg) {
 		try {
 			cg.emit.increaseIndent("Emitting " + AstOneLine.toString(ast));
-			return super.visit(ast, null);
+			return super.visit(ast, arg);
 		} finally {
 			cg.emit.decreaseIndent();
 		}
@@ -63,7 +63,7 @@ class ExprGenerator extends ExprVisitor<Register, Void> {
 	}
 
 	@Override
-	public Register intConst(IntConst ast, Void arg) {
+	public Register intConst(IntConst ast, CurrentContext arg) {
 		{
 			Register reg = cg.rm.getRegister();
 			cg.emit.emit("movl", "$" + ast.value, reg);
@@ -72,9 +72,9 @@ class ExprGenerator extends ExprVisitor<Register, Void> {
 	}
 
 	@Override
-	public Register unaryOp(UnaryOp ast, Void arg) {
+	public Register unaryOp(UnaryOp ast, CurrentContext arg) {
 		{
-			Register argReg = gen(ast.arg());
+			Register argReg = gen(ast.arg(), arg);
 			switch (ast.operator) {
 			case U_PLUS:
 				break;
@@ -126,7 +126,7 @@ class ExprGeneratorRef extends ExprGenerator {
 	 * second of which stores the right value.
 	 * 
 	 */
-	public Pair<Register> genPushing(Register leftReg, Expr right) {
+	public Pair<Register> genPushing(Register leftReg, Expr right, CurrentContext context) {
 		Register newLeftReg = leftReg;
 		boolean pop = false;
 
@@ -136,7 +136,7 @@ class ExprGeneratorRef extends ExprGenerator {
 			pop = true;
 		}
 
-		Register rightReg = gen(right);
+		Register rightReg = gen(right, context);
 
 		if (pop) {
 			newLeftReg = cgRef.rm.getRegister();
@@ -148,14 +148,14 @@ class ExprGeneratorRef extends ExprGenerator {
 	}
 
 	@Override
-	public Register binaryOp(BinaryOp ast, Void arg) {
+	public Register binaryOp(BinaryOp ast, CurrentContext arg) {
 		Register leftReg = null;
 		Register rightReg = null;
 
 		{
 
-			leftReg = gen(ast.left());
-			Pair<Register> regs = genPushing(leftReg, ast.right());
+			leftReg = gen(ast.left(), arg);
+			Pair<Register> regs = genPushing(leftReg, ast.right(), arg);
 			leftReg = regs.a;
 			rightReg = regs.b;
 
@@ -283,14 +283,14 @@ class ExprGeneratorRef extends ExprGenerator {
 	}
 
 	@Override
-	public Register booleanConst(BooleanConst ast, Void arg) {
+	public Register booleanConst(BooleanConst ast, CurrentContext arg) {
 		Register reg = cgRef.rm.getRegister();
 		cgRef.emit.emit("movl", ast.value ? "$1" : "$0", reg);
 		return reg;
 	}
 
 	@Override
-	public Register builtInRead(BuiltInRead ast, Void arg) {
+	public Register builtInRead(BuiltInRead ast, CurrentContext arg) {
 		Register reg = cgRef.rm.getRegister();
 		int padding = cgRef.emitCallPrefix(reg, 0);
 		cgRef.emit.emit("call", AstCodeGeneratorRef.READ_INTEGER);
@@ -299,10 +299,10 @@ class ExprGeneratorRef extends ExprGenerator {
 	}
 
 	@Override
-	public Register cast(Cast ast, Void arg) {
+	public Register cast(Cast ast, CurrentContext arg) {
 		// Invoke the helper function. If it does not exit,
 		// the cast succeeded!
-		Register objReg = gen(ast.arg());
+		Register objReg = gen(ast.arg(), arg);
 		int padding = cgRef.emitCallPrefix(null, 2);
 		cgRef.push(objReg.repr);
 		cgRef.push(AssemblyEmitter.labelAddress(cgRef.vtable(ast.type)));
@@ -312,15 +312,15 @@ class ExprGeneratorRef extends ExprGenerator {
 	}
 
 	@Override
-	public Register index(Index ast, Void arg) {
-		Register arr = gen(ast.left());
-		cgRef.emitNullCheck(arr, ast.left());
-		Pair<Register> pair = genPushing(arr, ast.right());
+	public Register index(Index ast, CurrentContext arg) {
+		Register arr = gen(ast.left(), arg);
+		cgRef.emitNullCheck(arr, ast.left(), arg);
+		Pair<Register> pair = genPushing(arr, ast.right(), arg);
 		arr = pair.a;
 		Register idx = pair.b;
 
 		// Check array bounds
-        cgRef.emitArrayBoundsCheck(arr, idx, ast);
+        cgRef.emitArrayBoundsCheck(arr, idx, ast, arg);
 
 		cgRef.emit.emitMove(AssemblyEmitter.arrayAddress(arr, idx), idx);
 		cgRef.rm.releaseRegister(arr);
@@ -328,22 +328,22 @@ class ExprGeneratorRef extends ExprGenerator {
 	}
 
 	@Override
-	public Register field(Field ast, Void arg) {
-		Register reg = gen(ast.arg());
-		cgRef.emitNullCheck(reg, ast.arg());
+	public Register field(Field ast, CurrentContext arg) {
+		Register reg = gen(ast.arg(), arg);
+		cgRef.emitNullCheck(reg, ast.arg(), arg);
 		assert ast.sym.offset != -1;
 		cgRef.emit.emitLoad(ast.sym.offset, reg, reg);
 		return reg;
 	}
 
 	@Override
-	public Register newArray(NewArray ast, Void arg) {
+	public Register newArray(NewArray ast, CurrentContext arg) {
 		// Size of the array = 4 + 4 + elemsize * num elem.
 		// Compute that into reg, store it into the stack as
 		// an argument to Javali$Alloc(), and then use it to store final
 		// result.
 		ArrayTypeSymbol arrsym = (ArrayTypeSymbol) ast.type;
-		Register reg = gen(ast.arg());
+		Register reg = gen(ast.arg(), arg);
 
 		// Check for negative array sizes
 		int padding = cgRef.emitCallPrefix(null, 1);
@@ -371,7 +371,7 @@ class ExprGeneratorRef extends ExprGenerator {
 	}
 
 	@Override
-	public Register newObject(NewObject ast, Void arg) {
+	public Register newObject(NewObject ast, CurrentContext arg) {
 		ClassSymbol clssym = (ClassSymbol) ast.type;
 		Register reg = cgRef.rm.getRegister();
 		int allocPadding = cgRef.emitCallPrefix(reg, 1);
@@ -383,21 +383,21 @@ class ExprGeneratorRef extends ExprGenerator {
 	}
 
 	@Override
-	public Register nullConst(NullConst ast, Void arg) {
+	public Register nullConst(NullConst ast, CurrentContext arg) {
 		Register reg = cgRef.rm.getRegister();
 		cgRef.emit.emit("movl", "$0", reg);
 		return reg;
 	}
 
 	@Override
-	public Register thisRef(ThisRef ast, Void arg) {
+	public Register thisRef(ThisRef ast, CurrentContext arg) {
 		Register reg = cgRef.rm.getRegister();
 		cgRef.emit.emitLoad(cgRef.THIS_OFFSET, BASE_REG, reg);
 		return reg;
 	}
 
 	@Override
-	public Register methodCall(MethodCallExpr ast, Void arg) {
+	public Register methodCall(MethodCallExpr ast, CurrentContext arg) {
 		List<Expr> allArgs = ast.allArguments();
 		Symbol.MethodSymbol mthSymbol = ast.sym;
 
@@ -408,7 +408,7 @@ class ExprGeneratorRef extends ExprGenerator {
 			if (reg != null) {
 				cgRef.rm.releaseRegister(reg);
 			}
-			reg = cgRef.eg.gen(allArgs.get(i));
+			reg = cgRef.eg.gen(allArgs.get(i), arg);
 			cgRef.push(reg.repr);
 		}
 
@@ -418,7 +418,7 @@ class ExprGeneratorRef extends ExprGenerator {
 		cgRef.emit.emitLoad((allArgs.size() - 1) * Config.SIZEOF_PTR, STACK_REG, reg);
 
 		// Check for a null receiver
-		cgRef.emitNullCheck(reg, ast.receiver());
+		cgRef.emitNullCheck(reg, ast.receiver(), arg);
 
 		// Load the address of the method to call into "reg"
 		// and call it indirectly.
@@ -437,7 +437,7 @@ class ExprGeneratorRef extends ExprGenerator {
 	}
 
 	@Override
-	public Register var(Var ast, Void arg) {
+	public Register var(Var ast, CurrentContext arg) {
 		Register reg = cgRef.rm.getRegister();
 		switch (ast.sym.kind) {
 		case LOCAL:
@@ -454,9 +454,9 @@ class ExprGeneratorRef extends ExprGenerator {
 	}
 
 	@Override
-	public Register unaryOp(UnaryOp ast, Void arg) {
+	public Register unaryOp(UnaryOp ast, CurrentContext arg) {
 		if (ast.operator == UOp.U_MINUS) {
-			Register argReg = gen(ast.arg());
+			Register argReg = gen(ast.arg(), arg);
 			cgRef.emit.emit("negl", argReg);
 			return argReg;
 		} else {

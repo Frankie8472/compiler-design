@@ -1,10 +1,6 @@
 package cd.transform.optimizer;
 
-import cd.ir.Ast;
-import cd.ir.AstVisitor;
-import cd.ir.BasicBlock;
-import cd.ir.Symbol;
-import cd.util.debug.AstDump;
+import cd.ir.*;
 
 public class PreCalculateOperatorsOptimizer extends BaseOptimizer<Void> {
 
@@ -37,7 +33,6 @@ public class PreCalculateOperatorsOptimizer extends BaseOptimizer<Void> {
      */
     @Override
     public Ast binaryOp(Ast.BinaryOp ast, Void arg) {
-        //TODO: When an arithmetic exception happens, it is just ignored and nothing is optimized. handle divide by zero
         dflt(ast, arg);
         if (ast.left() instanceof Ast.IntConst && ast.right() instanceof Ast.IntConst) {
             Integer leftValue = ((Ast.IntConst) ast.left()).value;
@@ -344,7 +339,10 @@ public class PreCalculateOperatorsOptimizer extends BaseOptimizer<Void> {
                 return other;
             }
             if (ast.operator == Ast.BinaryOp.BOp.B_TIMES) {
-                return createNewIntConst(0);
+                DivisionMustBePreservedVisitor visitor = new DivisionMustBePreservedVisitor();
+                if(!visitor.visit(ast, null)) {
+                    return createNewIntConst(0);
+                }
             }
         } else if (value == 1) {
             if (ast.operator == Ast.BinaryOp.BOp.B_TIMES) {
@@ -374,4 +372,20 @@ public class PreCalculateOperatorsOptimizer extends BaseOptimizer<Void> {
         return ast instanceof Ast.IntConst || ast instanceof Ast.BooleanConst;
     }
 
+
+    private class DivisionMustBePreservedVisitor extends ExprVisitor<Boolean, Void>{
+        @Override
+        public Boolean binaryOp(Ast.BinaryOp ast, Void arg) {
+            if(ast.operator == Ast.BinaryOp.BOp.B_DIV && (ast.right() instanceof Ast.IntConst && ((Ast.IntConst) ast.right()).value != 0)){
+                boolean result = false;
+                for(Ast child : ast.children()){
+                    result = result || visit((Ast.Expr) child, arg);
+                }
+                return result;
+            }else {
+                return true;
+
+            }
+        }
+    }
 }
