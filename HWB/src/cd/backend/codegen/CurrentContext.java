@@ -2,7 +2,9 @@ package cd.backend.codegen;
 
 import cd.ir.Ast;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -24,6 +26,11 @@ public final class CurrentContext {
      * Known Arraybounds for the local variables that are Arrays.
      */
     private final Map<String, Integer> knownLocalArrayBounds;
+
+    /**
+     * Known Arraybounds for the local variables that are Arrays.
+     */
+    private final Map<String, List<String>> knownLocalArrayVarAccess;
 
     /**
      * Known Arraybounds for the fields of the current class that are Arrays.
@@ -54,6 +61,7 @@ public final class CurrentContext {
         this.methodDecl = methodDecl;
         this.knownLocalArrayBounds = new HashMap<>();
         this.knownFieldArrayBounds = new HashMap<>();
+        this.knownLocalArrayVarAccess = new HashMap<>();
     }
 
     /**
@@ -75,7 +83,41 @@ public final class CurrentContext {
     }
 
 
-    public Map<String, Integer> getKnownLocalArrayBounds() {
-        return knownLocalArrayBounds;
+    public boolean isKnownAccess(String array, int offset) {
+        if(knownLocalArrayBounds.get(array) != null) {
+            if (offset >= 0 && offset <= knownLocalArrayBounds.get(array)) {
+                return true;
+            } else {
+                knownLocalArrayBounds.put(array, offset);
+                return false;
+            }
+
+        }
+        return false;
+    }
+
+    public void removeAccessesToArray(String array){
+        knownLocalArrayBounds.remove(array);
+        knownLocalArrayVarAccess.remove(array);
+    }
+
+    public void removeAccessFromArray(String array, String var){
+        if(knownLocalArrayVarAccess.get(array) != null){
+            knownLocalArrayVarAccess.get(array).remove(var);
+        } else {
+            knownLocalArrayVarAccess.put(array, new ArrayList<>());
+        }
+    }
+
+    public boolean isKnownAccess(String array, String var) {
+        if(knownLocalArrayVarAccess.get(array) != null){
+            if(knownLocalArrayVarAccess.get(array).contains(var)) {
+                return true;
+            }
+        } else {
+            knownLocalArrayVarAccess.put(array, new ArrayList<>());
+        }
+        knownLocalArrayVarAccess.get(array).add(var);
+        return false;
     }
 }

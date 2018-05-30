@@ -119,19 +119,22 @@ class AstCodeGeneratorOpt extends AstCodeGeneratorRef {
     protected void emitArrayBoundsCheck(Register reference, Register index, Ast.Index exprToCheck, CurrentContext context) {
         //TODO: Do not emit if not necessary.
 
-        Map<String, Integer> knownArrayBounds = context.getKnownLocalArrayBounds();
-
         if (exprToCheck.left() instanceof Ast.Var && exprToCheck.right() instanceof Ast.IntConst) {
             Ast.Var arrVar = (Ast.Var) exprToCheck.left();
             Integer indexAccess = ((Ast.IntConst) exprToCheck.right()).value;
-            if (indexAccess >= 0) {
-                if (knownArrayBounds.get(arrVar.name) != null && indexAccess <= knownArrayBounds.get(arrVar.name)) {
-                    return;
-                } else {
-                    knownArrayBounds.put(arrVar.name, indexAccess);
-                }
+            if (context.isKnownAccess(arrVar.name, indexAccess)) {
+                return;
             }
         }
+
+        if (exprToCheck.left() instanceof Ast.Var && exprToCheck.right() instanceof Ast.Var) {
+            Ast.Var arrVar = (Ast.Var) exprToCheck.left();
+            Ast.Var var = ((Ast.Var) exprToCheck.right());
+            if (context.isKnownAccess(arrVar.name, var.name)) {
+                return;
+            }
+        }
+
         //you emit the check with this statement:
         super.emitArrayBoundsCheck(reference, index, exprToCheck, context);
         // check the superclass, there you find the implementation.
