@@ -10,9 +10,7 @@ import static cd.backend.codegen.RegisterManager.BASE_REG;
 
 import java.io.Writer;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import cd.Config;
 import cd.Main;
@@ -109,6 +107,9 @@ class AstCodeGeneratorOpt extends AstCodeGeneratorRef {
     @Override
     protected void emitNullCheck(Register toCheck, Expr exprToCheck, CurrentContext context) {
         //TODO: Do not emit if not necessary.
+        // wenn dvariable schoma gused worde isch
+        // bi assign zurücksetzen, aussser b von a = b is known not null
+
 
         //you emit the check with this statement:
         super.emitNullCheck(toCheck, exprToCheck, context);
@@ -122,7 +123,7 @@ class AstCodeGeneratorOpt extends AstCodeGeneratorRef {
         if (exprToCheck.left() instanceof Ast.Var && exprToCheck.right() instanceof Ast.IntConst) {
             Ast.Var arrVar = (Ast.Var) exprToCheck.left();
             Integer indexAccess = ((Ast.IntConst) exprToCheck.right()).value;
-            if (context.isKnownAccess(arrVar.name, indexAccess)) {
+            if (context.isKnownArrayAccess(arrVar.name, indexAccess)) {
                 return;
             }
         }
@@ -130,7 +131,7 @@ class AstCodeGeneratorOpt extends AstCodeGeneratorRef {
         if (exprToCheck.left() instanceof Ast.Var && exprToCheck.right() instanceof Ast.Var) {
             Ast.Var arrVar = (Ast.Var) exprToCheck.left();
             Ast.Var var = ((Ast.Var) exprToCheck.right());
-            if (context.isKnownAccess(arrVar.name, var.name)) {
+            if (context.isKnownArrayAccess(arrVar.name, var.name)) {
                 return;
             }
         }

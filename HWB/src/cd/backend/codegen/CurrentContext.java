@@ -83,7 +83,7 @@ public final class CurrentContext {
     }
 
 
-    public boolean isKnownAccess(String array, int offset) {
+    public boolean isKnownArrayAccess(String array, int offset) {
         if(knownLocalArrayBounds.get(array) != null) {
             if (offset >= 0 && offset <= knownLocalArrayBounds.get(array)) {
                 return true;
@@ -109,7 +109,7 @@ public final class CurrentContext {
         }
     }
 
-    public boolean isKnownAccess(String array, String var) {
+    public boolean isKnownArrayAccess(String array, String var) {
         if(knownLocalArrayVarAccess.get(array) != null){
             if(knownLocalArrayVarAccess.get(array).contains(var)) {
                 return true;

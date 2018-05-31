@@ -4,14 +4,13 @@ ATeam
 + comments
 - vtable on stack, rather have it on the heap?
 - some helperfunctions are exit code. no comments on that?
-
 + saved callee saved registers before method call!
 
 ======
 ehhhm
 ======
 - comments
-~ why differntiate between caller sve and register uses?
+~ why differentiate between caller use and register uses?
 + nice helper funtions for errors
 + classcontext.java
 o Your Casts and inheritance does not always work.
