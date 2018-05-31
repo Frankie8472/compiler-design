@@ -81,6 +81,9 @@ class StmtGeneratorOpt extends StmtGeneratorRef {
             cgRef.rm.tagRegister(rhsReg, var.name);
             cg.emit.emitComment("REGISTERED TAG");
             cgRef.rm.releaseRegister(rhsReg);
+
+            // NullCheck remover
+            arg.removeObjectAccess(var.name);
             return null;
         }
         if (ast.right() instanceof Ast.IntConst) {
@@ -129,6 +132,8 @@ class StmtGeneratorOpt extends StmtGeneratorRef {
         cgRef.rm.flushTags();
         return null;
     }
+
+
 }
 
 /*

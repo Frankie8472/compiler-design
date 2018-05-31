@@ -106,10 +106,15 @@ class AstCodeGeneratorOpt extends AstCodeGeneratorRef {
 
     @Override
     protected void emitNullCheck(Register toCheck, Expr exprToCheck, CurrentContext context) {
-        //TODO: Do not emit if not necessary.
-        // wenn dvariable schoma gused worde isch
-        // bi assign zurücksetzen, aussser b von a = b is known not null
-
+        if (exprToCheck instanceof Ast.ThisRef) {
+            return;
+        } else if (exprToCheck instanceof Ast.Var) {
+            String varName = ((Ast.Var) exprToCheck).name;
+            if (context.isKnownObjectAccess(varName)) {
+                return;
+            }
+            context.addObjectAccess(varName);
+        }
 
         //you emit the check with this statement:
         super.emitNullCheck(toCheck, exprToCheck, context);

@@ -38,17 +38,25 @@ public final class CurrentContext {
     private final Map<String, Integer> knownFieldArrayBounds;
 
     /**
+     * Known Objects not null.
+     */
+    private final List<String> knownObjects = new ArrayList<>();
+
+    /**
      * Copies the class and other properties from the given Context and sets the new methodDecl.
-     * @param context Context to copy from
+     *
+     * @param context    Context to copy from
      * @param methodDecl The new MethodDecl of the new context.
      */
     public CurrentContext(CurrentContext context, Ast.MethodDecl methodDecl) {
         this(context.getClassDecl(), methodDecl);
         this.knownFieldArrayBounds.putAll(context.knownFieldArrayBounds);
+        this.knownObjects.clear();
     }
 
     /**
      * Creates a new CurrentContext for a class. This context is not inside a method.
+     *
      * @param classDecl Class for the context
      */
     public CurrentContext(Ast.ClassDecl classDecl) {
@@ -61,6 +69,7 @@ public final class CurrentContext {
         this.knownLocalArrayBounds = new HashMap<>();
         this.knownFieldArrayBounds = new HashMap<>();
         this.knownLocalArrayVarAccess = new HashMap<>();
+        this.knownObjects.clear();
     }
 
     /**
@@ -81,9 +90,20 @@ public final class CurrentContext {
         return this.classDecl;
     }
 
+    public boolean isKnownObjectAccess(String varName) {
+        return this.knownObjects.contains(varName);
+    }
+
+    public void removeObjectAccess(String varName) {
+        this.knownObjects.remove(varName);
+    }
+
+    public void addObjectAccess(String varName) {
+        this.knownObjects.add(varName);
+    }
 
     public boolean isKnownArrayAccess(String array, int offset) {
-        if(knownLocalArrayBounds.get(array) != null) {
+        if (knownLocalArrayBounds.get(array) != null) {
             if (offset >= 0 && offset <= knownLocalArrayBounds.get(array)) {
                 return true;
             } else {
@@ -95,13 +115,13 @@ public final class CurrentContext {
         return false;
     }
 
-    public void removeAccessesToArray(String array){
+    public void removeAccessesToArray(String array) {
         knownLocalArrayBounds.remove(array);
         knownLocalArrayVarAccess.remove(array);
     }
 
-    public void removeAccessFromArray(String array, String var){
-        if(knownLocalArrayVarAccess.get(array) != null){
+    public void removeAccessFromArray(String array, String var) {
+        if (knownLocalArrayVarAccess.get(array) != null) {
             knownLocalArrayVarAccess.get(array).remove(var);
         } else {
             knownLocalArrayVarAccess.put(array, new ArrayList<>());
@@ -109,8 +129,8 @@ public final class CurrentContext {
     }
 
     public boolean isKnownArrayAccess(String array, String var) {
-        if(knownLocalArrayVarAccess.get(array) != null){
-            if(knownLocalArrayVarAccess.get(array).contains(var)) {
+        if (knownLocalArrayVarAccess.get(array) != null) {
+            if (knownLocalArrayVarAccess.get(array).contains(var)) {
                 return true;
             }
         } else {
