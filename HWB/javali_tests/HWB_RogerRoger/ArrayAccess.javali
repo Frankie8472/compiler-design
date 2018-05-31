@@ -1,0 +1,32 @@
+class Main{
+    int[] field;
+    void main(){
+        int[] a;
+        int b;
+        int c;
+        c = 5;
+        a = new int[6];
+        a[1] = 1;
+        a = new int[1];
+        a[1] = 0xbeef;
+        //a[2] = 5;
+        //a[1] = 42;
+        b = a[0];
+        write(b);
+
+        a = getArray();
+        a[2] = 5;
+        field = a;
+        field[0] = 7;
+        write(field[2]);
+
+        write(7);
+    }
+
+    int[] getArray(){
+        int[] a;
+        a = new int[4];
+        a[1] = 3456789;
+        return a;
+    }
+}

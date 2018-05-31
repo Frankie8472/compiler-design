@@ -1,9 +1,7 @@
 package cd.backend.codegen;
 
 import java.io.Writer;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import cd.Main;
 import cd.ir.Ast.ClassDecl;
@@ -60,6 +58,8 @@ public class CfgCodeGenerator {
             String exitLabel = cg.emit.uniqueLabel();
 
             cg.emit.emit("jmp", labels.get(cfg.start));
+
+            cfg.allBlocks.sort(Comparator.comparingInt(o -> o.index));
 
             for (BasicBlock blk : cfg.allBlocks) {
 

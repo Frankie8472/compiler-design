@@ -123,7 +123,9 @@ public final class CurrentContext {
     }
 
     public void addArrayAccess(String array, int offset){
-        knownLocalArrayBounds.put(array, offset);
+        if(offset >= 0 && (knownLocalArrayBounds.get(array) == null || knownLocalArrayBounds.get(array) < offset)){
+            knownLocalArrayBounds.put(array, offset);
+        }
     }
 
     public void addArrayAccess(String array, String var){

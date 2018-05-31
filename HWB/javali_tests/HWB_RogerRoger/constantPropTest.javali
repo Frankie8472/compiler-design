@@ -1,0 +1,27 @@
+class Main{
+    int a;
+    void main(){
+        int b;
+        Bla bla;
+        bla  = new Bla();
+        a = getNumber();
+        bla.a = a;
+        b = a;
+        a = 9 + b;
+        b = a;
+        bla.getThis().getThis().getThis().getThis().getThis().getThis().getThis().a = 5;
+        write(b);
+    }
+
+    int getNumber(){
+        return 3242874;
+    }
+}
+
+class Bla{
+    int a;
+
+    Bla getThis(){
+        return this;
+    }
+}

@@ -1,0 +1,19 @@
+class Main{
+    void main(){
+        int a;
+        a = getNumber();
+        a = 1 + a;
+        a = a + 7;
+        a = 6 - a;
+        a = a - 9;
+        a = 9 * a;
+        a = a / 2;
+        a = a + ( a % 2);
+        write(a);
+
+    }
+
+    int getNumber(){
+        return 234567;
+    }
+}

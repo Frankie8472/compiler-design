@@ -4,8 +4,7 @@ import static cd.backend.codegen.AssemblyEmitter.constant;
 import static cd.backend.codegen.AssemblyEmitter.labelAddress;
 import static cd.backend.codegen.RegisterManager.BASE_REG;
 import static cd.backend.codegen.RegisterManager.STACK_REG;
-import static cd.ir.Ast.BinaryOp.BOp.B_MINUS;
-import static cd.ir.Ast.BinaryOp.BOp.B_MOD;
+import static cd.ir.Ast.BinaryOp.BOp.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -116,7 +115,7 @@ class ExprGeneratorOpt extends ExprGeneratorRef {
 
     @Override
     public Register binaryOp(BinaryOp ast, CurrentContext arg) {
-        if (ast.operator != BOp.B_DIV && ast.operator != B_MOD && ast.operator != B_MINUS) {
+        if (ast.operator != BOp.B_DIV && ast.operator != B_MOD && ast.operator != B_MINUS && ast.operator != B_LESS_THAN && ast.operator != B_LESS_OR_EQUAL && ast.operator != B_GREATER_THAN && ast.operator != B_GREATER_OR_EQUAL) {
             String value = null;
             Register exprResult = null;
             if (ast.left() instanceof IntConst) {
@@ -148,16 +147,9 @@ class ExprGeneratorOpt extends ExprGeneratorRef {
                         emitCmp("setne", exprResult, value);
                         break;
                     case B_LESS_THAN:
-                        emitCmp("setl", exprResult, value);
-                        break;
                     case B_LESS_OR_EQUAL:
-                        emitCmp("setle", exprResult, value);
-                        break;
                     case B_GREATER_THAN:
-                        emitCmp("setg", exprResult, value);
-                        break;
                     case B_GREATER_OR_EQUAL:
-                        emitCmp("setge", exprResult, value);
                         break;
                     default:
                         throw new AssemblyFailedException(
@@ -318,7 +310,6 @@ class ExprGeneratorRef extends ExprGenerator {
     }
 
     protected void emitCmp(String opname, Register leftReg, String rightReg) {
-
         cgRef.emit.emit("cmpl", rightReg, leftReg);
 
         if (leftReg.hasLowByteVersion()) {

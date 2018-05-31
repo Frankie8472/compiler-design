@@ -133,16 +133,16 @@ class AstCodeGeneratorOpt extends AstCodeGeneratorRef {
             Ast.Var arrVar = (Ast.Var) exprToCheck.left();
             Integer indexAccess = ((Ast.IntConst) exprToCheck.right()).value;
             if (context.isKnownArrayAccess(arrVar.name, indexAccess)) {
-                context.addArrayAccess(arrVar.name, indexAccess);
                 return;
             }
+            context.addArrayAccess(arrVar.name, indexAccess);
         }
 
         if (exprToCheck.left() instanceof Ast.Var && exprToCheck.right() instanceof Ast.Var) {
             Ast.Var arrVar = (Ast.Var) exprToCheck.left();
             Ast.Var var = ((Ast.Var) exprToCheck.right());
+            context.addArrayAccess(arrVar.name, var.name);
             if (context.isKnownArrayAccess(arrVar.name, var.name)) {
-                context.addArrayAccess(arrVar.name, var.name);
                 return;
             }
         }
