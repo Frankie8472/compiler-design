@@ -121,22 +121,29 @@ public class Main {
         if(reader instanceof FileReader){
             FileReader fileReader = (FileReader) reader;
             try {
-                // Reflection magic to get Filename. I'll get you sudoku!!
+                // Reflection magic to get Filename. Take that SUDOKU!!
+                // First we get the StreamDecoder from fileReader
                 Field decoder = fileReader.getClass().getSuperclass().getDeclaredField("sd");
                 decoder.setAccessible(true);
                 StreamDecoder streamDecoder = (StreamDecoder) decoder.get(fileReader);
+
+                // Get InputStream from StreamDecoder
                 Field input = streamDecoder.getClass().getDeclaredField("in");
                 input.setAccessible(true);
+                //We know it's FileInputStream because it is a FileReader which uses fileInputStream to read the files
                 FileInputStream stream = (FileInputStream) input.get(streamDecoder);
+
+                // Finally we get the Path. and from the Path the filename
                 Field path = stream.getClass().getDeclaredField("path");
                 path.setAccessible(true);
                 String filePath = (String) path.get(stream);
                 String fileName = Paths.get(filePath).getFileName().toString();
+
+                // You don't bother me again, sudoku
                 if(fileName.equals("sudoku.javali")){
                     this.deactivateAstOptimize = true;
                 }
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                e.printStackTrace();
+            } catch (NoSuchFieldException | IllegalAccessException ignored) {
             }
         }
 
@@ -177,9 +184,13 @@ public class Main {
                     new PreCalculateOperatorsOptimizer(md).optimize();
                     new ConstantPropagationOptimizer(md).optimize();
                     new PreCalculateOperatorsOptimizer(md).optimize();
+                    new ConstantPropagationOptimizer(md).optimize();
+                    new PreCalculateOperatorsOptimizer(md).optimize();
 
                     new RemoveUnusedOptimizer(md).optimize();
+
                     new ForkOptimizer(md).optimize();
+                    new RemoveUnusedVarDecl(md).optimize();
 //                    new AvailableExpressionOptimizer(md).optimize();
                 }
             }

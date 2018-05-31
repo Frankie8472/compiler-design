@@ -37,7 +37,6 @@ public final class CurrentContext {
      */
     private final Map<String, Integer> knownFieldArrayBounds;
 
-
     /**
      * Copies the class and other properties from the given Context and sets the new methodDecl.
      * @param context Context to copy from

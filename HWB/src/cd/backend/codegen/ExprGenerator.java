@@ -10,6 +10,7 @@ import java.util.List;
 
 import cd.Config;
 import cd.backend.codegen.RegisterManager.Register;
+import cd.ir.Ast;
 import cd.ir.Ast.BinaryOp;
 import cd.ir.Ast.BinaryOp.BOp;
 import cd.ir.Ast.BooleanConst;
@@ -99,6 +100,49 @@ class ExprGeneratorOpt extends ExprGeneratorRef{
 	ExprGeneratorOpt(AstCodeGeneratorRef astCodeGenerator) {
 		super(astCodeGenerator);
 	}
+
+	@Override
+	public Register var(Var ast, CurrentContext arg) {
+		Register allReadyInRegister = cg.rm.getRegisterFromTag(ast.name);
+		if(allReadyInRegister != null){
+			cgRef.rm.setRegisterUsed(allReadyInRegister);
+			cg.emit.emitComment("REUSED REGISTER");
+			return allReadyInRegister;
+		}
+		return super.var(ast, arg);
+	}
+
+	@Override
+	public Register binaryOp(BinaryOp ast, CurrentContext arg) {
+//		String value = null;
+//		Register exprResult = null;
+//		if(ast.left() instanceof IntConst ){
+//			value = AssemblyEmitter.constant(((IntConst) ast.left()).value);
+//			//exprResult = gen(ast.right(), arg);
+//		} else if(ast.right() instanceof IntConst ){
+//			value = AssemblyEmitter.constant(((IntConst) ast.right()).value);
+//			//exprResult = gen(ast.left(), arg);
+//		}
+//		if(exprResult != null) {
+//
+//        }
+
+		Register result =  super.binaryOp(ast, arg);
+		cgRef.rm.removeRegisterTag(result);
+		return result;
+	}
+
+    @Override
+    public Register methodCall(MethodCallExpr ast, CurrentContext arg) {
+	    cgRef.rm.removeRegisterTag(Register.EAX);
+	    return super.methodCall(ast, arg);
+    }
+
+    @Override
+    public Register builtInRead(BuiltInRead ast, CurrentContext arg) {
+        cgRef.rm.flushTags();
+        return super.builtInRead(ast, arg);
+    }
 }
 
 /*

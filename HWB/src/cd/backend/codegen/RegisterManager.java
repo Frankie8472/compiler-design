@@ -1,8 +1,6 @@
 package cd.backend.codegen;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * Simple class that manages the set of currently used
@@ -10,6 +8,8 @@ import java.util.List;
  */
 public class RegisterManager {
 	private List<Register> registers = new ArrayList<Register>();
+
+	private Map<String, Register> registerTags = new HashMap<>();
 
 	// lists of register to save by the callee and the caller
 	public static final Register CALLEE_SAVE[] = new Register[]{Register.ESI,
@@ -85,18 +85,36 @@ public class RegisterManager {
 	public void initRegisters() {
 		registers.clear();
 		registers.addAll(Arrays.asList(GPR));
+		registerTags.clear();
 	}
 
 	/**
 	 * returns a free register and marks it as used
 	 */
 	public Register getRegister() {
-		int last = registers.size() - 1;
-		if (last < 0)
+		int availableRegisters = availableRegisters();
+		if(availableRegisters <=0){
 			throw new AssemblyFailedException(
 					"Program requires too many registers");
+		}
 
-		return registers.remove(last);
+		// Select register which is not tagged. If not possible select last in registers List.
+		Register newReg;
+		if(availableRegisters - registerTags.keySet().size() > 0){
+		    List<Register> filtered = new ArrayList<>();
+			for(Register reg : registers){
+			    if(!registerTags.values().contains(reg)){
+			        filtered.add(reg);
+                }
+            }
+		    newReg = filtered.get(filtered.size() -1);
+			registers.remove(newReg);
+		} else {
+			newReg = registers.remove(registers.size() - 1);
+            removeRegisterTag(newReg);
+        }
+
+		return newReg;
 	}
 
 	/**
@@ -105,6 +123,11 @@ public class RegisterManager {
 	public void releaseRegister(Register reg) {
 		assert !registers.contains(reg);
 		registers.add(reg);
+	}
+
+	public void setRegisterUsed(Register reg){
+//		assert registers.contains(reg);
+		registers.remove(reg);
 	}
 
 	/**
@@ -120,4 +143,33 @@ public class RegisterManager {
 	public int availableRegisters() {
 		return registers.size();
 	}
+
+	public void tagRegister(Register reg, String tag){
+		registerTags.put(tag, reg);
+	}
+
+	public void removeRegisterTag(Register reg){
+	    String removeTag = null;
+		for(String tag : registerTags.keySet()){
+		    if(reg == registerTags.get(tag)){
+		        removeTag = tag;
+		        break;
+            }
+        }
+        if(removeTag != null) {
+            registerTags.remove(removeTag);
+        }
+	}
+
+	public void removeTagFromRegsiter(String tag){
+	    registerTags.remove(tag);
+    }
+
+	public Register getRegisterFromTag(String tag){
+		return registerTags.get(tag);
+	}
+
+	public void flushTags(){
+	    registerTags.clear();
+    }
 }

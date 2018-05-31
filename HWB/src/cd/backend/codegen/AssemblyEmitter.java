@@ -136,7 +136,7 @@ public class AssemblyEmitter {
 	}
 
 	String uniqueLabel() {
-		String labelName = "label" + counter++;
+		String labelName = ".Llabel" + counter++;
 		return labelName;
 	}
 
