@@ -78,7 +78,7 @@ class StmtGeneratorOpt extends StmtGeneratorRef {
             final Register rhsReg = cgRef.eg.gen(right, arg);
             arg.removeAccessesToArray(var.name);
             cgRef.emit.emitStore(rhsReg, var.sym.offset, BASE_REG);
-            cgRef.rm.tagRegister(rhsReg, var.name);
+//            cgRef.rm.tagRegister(rhsReg, var.name);
             cg.emit.emitComment("REGISTERED TAG");
             cgRef.rm.releaseRegister(rhsReg);
 

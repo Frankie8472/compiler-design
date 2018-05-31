@@ -105,9 +105,9 @@ class ExprGeneratorOpt extends ExprGeneratorRef{
 	public Register var(Var ast, CurrentContext arg) {
 		Register allReadyInRegister = cg.rm.getRegisterFromTag(ast.name);
 		if(allReadyInRegister != null){
-			cgRef.rm.setRegisterUsed(allReadyInRegister);
-			cg.emit.emitComment("REUSED REGISTER");
-			return allReadyInRegister;
+//			cgRef.rm.setRegisterUsed(allReadyInRegister);
+//			cg.emit.emitComment("REUSED REGISTER");
+//			return allReadyInRegister;
 		}
 		return super.var(ast, arg);
 	}
