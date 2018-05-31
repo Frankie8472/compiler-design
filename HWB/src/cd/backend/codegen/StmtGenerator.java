@@ -83,7 +83,11 @@ class StmtGeneratorOpt extends StmtGeneratorRef {
             cgRef.rm.releaseRegister(rhsReg);
 
             // NullCheck remover
-            arg.removeObjectAccess(var.name);
+            if (ast.right() instanceof Var && arg.isKnownObjectAccess(((Var) ast.right()).name)) {
+                arg.addObjectAccess(var.name);
+            } else {
+                arg.removeObjectAccess(var.name);
+            }
             return null;
         }
         if (ast.right() instanceof Ast.IntConst) {
