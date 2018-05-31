@@ -17,7 +17,10 @@ public class PreCalculateOperatorsOptimizer extends BaseOptimizer<Void> {
 //                System.out.println(cd.util.debug.AstDump.toString(block.stmts.get(i)));
             }
             if (block.condition != null) {
-                visit(block.condition, null);
+                Ast.Expr expr = (Ast.Expr) visit(block.condition, null);
+                if(expr != null) {
+                    block.condition = expr;
+                }
             }
         }
     }
@@ -88,6 +91,15 @@ public class PreCalculateOperatorsOptimizer extends BaseOptimizer<Void> {
                     return null;
             }
 
+        } else if (ast.left() instanceof Ast.NullConst && ast.right() instanceof Ast.NullConst) {
+            switch (ast.operator){
+                case B_EQUAL:
+                    return createNewBoolConst(true);
+                case B_NOT_EQUAL:
+                    return createNewBoolConst(false);
+                default:
+                    return null;
+            }
         } else if (isConstant(ast.left())) {
             Ast constant = ast.left();
             if ((ast.right() instanceof Ast.BinaryOp)) {
@@ -320,7 +332,7 @@ public class PreCalculateOperatorsOptimizer extends BaseOptimizer<Void> {
         if (ast.left() instanceof Ast.IntConst) {
             value = ((Ast.IntConst) ast.left()).value;
             other = ast.right();
-            if(ast.operator == Ast.BinaryOp.BOp.B_MINUS && value == 0){
+            if (ast.operator == Ast.BinaryOp.BOp.B_MINUS && value == 0) {
                 return createNewUnaryOp(Ast.UnaryOp.UOp.U_MINUS, other);
             }
         } else if (ast.right() instanceof Ast.IntConst) {
@@ -328,8 +340,8 @@ public class PreCalculateOperatorsOptimizer extends BaseOptimizer<Void> {
             other = ast.left();
             if (ast.operator == Ast.BinaryOp.BOp.B_DIV && value == 1) {
                 return other;
-            } else if(ast.operator == Ast.BinaryOp.BOp.B_MINUS && value == 0){
-                return  other;
+            } else if (ast.operator == Ast.BinaryOp.BOp.B_MINUS && value == 0) {
+                return other;
             }
         } else {
             return null;
@@ -340,7 +352,7 @@ public class PreCalculateOperatorsOptimizer extends BaseOptimizer<Void> {
             }
             if (ast.operator == Ast.BinaryOp.BOp.B_TIMES) {
                 DivisionMustBePreservedVisitor visitor = new DivisionMustBePreservedVisitor();
-                if(!visitor.visit(ast, null)) {
+                if (!visitor.visit(ast, null)) {
                     return createNewIntConst(0);
                 }
             }
@@ -373,16 +385,16 @@ public class PreCalculateOperatorsOptimizer extends BaseOptimizer<Void> {
     }
 
 
-    private class DivisionMustBePreservedVisitor extends ExprVisitor<Boolean, Void>{
+    private class DivisionMustBePreservedVisitor extends ExprVisitor<Boolean, Void> {
         @Override
         public Boolean binaryOp(Ast.BinaryOp ast, Void arg) {
-            if(ast.operator == Ast.BinaryOp.BOp.B_DIV && (ast.right() instanceof Ast.IntConst && ((Ast.IntConst) ast.right()).value != 0)){
+            if (ast.operator == Ast.BinaryOp.BOp.B_DIV && (ast.right() instanceof Ast.IntConst && ((Ast.IntConst) ast.right()).value != 0)) {
                 boolean result = false;
-                for(Ast child : ast.children()){
+                for (Ast child : ast.children()) {
                     result = result || visit((Ast.Expr) child, arg);
                 }
                 return result;
-            }else {
+            } else {
                 return true;
 
             }

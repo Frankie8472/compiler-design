@@ -1,6 +1,7 @@
 package cd.backend.codegen;
 
 import cd.ir.Ast;
+import sun.nio.cs.StreamDecoder;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -90,6 +91,7 @@ public final class CurrentContext {
         return this.classDecl;
     }
 
+
     public boolean isKnownObjectAccess(String varName) {
         return this.knownObjects.contains(varName);
     }
@@ -102,17 +104,9 @@ public final class CurrentContext {
         this.knownObjects.add(varName);
     }
 
-    public boolean isKnownArrayAccess(String array, int offset) {
-        if (knownLocalArrayBounds.get(array) != null) {
-            if (offset >= 0 && offset <= knownLocalArrayBounds.get(array)) {
-                return true;
-            } else {
-                knownLocalArrayBounds.put(array, offset);
-                return false;
-            }
 
-        }
-        return false;
+    public boolean isKnownArrayAccess(String array, int offset) {
+        return knownLocalArrayBounds.get(array) != null && offset >= 0 && offset <= knownLocalArrayBounds.get(array);
     }
 
     public void removeAccessesToArray(String array) {
@@ -128,15 +122,19 @@ public final class CurrentContext {
         }
     }
 
-    public boolean isKnownArrayAccess(String array, String var) {
+    public void addArrayAccess(String array, int offset){
+        knownLocalArrayBounds.put(array, offset);
+    }
+
+    public void addArrayAccess(String array, String var){
         if (knownLocalArrayVarAccess.get(array) != null) {
-            if (knownLocalArrayVarAccess.get(array).contains(var)) {
-                return true;
-            }
+            knownLocalArrayVarAccess.get(array).add(var);
         } else {
             knownLocalArrayVarAccess.put(array, new ArrayList<>());
         }
-        knownLocalArrayVarAccess.get(array).add(var);
-        return false;
+    }
+
+    public boolean isKnownArrayAccess(String array, String var) {
+        return knownLocalArrayVarAccess.get(array) != null && knownLocalArrayVarAccess.get(array).contains(var);
     }
 }

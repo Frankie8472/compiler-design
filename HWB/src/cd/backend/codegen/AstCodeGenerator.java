@@ -106,6 +106,10 @@ class AstCodeGeneratorOpt extends AstCodeGeneratorRef {
 
     @Override
     protected void emitNullCheck(Register toCheck, Expr exprToCheck, CurrentContext context) {
+        // Does not work if object is checked in one if branch but not in other and is in fact null but the branch
+        // without check is taken. The check of the variable has been done in the other branch and so the check will not
+        // be done after the if statement. But when the variable is null the check would be necessary...
+
         if (exprToCheck instanceof Ast.ThisRef) {
             return;
         } else if (exprToCheck instanceof Ast.Var) {
@@ -129,6 +133,7 @@ class AstCodeGeneratorOpt extends AstCodeGeneratorRef {
             Ast.Var arrVar = (Ast.Var) exprToCheck.left();
             Integer indexAccess = ((Ast.IntConst) exprToCheck.right()).value;
             if (context.isKnownArrayAccess(arrVar.name, indexAccess)) {
+                context.addArrayAccess(arrVar.name, indexAccess);
                 return;
             }
         }
@@ -137,6 +142,7 @@ class AstCodeGeneratorOpt extends AstCodeGeneratorRef {
             Ast.Var arrVar = (Ast.Var) exprToCheck.left();
             Ast.Var var = ((Ast.Var) exprToCheck.right());
             if (context.isKnownArrayAccess(arrVar.name, var.name)) {
+                context.addArrayAccess(arrVar.name, var.name);
                 return;
             }
         }

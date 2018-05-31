@@ -46,4 +46,10 @@ public class BaseOptimizer<V> extends AstVisitor<Ast, V> {
         unaryOp.type = expr.type;
         return unaryOp;
     }
+
+    protected Ast.NullConst createNewNullConst(){
+        Ast.NullConst nullConst = new Ast.NullConst();
+        nullConst.type = Symbol.ClassSymbol.nullType;
+        return nullConst;
+    }
 }

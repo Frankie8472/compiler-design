@@ -11,6 +11,7 @@ import java.util.*;
 public class ConstantPropagationDataFlowAnalysis extends ForwardDataFlowAnalysis<Map<String, Object>> {
 
     public final static Integer TOP_SYMBOL = null;
+    public final static Object NULL_SYMBOL = new Object();
     private Ast.MethodDecl decl;
 
     public ConstantPropagationDataFlowAnalysis(Ast.MethodDecl decl) {
@@ -34,6 +35,8 @@ public class ConstantPropagationDataFlowAnalysis extends ForwardDataFlowAnalysis
                     startMap.put(varDecl.name, 0);
                 } else if (varDecl.type.equals(Symbol.PrimitiveTypeSymbol.booleanType.name)) {
                     startMap.put(varDecl.name, false);
+                } else if (varDecl.type.equals(Symbol.ClassSymbol.nullType.name)) {
+                    startMap.put(varDecl.name, NULL_SYMBOL);
                 }
             }
         }
@@ -53,6 +56,8 @@ public class ConstantPropagationDataFlowAnalysis extends ForwardDataFlowAnalysis
                         outState.put(((Ast.Var) assign.left()).name, ((Ast.IntConst) assign.right()).value);
                     } else if (assign.right() instanceof Ast.BooleanConst) {
                         outState.put(((Ast.Var) assign.left()).name, ((Ast.BooleanConst) assign.right()).value);
+                    } else if (assign.right() instanceof Ast.NullConst) {
+                        outState.put(((Ast.Var) assign.left()).name, NULL_SYMBOL);
                     } else if (assign.right() instanceof Ast.Var) {
                         outState.put(((Ast.Var) assign.left()).name, outState.get(((Ast.Var) assign.right()).name));
                     } else {

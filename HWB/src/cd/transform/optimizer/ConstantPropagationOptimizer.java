@@ -38,6 +38,8 @@ public class ConstantPropagationOptimizer extends BaseOptimizer<Map<String, Obje
                 return createNewIntConst((Integer) value);
             } else if(value instanceof Boolean){
                 return createNewBoolConst((Boolean) value);
+            } else if(value == ConstantPropagationDataFlowAnalysis.NULL_SYMBOL){
+                return createNewNullConst();
             }
         }
         return null;
@@ -55,6 +57,8 @@ public class ConstantPropagationOptimizer extends BaseOptimizer<Map<String, Obje
                 arg.put(((Ast.Var) ast.left()).name, ((Ast.IntConst) ast.right()).value);
             } else if (ast.right() instanceof Ast.BooleanConst) {
                 arg.put(((Ast.Var) ast.left()).name, ((Ast.BooleanConst) ast.right()).value);
+            } else if (ast.right() instanceof Ast.NullConst) {
+                arg.put(((Ast.Var) ast.left()).name, ConstantPropagationDataFlowAnalysis.NULL_SYMBOL);
             }else if(ast.right() instanceof Ast.Var){
 //                System.out.println("hallo");
                 arg.put(((Ast.Var) ast.left()).name, arg.get(((Ast.Var) ast.right()).name));

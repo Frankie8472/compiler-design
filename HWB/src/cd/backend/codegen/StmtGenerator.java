@@ -88,6 +88,10 @@ class StmtGeneratorOpt extends StmtGeneratorRef {
             } else {
                 arg.removeObjectAccess(var.name);
             }
+
+            if(ast.right() instanceof Ast.NewArray && ((Ast.NewArray) ast.right()).arg() instanceof Ast.IntConst){
+               arg.addArrayAccess(var.name, ((Ast.IntConst) ((Ast.NewArray) ast.right()).arg()).value -1);
+            }
             return null;
         }
         if (ast.right() instanceof Ast.IntConst) {
