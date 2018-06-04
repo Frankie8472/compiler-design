@@ -78,8 +78,8 @@ class StmtGeneratorOpt extends StmtGeneratorRef {
             final Register rhsReg = cgRef.eg.gen(right, arg);
             arg.removeAccessesToArray(var.name);
             cgRef.emit.emitStore(rhsReg, var.sym.offset, BASE_REG);
-//            cgRef.rm.tagRegister(rhsReg, var.name);
-            cg.emit.emitComment("REGISTERED TAG");
+            cgRef.rm.tagRegister(rhsReg, var.name);
+            cg.emit.emitComment("REGISTERED TAG " + var.name + " for register " + rhsReg.repr);
             cgRef.rm.releaseRegister(rhsReg);
 
             // NullCheck remover
@@ -130,14 +130,14 @@ class StmtGeneratorOpt extends StmtGeneratorRef {
     @Override
     public Register builtInWrite(BuiltInWrite ast, CurrentContext arg) {
         super.builtInWrite(ast, arg);
-        cgRef.rm.flushTags();
+        cgRef.rm.removeTagsFromUnusedRegister();
         return null;
     }
 
     @Override
     public Register builtInWriteln(BuiltInWriteln ast, CurrentContext arg) {
         super.builtInWriteln(ast, arg);
-        cgRef.rm.flushTags();
+        cgRef.rm.removeTagsFromUnusedRegister();
         return null;
     }
 

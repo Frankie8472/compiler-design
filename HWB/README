@@ -21,3 +21,24 @@ and delete one branch completely (Transform the condition block to a non-conditi
 
 In the end we tried to replace reoccurring expressions with a temporary variable. But it failed and we had not the time
 to debug it.
+
+==============================
+Assembly Optimizations we did:
+==============================
+
+We removed unnecessary nullpointer checks when we knew that a variable is definitely not null. We keep track if a
+variable is not null and reset that every time the variable is assigned, except we know that the value assigned to the
+variable is not null.
+
+Next we removed unnecessary ArrayBoundsCheck. When we access a location in an array and it succeeds, we know that from
+0 to that index all accesses are safe. Also if we know the size of the array at compile time we already know which
+locations are safe.
+
+We also tried to remove loads from constants into registers for binaryOps and array creations. We managed to do this for
+commutative operations but non-commutative operations are giving us some trouble...
+
+We started working on reusing register. If we know that we saved variable "a" to register, let's say, EDI we can just use
+that register instead of loading variable "a" again from the stack. But this leads to numbers of problems. We have to
+make sure that every time we modify that register we do not reuse that register for "a" anymore. Also in a binary
+operation when we want reuse the register on the left side for a variable but we modify it on the right side with an
+operation the left side won't be allowed to reuse that register anymore.

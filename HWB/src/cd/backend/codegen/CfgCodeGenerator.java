@@ -11,6 +11,7 @@ import cd.ir.AstVisitor;
 import cd.ir.BasicBlock;
 import cd.ir.ControlFlowGraph;
 import cd.ir.Symbol.PrimitiveTypeSymbol;
+import cd.util.debug.AstDump;
 
 public class CfgCodeGenerator {
 
@@ -57,17 +58,21 @@ public class CfgCodeGenerator {
                 labels.put(blk, cg.emit.uniqueLabel());
             String exitLabel = cg.emit.uniqueLabel();
 
-            cg.emit.emit("jmp", labels.get(cfg.start));
 
             cfg.allBlocks.sort(Comparator.comparingInt(o -> o.index));
+            if(cfg.start != cfg.allBlocks.get(0)) {
+                cg.emit.emit("jmp", labels.get(cfg.start));
+            }
 
             for (BasicBlock blk : cfg.allBlocks) {
 
                 cg.emit.emitCommentSection("Basic block " + blk.index);
                 cg.emit.emitLabel(labels.get(blk));
 
-                for (Stmt stmt : blk.stmts)
+                for (Stmt stmt : blk.stmts) {
+//                    System.out.println(AstDump.toString(stmt));
                     cg.sg.gen(stmt, context);
+                }
 
                 if (blk == cfg.end) {
                     cg.emit.emitComment(String.format("Return"));
@@ -79,13 +84,18 @@ public class CfgCodeGenerator {
                             "Exit to block %d if true, block %d if false",
                             blk.trueSuccessor().index, blk.falseSuccessor().index));
                     cg.genJumpIfFalse(blk.condition, labels.get(blk.falseSuccessor()), arg);
-                    cg.emit.emit("jmp", labels.get(blk.trueSuccessor()));
+                    if(blk.trueSuccessor().index != blk.index + 1) {
+                        cg.emit.emit("jmp", labels.get(blk.trueSuccessor()));
+                    }
                 } else {
                     cg.emit.emitComment(String.format(
                             "Exit to block %d", blk.successors.get(0).index));
                     assert blk.successors.size() == 1;
-                    cg.emit.emit("jmp", labels.get(blk.successors.get(0)));
+                    if(blk.successors.get(0).index != blk.index + 1){
+                        cg.emit.emit("jmp", labels.get(blk.successors.get(0)));
+                    }
                 }
+                cg.rm.flushTags();
             }
 
             cg.emit.emitLabel(exitLabel);

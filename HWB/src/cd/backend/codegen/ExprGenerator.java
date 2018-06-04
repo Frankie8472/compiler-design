@@ -4,14 +4,12 @@ import static cd.backend.codegen.AssemblyEmitter.constant;
 import static cd.backend.codegen.AssemblyEmitter.labelAddress;
 import static cd.backend.codegen.RegisterManager.BASE_REG;
 import static cd.backend.codegen.RegisterManager.STACK_REG;
-import static cd.ir.Ast.BinaryOp.BOp.*;
 
 import java.util.Arrays;
 import java.util.List;
 
 import cd.Config;
 import cd.backend.codegen.RegisterManager.Register;
-import cd.ir.Ast;
 import cd.ir.Ast.BinaryOp;
 import cd.ir.Ast.BinaryOp.BOp;
 import cd.ir.Ast.BooleanConst;
@@ -93,7 +91,6 @@ class ExprGenerator extends ExprVisitor<Register, CurrentContext> {
             return argReg;
         }
     }
-
 }
 
 class ExprGeneratorOpt extends ExprGeneratorRef {
@@ -106,16 +103,33 @@ class ExprGeneratorOpt extends ExprGeneratorRef {
     public Register var(Var ast, CurrentContext arg) {
         Register allReadyInRegister = cg.rm.getRegisterFromTag(ast.name);
         if (allReadyInRegister != null) {
-//			cgRef.rm.setRegisterUsed(allReadyInRegister);
-//			cg.emit.emitComment("REUSED REGISTER");
-//			return allReadyInRegister;
+            cgRef.rm.setRegisterUsed(allReadyInRegister);
+            cg.emit.emitComment("REUSED REGISTER " + allReadyInRegister.repr + " for Variable " + ast.name);
+            return allReadyInRegister;
         }
-        return super.var(ast, arg);
+        Register register = super.var(ast, arg);
+//        cgRef.rm.tagRegister(register, ast.name);
+//        cg.emit.emitComment("REGISTERED TAG " + ast.name + " for register " + register.repr);
+        return register;
+    }
+
+    @Override
+    public Register field(Field ast, CurrentContext arg) {
+        Register register = super.field(ast, arg);
+        cgRef.rm.removeTagFromRegister(register);
+        return register;
+    }
+
+    @Override
+    public Register index(Index ast, CurrentContext arg) {
+        Register register = super.index(ast, arg);
+        cgRef.rm.removeTagFromRegister(register);
+        return register;
     }
 
     @Override
     public Register binaryOp(BinaryOp ast, CurrentContext arg) {
-        if (ast.operator != BOp.B_DIV && ast.operator != B_MOD && ast.operator != B_MINUS && ast.operator != B_LESS_THAN && ast.operator != B_LESS_OR_EQUAL && ast.operator != B_GREATER_THAN && ast.operator != B_GREATER_OR_EQUAL) {
+        if (ast.operator.isCommutative()) {
             String value = null;
             Register exprResult = null;
             if (ast.left() instanceof IntConst) {
@@ -124,61 +138,179 @@ class ExprGeneratorOpt extends ExprGeneratorRef {
             } else if (ast.right() instanceof IntConst) {
                 value = AssemblyEmitter.constant(((IntConst) ast.right()).value);
                 exprResult = gen(ast.left(), arg);
+            } else {
+                Register left;
+                Register right;
+                if (ast.left() instanceof Var) {
+                    right = gen(ast.right(), arg);
+                    Pair<Register> regs = genPushing(right, ast.left(), arg);
+                    left = regs.b;
+                    right = regs.a;
+                } else {
+                    left = gen(ast.left(), arg);
+                    Pair<Register> regs = genPushing(left, ast.right(), arg);
+                    left = regs.a;
+                    right = regs.b;
+                }
+                if (cgRef.rm.getTagsFromRegister(left).size() != 0) {
+                    value = right.repr;
+                    cg.rm.releaseRegister(right);
+
+                    exprResult = left;
+                } else {
+                    value = left.repr;
+                    cg.rm.releaseRegister(left);
+                    exprResult = right;
+                }
             }
-            if (exprResult != null) {
-                BOp op = ast.operator;
-                switch (op) {
-                    case B_TIMES:
-                        cgRef.emit.emit("imull", value, exprResult);
-                        break;
-                    case B_PLUS:
-                        cgRef.emit.emit("addl", value, exprResult);
-                        break;
-                    case B_AND:
-                        cgRef.emit.emit("andl", value, exprResult);
-                        break;
-                    case B_OR:
-                        cgRef.emit.emit("orl", value, exprResult);
-                        break;
-                    case B_EQUAL:
-                        emitCmp("sete", exprResult, value);
-                        break;
-                    case B_NOT_EQUAL:
-                        emitCmp("setne", exprResult, value);
-                        break;
-                    case B_LESS_THAN:
-                    case B_LESS_OR_EQUAL:
-                    case B_GREATER_THAN:
-                    case B_GREATER_OR_EQUAL:
-                        break;
-                    default:
-                        throw new AssemblyFailedException(
-                                "Invalid binary operator for "
-                                        + PrimitiveTypeSymbol.intType + " or "
-                                        + PrimitiveTypeSymbol.booleanType);
+            switch (ast.operator) {
+                case B_TIMES:
+                    cgRef.emit.emit("imull", value, exprResult);
+                    break;
+                case B_PLUS:
+                    cgRef.emit.emit("addl", value, exprResult);
+                    break;
+                case B_AND:
+                    cgRef.emit.emit("andl", value, exprResult);
+                    break;
+                case B_OR:
+                    cgRef.emit.emit("orl", value, exprResult);
+                    break;
+                case B_EQUAL:
+                    emitCmp("sete", exprResult, value);
+                    break;
+                case B_NOT_EQUAL:
+                    emitCmp("setne", exprResult, value);
+                    break;
+            }
+            cgRef.rm.removeTagFromRegister(exprResult);
+            return exprResult;
+        } else {
+            Register left;
+            Register right;
+            if (ast.left() instanceof Var) {
+                right = gen(ast.right(), arg);
+                Pair<Register> regs = genPushing(right, ast.left(), arg);
+                left = regs.b;
+                right = regs.a;
+//            } else if(ast.right() instanceof IntConst){
+                //TODO: Optimize
+            } else {
+                left = gen(ast.left(), arg);
+                Pair<Register> regs = genPushing(left, ast.right(), arg);
+                left = regs.a;
+                right = regs.b;
+            }
+            assert left != null && right != null;
+
+            new OperandsDispatcher() {
+
+                @Override
+                public void booleanOp(Register leftReg, BOp op, Register rightReg) {
+                    integerOp(leftReg, op, rightReg);
                 }
 
-                return exprResult;
+                @Override
+                public void integerOp(Register leftReg, BOp op, Register rightReg) {
 
-            }
+                    switch (op) {
+                        case B_MINUS:
+                            cgRef.emit.emit("subl", rightReg, leftReg);
+                            break;
+                        case B_DIV:
+                            emitDivMod(Register.EAX, leftReg, rightReg);
+                            cgRef.rm.removeTagFromRegister(Register.EDX);
+                            cgRef.rm.removeTagFromRegister(Register.EAX);
+                            break;
+                        case B_MOD:
+                            emitDivMod(Register.EDX, leftReg, rightReg);
+                            cgRef.rm.removeTagFromRegister(Register.EDX);
+                            cgRef.rm.removeTagFromRegister(Register.EAX);
+                            break;
+                        case B_LESS_THAN:
+                            emitCmp("setl", leftReg, rightReg.repr);
+                            break;
+                        case B_LESS_OR_EQUAL:
+                            emitCmp("setle", leftReg, rightReg.repr);
+                            break;
+                        case B_GREATER_THAN:
+                            emitCmp("setg", leftReg, rightReg.repr);
+                            break;
+                        case B_GREATER_OR_EQUAL:
+                            emitCmp("setge", leftReg, rightReg.repr);
+                            break;
+                        default:
+                            throw new AssemblyFailedException(
+                                    "Invalid binary operator for "
+                                            + PrimitiveTypeSymbol.intType + " or "
+                                            + PrimitiveTypeSymbol.booleanType);
+                    }
 
+                }
+
+            }.binaryOp(ast, left, right);
+
+            cgRef.rm.releaseRegister(right);
+            cgRef.rm.removeTagFromRegister(left);
+
+            return left;
         }
-
-        Register result = super.binaryOp(ast, arg);
-        cgRef.rm.removeRegisterTag(result);
-        return result;
     }
 
     @Override
     public Register methodCall(MethodCallExpr ast, CurrentContext arg) {
-        cgRef.rm.removeRegisterTag(Register.EAX);
-        return super.methodCall(ast, arg);
+        Register reg = super.methodCall(ast, arg);
+        cgRef.rm.removeTagFromRegister(Register.EAX);
+        cgRef.rm.removeTagFromRegister(reg);
+        cgRef.rm.removeTagsFromUnusedRegister();
+        return reg;
     }
 
     @Override
     public Register builtInRead(BuiltInRead ast, CurrentContext arg) {
-        cgRef.rm.flushTags();
-        return super.builtInRead(ast, arg);
+        Register reg = super.builtInRead(ast, arg);
+        cgRef.rm.removeTagsFromUnusedRegister();
+        return reg;
+    }
+
+    @Override
+    public Register newArray(NewArray ast, CurrentContext arg) {
+        if (ast.arg() instanceof IntConst) {
+            // Size of the array = 4 + 4 + elemsize * num elem.
+            // Compute that into reg, store it into the stack as
+            // an argument to Javali$Alloc(), and then use it to store final
+            // result.
+            ArrayTypeSymbol arrsym = (ArrayTypeSymbol) ast.type;
+            int length = ((IntConst) ast.arg()).value;
+            if (length < 0) {
+                return super.newArray(ast, arg);
+            }
+
+            Register reg = cgRef.rm.getRegister();
+
+            int allocate = Config.SIZEOF_PTR * length + 2 * Config.SIZEOF_PTR;
+
+            int allocPadding = cgRef.emitCallPrefix(reg, 1);
+            cgRef.push(AssemblyEmitter.constant(allocate));
+            cgRef.emit.emit("call", AstCodeGeneratorRef.ALLOC);
+            cgRef.rm.removeTagsFromUnusedRegister();
+            cgRef.emitCallSuffix(reg, 1, allocPadding);
+
+            // store vtable ptr and array length
+            cgRef.emit.emitStore(AssemblyEmitter.labelAddress(cgRef.vtable(arrsym)), 0, reg);
+            cgRef.emit.emitStore(AssemblyEmitter.constant(length), Config.SIZEOF_PTR, reg);
+
+            return reg;
+        }
+
+        return super.newArray(ast, arg);
+    }
+
+    @Override
+    public Register cast(Cast ast, CurrentContext arg) {
+        Register reg =  super.cast(ast, arg);
+        cgRef.rm.removeTagsFromUnusedRegister();
+        return reg;
     }
 }
 
@@ -386,6 +518,7 @@ class ExprGeneratorRef extends ExprGenerator {
         cgRef.push(objReg.repr);
         cgRef.push(AssemblyEmitter.labelAddress(cgRef.vtable(ast.type)));
         cgRef.emit.emit("call", AstCodeGeneratorRef.CHECK_CAST);
+        cgRef.rm.removeTagsFromUnusedRegister();
         cgRef.emitCallSuffix(null, 2, padding);
         return objReg;
     }
@@ -439,6 +572,7 @@ class ExprGeneratorRef extends ExprGenerator {
         int allocPadding = cgRef.emitCallPrefix(reg, 1);
         cgRef.push(reg.repr);
         cgRef.emit.emit("call", AstCodeGeneratorRef.ALLOC);
+        cgRef.rm.removeTagsFromUnusedRegister();
         cgRef.emitCallSuffix(reg, 1, allocPadding);
 
         // store vtable ptr and array length
@@ -456,6 +590,8 @@ class ExprGeneratorRef extends ExprGenerator {
         int allocPadding = cgRef.emitCallPrefix(reg, 1);
         cgRef.push(constant(clssym.sizeof));
         cgRef.emit.emit("call", AstCodeGeneratorRef.ALLOC);
+        cgRef.rm.removeTagsFromUnusedRegister();
+//        cgRef.rm.flushTags();
         cgRef.emitCallSuffix(reg, 1, allocPadding);
         cgRef.emit.emitStore(labelAddress(cgRef.vtable(clssym)), 0, reg);
         return reg;
