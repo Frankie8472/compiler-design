@@ -1,6 +1,7 @@
 package cd.backend.codegen;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * Simple class that manages the set of currently used
@@ -109,6 +110,7 @@ public class RegisterManager {
                     filtered.add(reg);
                 }
             }
+//            newReg = filtered.stream().filter(register -> Arrays.asList(CALLEE_SAVE).contains(register)).findFirst().orElse(filtered.get(filtered.size() - 1));
             newReg = filtered.get(filtered.size() - 1);
             registers.remove(newReg);
         } else {

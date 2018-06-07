@@ -27,12 +27,16 @@ Assembly Optimizations we did:
 ==============================
 
 We removed unnecessary nullpointer checks when we knew that a variable is definitely not null. We keep track if a
-variable is not null and reset that every time the variable is assigned, except we know that the value assigned to the
-variable is not null.
+variable is not null and reset that every time the variable is assigned to, except we know that the value assigned to the
+variable is not null. This can happen if we assign a "new"-expression to a variable or a variable from which we know that
+it is not null.
 
 Next we removed unnecessary ArrayBoundsCheck. When we access a location in an array and it succeeds, we know that from
 0 to that index all accesses are safe. Also if we know the size of the array at compile time we already know which
-locations are safe.
+locations are safe. This only works for indices that are known at compile time. For variables, we remove the
+ArrayBoundsCheck if we already had an access on the array with that variable and it succeeded and the variable was not
+assigned to in the meantime.
+
 
 We also tried to remove loads from constants into registers for binaryOps and array creations. We managed to do this for
 commutative operations but non-commutative operations are giving us some trouble...
@@ -41,4 +45,10 @@ We started working on reusing register. If we know that we saved variable "a" to
 that register instead of loading variable "a" again from the stack. But this leads to numbers of problems. We have to
 make sure that every time we modify that register we do not reuse that register for "a" anymore. Also in a binary
 operation when we want reuse the register on the left side for a variable but we modify it on the right side with an
-operation the left side won't be allowed to reuse that register anymore.
+operation the left side won't be allowed to reuse that register anymore. It is also possible that two variables are in
+the same register (e.g. a = b; here are a and b the same value in the register).  For that case we have to clean up
+properly.
+
+We also inlined a lot of the predefined methods to get rid of the call boilerplate. This saved a lot of instructions to
+execute. We did this using linker macros. We defined a macro for some functions which we could use instead of the call
+to the function.

@@ -1,0 +1,35 @@
+class Main{
+    void main(){
+        int i, y, z, x;
+        int[] bit;
+        boolean wasNegative;
+
+        i = read();
+        write(i);
+        if(i < 0){
+            i = -i;
+            wasNegative = true;
+        }
+        writeln();
+        y = 0;
+        x = 1;
+        bit = new int[32];
+        while(y < 32){
+            z = i % 2;
+            if(wasNegative){
+                z = (z + 1) % 2;
+                z = z + x;
+                x = z / 2;
+                z = z % 2;
+            }
+            bit[y] = z;
+            i = i / 2;
+            y = y + 1;
+        }
+        y = 31;
+        while(y >= 0){
+            write(bit[y]);
+            y = y - 1;
+        }
+    }
+}

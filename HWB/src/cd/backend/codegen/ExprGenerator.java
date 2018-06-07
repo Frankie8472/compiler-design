@@ -108,8 +108,8 @@ class ExprGeneratorOpt extends ExprGeneratorRef {
             return allReadyInRegister;
         }
         Register register = super.var(ast, arg);
-//        cgRef.rm.tagRegister(register, ast.name);
-//        cg.emit.emitComment("REGISTERED TAG " + ast.name + " for register " + register.repr);
+        cgRef.rm.tagRegister(register, ast.name);
+        cg.emit.emitComment("REGISTERED TAG " + ast.name + " for register " + register.repr);
         return register;
     }
 
@@ -308,7 +308,7 @@ class ExprGeneratorOpt extends ExprGeneratorRef {
 
     @Override
     public Register cast(Cast ast, CurrentContext arg) {
-        Register reg =  super.cast(ast, arg);
+        Register reg = super.cast(ast, arg);
         cgRef.rm.removeTagsFromUnusedRegister();
         return reg;
     }
@@ -448,11 +448,13 @@ class ExprGeneratorRef extends ExprGenerator {
             cgRef.emit.emit("movl", "$0", leftReg);
             cgRef.emit.emit(opname, leftReg.lowByteVersion().repr);
         } else {
-            cgRef.push(Register.EAX.repr);
+//            cgRef.push(Register.EAX.repr);
+            cgRef.emit.emit("xchg", Register.EAX, leftReg);
             cgRef.emit.emit("movl", "$0", Register.EAX);
             cgRef.emit.emit(opname, "%al");
-            cgRef.emit.emit("movl", Register.EAX, leftReg);
-            cgRef.pop(Register.EAX.repr);
+            cgRef.emit.emit("xchg", Register.EAX, leftReg);
+//            cgRef.emit.emit("movl", Register.EAX, leftReg);
+//            cgRef.pop(Register.EAX.repr);
         }
 
     }
@@ -461,10 +463,11 @@ class ExprGeneratorRef extends ExprGenerator {
                               Register rightReg) {
 
         // Compare right reg for 0
-        int padding = cgRef.emitCallPrefix(null, 1);
-        cgRef.push(rightReg.repr);
-        cgRef.emit.emit("call", AstCodeGeneratorRef.CHECK_NON_ZERO);
-        cgRef.emitCallSuffix(null, 1, padding);
+//        int padding = cgRef.emitCallPrefix(null, 1);
+//        cgRef.push(rightReg.repr);
+        cgRef.emit.emit(AstCodeGeneratorRef.CHECK_NON_ZERO, rightReg);
+//        cgRef.emit.emit("call", AstCodeGeneratorRef.CHECK_NON_ZERO);
+//        cgRef.emitCallSuffix(null, 1, padding);
 
         // Save EAX, EBX, and EDX to the stack if they are not used
         // in this subtree (but are used elsewhere). We will be
@@ -477,12 +480,17 @@ class ExprGeneratorRef extends ExprGenerator {
 
         // Move the LHS (numerator) into eax
         // Move the RHS (denominator) into ebx
-        cgRef.emit.emit("pushl", rightReg);
-        cgRef.emit.emit("pushl", leftReg);
-        cgRef.emit.emit("popl", Register.EAX);
-        cgRef.emit.emit("popl", "%ebx");
+//        cgRef.emit.emit("pushl", );
+        cgRef.emit.emit("xchg", leftReg, Register.EAX);
+        if (rightReg == Register.EAX) {
+            cgRef.emit.emitMove(leftReg, Register.EBX);
+        } else if(rightReg == leftReg){
+            cgRef.emit.emitMove(Register.EAX, Register.EBX);
+        } else {
+            cgRef.emit.emitMove(rightReg, Register.EBX);
+        }
         cgRef.emit.emitRaw("cltd"); // sign-extend %eax into %edx
-        cgRef.emit.emit("idivl", "%ebx"); // division, result into edx:eax
+        cgRef.emit.emit("idivl", Register.EBX); // division, result into edx:eax
 
         // Move the result into the LHS, and pop off anything we saved
         cgRef.emit.emit("movl", whichResultReg, leftReg);
