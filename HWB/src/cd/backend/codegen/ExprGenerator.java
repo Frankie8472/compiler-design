@@ -108,8 +108,10 @@ class ExprGeneratorOpt extends ExprGeneratorRef {
             return allReadyInRegister;
         }
         Register register = super.var(ast, arg);
-        cgRef.rm.tagRegister(register, ast.name);
-        cg.emit.emitComment("REGISTERED TAG " + ast.name + " for register " + register.repr);
+        if(ast.type != PrimitiveTypeSymbol.intType && ast.type != PrimitiveTypeSymbol.booleanType) {
+            cgRef.rm.tagRegister(register, ast.name);
+            cg.emit.emitComment("REGISTERED TAG " + ast.name + " for register " + register.repr);
+        }
         return register;
     }
 

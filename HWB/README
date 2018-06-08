@@ -22,6 +22,11 @@ and delete one branch completely (Transform the condition block to a non-conditi
 In the end we tried to replace reoccurring expressions with a temporary variable. But it failed and we had not the time
 to debug it.
 
+Added in part 2:
+Using the live variable analysis we could detect assignments that are not used later and removed them. But in such
+statements errors could occur like division by zero or a null pointer exception. In order for correctness we kept all
+assignments that use division, method calls, arrays or fields.
+
 ==============================
 Assembly Optimizations we did:
 ==============================
@@ -52,3 +57,9 @@ properly.
 We also inlined a lot of the predefined methods to get rid of the call boilerplate. This saved a lot of instructions to
 execute. We did this using linker macros. We defined a macro for some functions which we could use instead of the call
 to the function.
+
+====
+Misc
+====
+Our optimizations can be deactivated using the parameter '--no'. Due to some changes we did to division and compare,
+there are still some small optimizations but they do not make the assembly code more difficult to read.

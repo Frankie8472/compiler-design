@@ -1,0 +1,45 @@
+/* Lots of fields*/
+
+
+class Main {
+	 	void main(){
+	 	A a;
+        B b;
+        C c;
+        D d;
+        a = new A();
+	 	b = new B();
+	 	c = new C();
+	 	d = new D();
+
+	 	a.b = b;
+	 	b.c = c;
+	 	c.d = d;
+
+        a.b = getSomeB();
+	 	a.b.c.d.a = a;
+
+   }
+}
+
+class A{
+	B b;
+
+	B getSomeB(){
+	    B b;
+	    b = new B();
+	    return b;
+	}
+}
+
+class B{
+	C c;
+}
+
+class C{
+	D d;
+}
+
+class D{
+    A a;
+}

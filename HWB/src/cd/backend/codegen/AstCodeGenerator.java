@@ -371,7 +371,6 @@ class AstCodeGeneratorRef extends AstCodeGenerator {
 
         // Generate a helper method for checking array bounds:
         {
-
             emit.emitCommentSection(CHECK_ARRAY_BOUNDS + " macro");
             emit.emitRaw(".macro " + CHECK_ARRAY_BOUNDS + " array index");
             emit.emit("cmpl", constant(0), "\\index"); // idx < 0
@@ -383,33 +382,6 @@ class AstCodeGeneratorRef extends AstCodeGenerator {
             emit.emitLabel(CHECK_ARRAY_BOUNDS + "_exit");
             emit.emitStore(constant(ExitCode.INVALID_ARRAY_BOUNDS.value), 0, STACK_REG);
             emit.emit("call", Config.EXIT);
-//            Register arr = RegisterManager.CALLER_SAVE[0];
-//            Register idx = RegisterManager.CALLER_SAVE[1];
-//            String faillbl = emit.uniqueLabel();
-//            emit.emitCommentSection(CHECK_ARRAY_BOUNDS + " function");
-//            emit.emitLabel(CHECK_ARRAY_BOUNDS);
-//
-//            emit.emit("push", BASE_REG);
-//            emit.emitMove(STACK_REG, BASE_REG);
-//            emit.emit("sub", constant(8), STACK_REG);
-//
-//            emit.emit("and", constant(-16), STACK_REG);
-//            emit.emit("sub", constant(16), STACK_REG);
-//            emit.emitLoad(SIZEOF_PTR * 3, BASE_REG, idx);
-//            emit.emitLoad(SIZEOF_PTR * 2, BASE_REG, arr);
-//            emit.emit("cmpl", constant(0), idx); // idx < 0
-//            emit.emit("jl", faillbl);
-//            emit.emit("cmpl", registerOffset(Config.SIZEOF_PTR, arr), idx); // idx >= len
-//            emit.emit("jge", faillbl);
-//            // done
-//            emit.emitMove(BASE_REG, STACK_REG);
-//            emit.emit("pop", BASE_REG);
-//            emit.emitRaw("ret");
-//            // fail
-//            emit.emitLabel(faillbl);
-//            emit.emitStore(constant(ExitCode.INVALID_ARRAY_BOUNDS.value), 0, STACK_REG);
-//            emit.emit("call", Config.EXIT);
-
         }
 
         // Generate a helper method for allocating objects/arrays
@@ -521,6 +493,47 @@ class AstCodeGeneratorRef extends AstCodeGenerator {
         emit.emitRaw("ret");
 
     }
+
+//    private void emitCheckArrayBoundsPrefix() {
+//
+//        emit.emitCommentSection(CHECK_ARRAY_BOUNDS + " macro");
+//        emit.emitRaw(".macro " + CHECK_ARRAY_BOUNDS + " array index");
+//        emit.emit("cmpl", constant(0), "\\index"); // idx < 0
+//        emit.emit("jl", CHECK_ARRAY_BOUNDS + "_exit");
+//        emit.emit("cmpl", String.format("%d(%s)", Config.SIZEOF_PTR, "\\array"), "\\index"); // idx >= len
+//        emit.emit("jge", CHECK_ARRAY_BOUNDS + "_exit");
+//        emit.emitRaw(".endm");
+//
+//        emit.emitLabel(CHECK_ARRAY_BOUNDS + "_exit");
+//        emit.emitStore(constant(ExitCode.INVALID_ARRAY_BOUNDS.value), 0, STACK_REG);
+//        emit.emit("call", Config.EXIT);
+//            Register arr = RegisterManager.CALLER_SAVE[0];
+//            Register idx = RegisterManager.CALLER_SAVE[1];
+//            String faillbl = emit.uniqueLabel();
+//            emit.emitCommentSection(CHECK_ARRAY_BOUNDS + " function");
+//            emit.emitLabel(CHECK_ARRAY_BOUNDS);
+//
+//            emit.emit("push", BASE_REG);
+//            emit.emitMove(STACK_REG, BASE_REG);
+//            emit.emit("sub", constant(8), STACK_REG);
+//
+//            emit.emit("and", constant(-16), STACK_REG);
+//            emit.emit("sub", constant(16), STACK_REG);
+//            emit.emitLoad(SIZEOF_PTR * 3, BASE_REG, idx);
+//            emit.emitLoad(SIZEOF_PTR * 2, BASE_REG, arr);
+//            emit.emit("cmpl", constant(0), idx); // idx < 0
+//            emit.emit("jl", faillbl);
+//            emit.emit("cmpl", registerOffset(Config.SIZEOF_PTR, arr), idx); // idx >= len
+//            emit.emit("jge", faillbl);
+//            // done
+//            emit.emitMove(BASE_REG, STACK_REG);
+//            emit.emit("pop", BASE_REG);
+//            emit.emitRaw("ret");
+//            // fail
+//            emit.emitLabel(faillbl);
+//            emit.emitStore(constant(ExitCode.INVALID_ARRAY_BOUNDS.value), 0, STACK_REG);
+//            emit.emit("call", Config.EXIT);
+//    }
 
     @Override
     public void go(List<? extends ClassDecl> astRoots) {
