@@ -98,12 +98,15 @@ public class AstCodeGenerator {
 
 class AstCodeGeneratorOpt extends AstCodeGeneratorRef {
 
+    private boolean runtimeOpts;
+
     public AstCodeGeneratorOpt(Main main, Writer out) {
         super(main, out);
         this.sg = new StmtGeneratorOpt(this);
         this.sgRef = new StmtGeneratorOpt(this);
         this.eg = new ExprGeneratorOpt(this);
         this.egRef = new ExprGeneratorOpt(this);
+        runtimeOpts = System.getProperty("cd.runtimeOpts") != null;
     }
 
     @Override
@@ -123,8 +126,11 @@ class AstCodeGeneratorOpt extends AstCodeGeneratorRef {
         }
 //        rm.removeTagFromRegister(Register.EDX);
         //you emit the check with this statement:
-        super.emitNullCheck(toCheck, exprToCheck, context);
-        // check the superclass, there you find the implementation.
+        if (runtimeOpts) {
+            emit.emit(AstCodeGeneratorRef.CHECK_NULL, toCheck);
+        } else {
+            super.emitNullCheck(toCheck, exprToCheck, context);
+        }
     }
 
     @Override
@@ -152,8 +158,73 @@ class AstCodeGeneratorOpt extends AstCodeGeneratorRef {
         rm.removeTagsFromUnusedRegister();
 
         //you emit the check with this statement:
-        super.emitArrayBoundsCheck(reference, index, exprToCheck, context);
-        // check the superclass, there you find the implementation.
+        if (runtimeOpts) {
+            emit.emit(AstCodeGeneratorRef.CHECK_ARRAY_BOUNDS, reference, index);
+        } else {
+            super.emitArrayBoundsCheck(reference, index, exprToCheck, context);
+        }
+    }
+
+    @Override
+    protected void emitDividByZeroCheck(Register toCheck) {
+        if (runtimeOpts) {
+            emit.emit(AstCodeGeneratorRef.CHECK_NON_ZERO, toCheck);
+        } else {
+            super.emitDividByZeroCheck(toCheck);
+        }
+    }
+
+    @Override
+    protected void emitCheckArrayBoundsPrefix() {
+        if(runtimeOpts) {
+            emit.emitCommentSection(CHECK_ARRAY_BOUNDS + " macro");
+            emit.emitRaw(".macro " + CHECK_ARRAY_BOUNDS + " array index");
+            emit.emit("cmpl", constant(0), "\\index"); // idx < 0
+            emit.emit("jl", CHECK_ARRAY_BOUNDS + "_exit");
+            emit.emit("cmpl", String.format("%d(%s)", Config.SIZEOF_PTR, "\\array"), "\\index"); // idx >= len
+            emit.emit("jge", CHECK_ARRAY_BOUNDS + "_exit");
+            emit.emitRaw(".endm");
+
+            emit.emitLabel(CHECK_ARRAY_BOUNDS + "_exit");
+            emit.emitStore(constant(ExitCode.INVALID_ARRAY_BOUNDS.value), 0, STACK_REG);
+            emit.emit("call", Config.EXIT);
+        } else {
+            super.emitCheckArrayBoundsPrefix();
+        }
+    }
+
+    @Override
+    protected void emitCheckDivideByZeroPrefix() {
+        if (runtimeOpts) {
+            emit.emitCommentSection(CHECK_NON_ZERO + " macro");
+            emit.emitRaw(".macro " + CHECK_NON_ZERO + " arg");
+            emit.emit("cmpl", constant(0), "\\arg");
+            emit.emit("je", CHECK_NON_ZERO + "_exit");
+            emit.emitRaw(".endm");
+
+            emit.emitLabel(CHECK_NON_ZERO + "_exit");
+            emit.emitStore(constant(ExitCode.DIVISION_BY_ZERO.value), 0, STACK_REG);
+            emit.emit("call", Config.EXIT);
+        } else {
+            super.emitCheckDivideByZeroPrefix();
+        }
+    }
+
+    @Override
+    protected void emitCheckNullPointerPrefix() {
+        if (runtimeOpts) {
+            emit.emitCommentSection(CHECK_NULL + " macro");
+            emit.emitRaw(".macro " + CHECK_NULL + " ptr");
+            emit.emit("cmpl", constant(0), "\\ptr");
+            emit.emit("je", CHECK_NULL + "_exit");
+            emit.emitRaw(".endm");
+
+            emit.emitLabel(CHECK_NULL + "_exit");
+            emit.emitStore(constant(ExitCode.NULL_POINTER.value), 0, STACK_REG);
+            emit.emit("call", Config.EXIT);
+        } else {
+            super.emitCheckNullPointerPrefix();
+        }
     }
 }
 
@@ -286,65 +357,12 @@ class AstCodeGeneratorRef extends AstCodeGenerator {
 
         // Generate a helper method for checking for null ptrs:
         {
-//            String oknulllbl = emit.uniqueLabel();
-            emit.emitCommentSection(CHECK_NULL + " macro");
-            emit.emitRaw(".macro " + CHECK_NULL + " ptr");
-            emit.emit("cmpl", constant(0), "\\ptr");
-            emit.emit("je", CHECK_NULL + "_exit");
-            emit.emitRaw(".endm");
-
-            emit.emitLabel(CHECK_NULL + "_exit");
-            emit.emitStore(constant(ExitCode.NULL_POINTER.value), 0, STACK_REG);
-            emit.emit("call", Config.EXIT);
-
-//            emit.emitCommentSection(CHECK_NULL + " function");
-//            emit.emitLabel(CHECK_NULL);
-
-//            emit.emit("push", BASE_REG);
-//            emit.emitMove(STACK_REG, BASE_REG);
-//            emit.emit("sub", constant(8), STACK_REG);
-//
-//            emit.emit("and", constant(-16), STACK_REG);
-//            emit.emit("sub", constant(16), STACK_REG);
-//            emit.emit("cmpl", constant(0), registerOffset(SIZEOF_PTR * 2, BASE_REG));
-//            emit.emit("jne", oknulllbl);
-//            emit.emitStore(constant(ExitCode.NULL_POINTER.value), 0, STACK_REG);
-//            emit.emit("call", Config.EXIT);
-//            emit.emitLabel(oknulllbl);
-//            emit.emitMove(BASE_REG, STACK_REG);
-//            emit.emit("pop", BASE_REG);
-//            emit.emitRaw("ret");
+            emitCheckNullPointerPrefix();
         }
 
         // Generate a helper method for checking that we don't divide by zero:
         {
-            emit.emitCommentSection(CHECK_NON_ZERO + " macro");
-            emit.emitRaw(".macro " + CHECK_NON_ZERO + " arg");
-            emit.emit("cmpl", constant(0), "\\arg");
-            emit.emit("je", CHECK_NON_ZERO + "_exit");
-            emit.emitRaw(".endm");
-
-            emit.emitLabel(CHECK_NON_ZERO + "_exit");
-            emit.emitStore(constant(ExitCode.DIVISION_BY_ZERO.value), 0, STACK_REG);
-            emit.emit("call", Config.EXIT);
-//            String oknzlbl = emit.uniqueLabel();
-//            emit.emitCommentSection(CHECK_NON_ZERO + " function");
-//            emit.emitLabel(CHECK_NON_ZERO);
-//
-//            emit.emit("push", BASE_REG);
-//            emit.emitMove(STACK_REG, BASE_REG);
-//            emit.emit("sub", constant(8), STACK_REG);
-//
-//            emit.emit("and", constant(-16), STACK_REG);
-//            emit.emit("sub", constant(16), STACK_REG);
-//            emit.emit("cmpl", constant(0), registerOffset(SIZEOF_PTR * 2, BASE_REG));
-//            emit.emit("jne", oknzlbl);
-//            emit.emitStore(constant(ExitCode.DIVISION_BY_ZERO.value), 0, STACK_REG);
-//            emit.emit("call", Config.EXIT);
-//            emit.emitLabel(oknzlbl);
-//            emit.emitMove(BASE_REG, STACK_REG);
-//            emit.emit("pop", BASE_REG);
-//            emit.emitRaw("ret");
+            emitCheckDivideByZeroPrefix();
         }
 
         // Generate a helper method for checking array size:
@@ -371,17 +389,7 @@ class AstCodeGeneratorRef extends AstCodeGenerator {
 
         // Generate a helper method for checking array bounds:
         {
-            emit.emitCommentSection(CHECK_ARRAY_BOUNDS + " macro");
-            emit.emitRaw(".macro " + CHECK_ARRAY_BOUNDS + " array index");
-            emit.emit("cmpl", constant(0), "\\index"); // idx < 0
-            emit.emit("jl", CHECK_ARRAY_BOUNDS + "_exit");
-            emit.emit("cmpl", String.format("%d(%s)", Config.SIZEOF_PTR, "\\array"), "\\index"); // idx >= len
-            emit.emit("jge", CHECK_ARRAY_BOUNDS + "_exit");
-            emit.emitRaw(".endm");
-
-            emit.emitLabel(CHECK_ARRAY_BOUNDS + "_exit");
-            emit.emitStore(constant(ExitCode.INVALID_ARRAY_BOUNDS.value), 0, STACK_REG);
-            emit.emit("call", Config.EXIT);
+            emitCheckArrayBoundsPrefix();
         }
 
         // Generate a helper method for allocating objects/arrays
@@ -494,46 +502,78 @@ class AstCodeGeneratorRef extends AstCodeGenerator {
 
     }
 
-//    private void emitCheckArrayBoundsPrefix() {
-//
-//        emit.emitCommentSection(CHECK_ARRAY_BOUNDS + " macro");
-//        emit.emitRaw(".macro " + CHECK_ARRAY_BOUNDS + " array index");
-//        emit.emit("cmpl", constant(0), "\\index"); // idx < 0
-//        emit.emit("jl", CHECK_ARRAY_BOUNDS + "_exit");
-//        emit.emit("cmpl", String.format("%d(%s)", Config.SIZEOF_PTR, "\\array"), "\\index"); // idx >= len
-//        emit.emit("jge", CHECK_ARRAY_BOUNDS + "_exit");
-//        emit.emitRaw(".endm");
-//
-//        emit.emitLabel(CHECK_ARRAY_BOUNDS + "_exit");
-//        emit.emitStore(constant(ExitCode.INVALID_ARRAY_BOUNDS.value), 0, STACK_REG);
-//        emit.emit("call", Config.EXIT);
-//            Register arr = RegisterManager.CALLER_SAVE[0];
-//            Register idx = RegisterManager.CALLER_SAVE[1];
-//            String faillbl = emit.uniqueLabel();
-//            emit.emitCommentSection(CHECK_ARRAY_BOUNDS + " function");
-//            emit.emitLabel(CHECK_ARRAY_BOUNDS);
-//
-//            emit.emit("push", BASE_REG);
-//            emit.emitMove(STACK_REG, BASE_REG);
-//            emit.emit("sub", constant(8), STACK_REG);
-//
-//            emit.emit("and", constant(-16), STACK_REG);
-//            emit.emit("sub", constant(16), STACK_REG);
-//            emit.emitLoad(SIZEOF_PTR * 3, BASE_REG, idx);
-//            emit.emitLoad(SIZEOF_PTR * 2, BASE_REG, arr);
-//            emit.emit("cmpl", constant(0), idx); // idx < 0
-//            emit.emit("jl", faillbl);
-//            emit.emit("cmpl", registerOffset(Config.SIZEOF_PTR, arr), idx); // idx >= len
-//            emit.emit("jge", faillbl);
-//            // done
-//            emit.emitMove(BASE_REG, STACK_REG);
-//            emit.emit("pop", BASE_REG);
-//            emit.emitRaw("ret");
-//            // fail
-//            emit.emitLabel(faillbl);
-//            emit.emitStore(constant(ExitCode.INVALID_ARRAY_BOUNDS.value), 0, STACK_REG);
-//            emit.emit("call", Config.EXIT);
-//    }
+    protected void emitCheckNullPointerPrefix() {
+        String oknulllbl = emit.uniqueLabel();
+        emit.emitCommentSection(CHECK_NULL + " function");
+        emit.emitLabel(CHECK_NULL);
+
+        emit.emit("push", BASE_REG);
+        emit.emitMove(STACK_REG, BASE_REG);
+        emit.emit("sub", constant(8), STACK_REG);
+
+        emit.emit("and", constant(-16), STACK_REG);
+        emit.emit("sub", constant(16), STACK_REG);
+        emit.emit("cmpl", constant(0), registerOffset(SIZEOF_PTR * 2, BASE_REG));
+        emit.emit("jne", oknulllbl);
+        emit.emitStore(constant(ExitCode.NULL_POINTER.value), 0, STACK_REG);
+        emit.emit("call", Config.EXIT);
+        emit.emitLabel(oknulllbl);
+        emit.emitMove(BASE_REG, STACK_REG);
+        emit.emit("pop", BASE_REG);
+        emit.emitRaw("ret");
+    }
+
+    protected void emitCheckDivideByZeroPrefix() {
+
+        String oknzlbl = emit.uniqueLabel();
+        emit.emitCommentSection(CHECK_NON_ZERO + " function");
+        emit.emitLabel(CHECK_NON_ZERO);
+
+        emit.emit("push", BASE_REG);
+        emit.emitMove(STACK_REG, BASE_REG);
+        emit.emit("sub", constant(8), STACK_REG);
+
+        emit.emit("and", constant(-16), STACK_REG);
+        emit.emit("sub", constant(16), STACK_REG);
+        emit.emit("cmpl", constant(0), registerOffset(SIZEOF_PTR * 2, BASE_REG));
+        emit.emit("jne", oknzlbl);
+        emit.emitStore(constant(ExitCode.DIVISION_BY_ZERO.value), 0, STACK_REG);
+        emit.emit("call", Config.EXIT);
+        emit.emitLabel(oknzlbl);
+        emit.emitMove(BASE_REG, STACK_REG);
+        emit.emit("pop", BASE_REG);
+        emit.emitRaw("ret");
+    }
+
+    protected void emitCheckArrayBoundsPrefix() {
+
+        Register arr = RegisterManager.CALLER_SAVE[0];
+        Register idx = RegisterManager.CALLER_SAVE[1];
+        String faillbl = emit.uniqueLabel();
+        emit.emitCommentSection(CHECK_ARRAY_BOUNDS + " function");
+        emit.emitLabel(CHECK_ARRAY_BOUNDS);
+
+        emit.emit("push", BASE_REG);
+        emit.emitMove(STACK_REG, BASE_REG);
+        emit.emit("sub", constant(8), STACK_REG);
+
+        emit.emit("and", constant(-16), STACK_REG);
+        emit.emit("sub", constant(16), STACK_REG);
+        emit.emitLoad(SIZEOF_PTR * 3, BASE_REG, idx);
+        emit.emitLoad(SIZEOF_PTR * 2, BASE_REG, arr);
+        emit.emit("cmpl", constant(0), idx); // idx < 0
+        emit.emit("jl", faillbl);
+        emit.emit("cmpl", registerOffset(Config.SIZEOF_PTR, arr), idx); // idx >= len
+        emit.emit("jge", faillbl);
+        // done
+        emit.emitMove(BASE_REG, STACK_REG);
+        emit.emit("pop", BASE_REG);
+        emit.emitRaw("ret");
+        // fail
+        emit.emitLabel(faillbl);
+        emit.emitStore(constant(ExitCode.INVALID_ARRAY_BOUNDS.value), 0, STACK_REG);
+        emit.emit("call", Config.EXIT);
+    }
 
     @Override
     public void go(List<? extends ClassDecl> astRoots) {
@@ -860,19 +900,25 @@ class AstCodeGeneratorRef extends AstCodeGenerator {
     }
 
     protected void emitNullCheck(Register toCheck, Expr exprToCheck, CurrentContext context) {
-        emit.emit(AstCodeGeneratorRef.CHECK_NULL, toCheck);
-//        int padding = emitCallPrefix(null, 1);
-//        push(toCheck.repr);
-//        emit.emit("call", AstCodeGeneratorRef.CHECK_NULL);
-//        emitCallSuffix(null, 1, padding);
+        int padding = emitCallPrefix(null, 1);
+        push(toCheck.repr);
+        emit.emit("call", AstCodeGeneratorRef.CHECK_NULL);
+        emitCallSuffix(null, 1, padding);
     }
 
     protected void emitArrayBoundsCheck(Register reference, Register index, Ast.Index exprToCheck, CurrentContext context) {
-//        int padding = emitCallPrefix(null, 2);
-//        push(index.repr);
-//        push(reference.repr);
-        emit.emit(AstCodeGeneratorRef.CHECK_ARRAY_BOUNDS, reference, index);
-//        rm.removeTagsFromUnusedRegister();
-//        emitCallSuffix(null, 2, padding);
+        int padding = emitCallPrefix(null, 2);
+        push(index.repr);
+        push(reference.repr);
+        emit.emit("call", AstCodeGeneratorRef.CHECK_ARRAY_BOUNDS);
+        rm.removeTagsFromUnusedRegister();
+        emitCallSuffix(null, 2, padding);
+    }
+
+    protected void emitDividByZeroCheck(Register toCheck) {
+        int padding = emitCallPrefix(null, 1);
+        push(toCheck.repr);
+        emit.emit("call", AstCodeGeneratorRef.CHECK_NON_ZERO);
+        emitCallSuffix(null, 1, padding);
     }
 }

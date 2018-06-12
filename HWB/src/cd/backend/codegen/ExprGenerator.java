@@ -465,11 +465,7 @@ class ExprGeneratorRef extends ExprGenerator {
                               Register rightReg) {
 
         // Compare right reg for 0
-//        int padding = cgRef.emitCallPrefix(null, 1);
-//        cgRef.push(rightReg.repr);
-        cgRef.emit.emit(AstCodeGeneratorRef.CHECK_NON_ZERO, rightReg);
-//        cgRef.emit.emit("call", AstCodeGeneratorRef.CHECK_NON_ZERO);
-//        cgRef.emitCallSuffix(null, 1, padding);
+        cgRef.emitDividByZeroCheck(rightReg);
 
         // Save EAX, EBX, and EDX to the stack if they are not used
         // in this subtree (but are used elsewhere). We will be

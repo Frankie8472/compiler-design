@@ -1,0 +1,15 @@
+team name: RogerRoger
+task 1 correctness: 99
+task 1 score: 489.1
+task 1 points (max 25 points): 19
+task 2 deadline 1 correctness: 100
+task 2 deadline 1 score: 258.3
+task 2 deadline 1 points: 18
+task 2 deadline 2 correctness: 100
+task 2 deadline 2 score: 353.8
+task 2 deadline 2 points: 21
+task 2 runtimeOpts correctness: 100
+task 2 runtimeOpts score: 735.8
+task 2 runtimeOpts bonus points: 2
+task 2 points (max 25 points): 23
+HWB TOTAL (max 50 points): 42
